@@ -12,7 +12,7 @@ repos:
 
   # auto-format code for the --pyXXXXXXX argument.
   - repo: "https://github.com/asottile/pyupgrade"
-    rev: "v3.20.0"
+    rev: "v3.21.2"
     hooks:
       - id: "pyupgrade"
         name: "Auto-standardize python syntax"
@@ -22,7 +22,7 @@ repos:
         verbose: true
 
   - repo: "https://github.com/psf/black"
-    rev: "25.1.0"
+    rev: "26.1.0"
     hooks:
       - id: "black"
         name: "Run black on ciscoconfparse2"
