@@ -837,9 +837,7 @@ _RE_PORTOBJ_STR = r"""(?:                            # Non-capturing parentesis
 |(^\s*port-object\s+(?P<operator>eq|range)\s+(?P<p_port>\S.+))
 |(^\s*group-object\s+(?P<groupobject>\S+))
 )                                                   # Close non-capture parens
-""".format(
-    "tcp|udp|tcp-udp"
-)
+""".format("tcp|udp|tcp-udp")
 _RE_PORTOBJECT = re.compile(_RE_PORTOBJ_STR, re.VERBOSE)
 
 
@@ -1420,9 +1418,7 @@ _RE_ACLOBJECT_STR = r"""(?:                         # Non-capturing parenthesis
   )?
   )
 )                                                   # Close non-capture parens
-""".format(
-    _ACL_PROTOCOLS, _ACL_LOGLEVELS, _ACL_ICMP_PROTOCOLS
-)
+""".format(_ACL_PROTOCOLS, _ACL_LOGLEVELS, _ACL_ICMP_PROTOCOLS)
 _RE_ACLOBJECT = re.compile(_RE_ACLOBJECT_STR, re.VERBOSE)
 
 

@@ -23,7 +23,6 @@ from ciscoconfparse2.ccp_abc import BaseCfgLine
 from ciscoconfparse2.models_base import BaseFactoryInterfaceLine
 from ciscoconfparse2.models_base import BaseFactoryLine
 
-
 ### HUGE UGLY WARNING:
 ###   Anything in models_cisco.py could change at any time, until I remove this
 ###   warning.  I have good reason to believe that these methods are stable and

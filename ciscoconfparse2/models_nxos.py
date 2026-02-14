@@ -24,7 +24,6 @@ from ciscoconfparse2.models_base import BaseFactoryLine
 from ciscoconfparse2.models_base import BaseFactoryInterfaceLine
 from ciscoconfparse2.models_cisco import HSRPInterfaceGroup
 
-
 ### HUGE UGLY WARNING:
 ###   Anything in models_nxos.py could change at any time, until I remove this
 ###   warning.  I have good reason to believe that these methods are stable and

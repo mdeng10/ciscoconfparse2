@@ -21,7 +21,6 @@ from ciscoconfparse2.ccp_util import CiscoRange
 from ciscoconfparse2.ccp_util import IPv4Obj, IPv6Obj
 from ciscoconfparse2.ccp_abc import BaseCfgLine
 
-
 ### HUGE UGLY WARNING:
 ###   Anything in models_cisco.py could change at any time, until I remove this
 ###   warning.  I have good reason to believe that these methods are stable and
