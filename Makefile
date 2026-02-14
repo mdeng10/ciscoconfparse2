@@ -118,6 +118,10 @@ flake:
 ty:
 	uvx ty check --color always | less -R
 
+.PHONY: ruff
+ruff:
+	uvx ruff check --color always | less -R
+
 .PHONY: coverage-pytest
 coverage-pytest:
 	@echo "[[[ py.test Coverage ]]]"
