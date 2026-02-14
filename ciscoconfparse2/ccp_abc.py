@@ -282,8 +282,10 @@ class BaseCfgLine:
         :return: A unique number for the BaseCfgLine object
         :rtype: int
         """
+
         linenum = getattr(self, "linenum", None)
         _text = getattr(self, "text", DEFAULT_TEXT)
+
         return hash(linenum) * hash(_text)
 
     # On BaseCfgLine()
