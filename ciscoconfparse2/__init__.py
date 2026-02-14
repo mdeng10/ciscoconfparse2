@@ -37,7 +37,6 @@ from ciscoconfparse2.ccp_util import collapse_addresses
 from ciscoconfparse2.ccp_util import L4Object
 from ciscoconfparse2.ccp_util import dns_query
 
-
 # Throw errors for PYTHONOPTIMIZE and `python -O ...` by executing
 #     PythonOptimizeCheck()...
 _ = PythonOptimizeCheck()
