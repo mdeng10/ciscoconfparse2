@@ -34,10 +34,7 @@ from ciscoconfparse2.models_asa import ASAObjGroupService
 
 from conftest import parse_a01, parse_a01_factory
 
-if sys.version_info[0] < 3:
-    from ipaddr import IPv4Address, IPv4Network, IPv6Address, IPv6Network
-else:
-    from ipaddress import IPv4Network, IPv6Network, IPv4Address, IPv6Address
+from ipaddress import IPv4Network, IPv6Network, IPv4Address, IPv6Address
 
 from loguru import logger
 
