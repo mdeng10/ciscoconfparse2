@@ -33,10 +33,9 @@ import random
 import re
 import time
 from collections import UserList
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Sequence, Iterator
 from types import GeneratorType
 from typing import Any
-from collections.abc import Iterator
 from warnings import warn
 
 
@@ -2482,12 +2481,15 @@ class CiscoConfParse:
             config_lines = self.read_config_file(
                 filepath=config, linesplit_rgx=r"\r*\n"
             )
+
         elif isinstance(config, str) and len(str(config).splitlines()) > 1:
             # Automatically split the configuration lines
             config_lines = config.splitlines()
+
         elif isinstance(config, Sequence):
             # Transparently pass tuples and lists into the config
             config_lines = config
+
         else:
             error = f"Cannot read config from {type(config)}: {config}"
             logger.critical(error)
@@ -4339,16 +4341,20 @@ def config_line_factory(
                     # comment_delimiters=comment_delimiters,
                 )  # instance of the proper subclass
                 return basecfgline_subclass
+
     except ValueError:
         error = f"ciscoconfparse2.py config_line_factory(all_lines={all_lines}, line=`{line}`, comment_delimiters=[`{comment_delimiters}`], syntax=`{syntax}`) could not find a subclass of BaseCfgLine()"
         logger.error(error)
-        raise ValueError(error)
-    except Exception as eee:
+        raise
+
+    except BaseException as eee:
         error = f"ciscoconfparse2.py config_line_factory(all_lines={all_lines}, line=`{line}`, comment_delimiters=[`{comment_delimiters}`], syntax=`{syntax}`): {eee}"
+        logger.error(error)
+        raise
 
     if debug > 0:
         logger.debug("config_line_factory() is returning a default of IOSCfgLine()")
-    # return IOSCfgLine(all_lines=all_lines, line=line, comment_delimiters=comment_delimiters)
+
     return IOSCfgLine(
         all_lines=all_lines,
         line=line,
