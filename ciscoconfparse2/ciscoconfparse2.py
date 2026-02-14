@@ -2513,11 +2513,12 @@ class CiscoConfParse:
         if self.finished_config_parse is not False:
             raise RequirementFailure()
 
-        valid_path_variable = False
         if filepath is None:
             error = "Filepath: None is invalid"
             logger.critical(error)
             raise FileNotFoundError(error)
+
+        _encoding = self.openargs["encoding"]
 
         if isinstance(
             filepath,
@@ -2526,27 +2527,11 @@ class CiscoConfParse:
                 pathlib.Path,
             ),
         ):
-            valid_path_variable = True
 
-        if valid_path_variable and not os.path.exists(filepath):
-            error = f"Filepath: {filepath} does not exist"
-            logger.critical(error)
-            raise FileNotFoundError(error)
-
-        config_lines = None
-
-        _encoding = self.openargs["encoding"]
-        if valid_path_variable is True and os.path.isfile(filepath) is True:
-            # config string - assume a filename...
-            if self.debug > 0:
-                logger.debug(f"reading config from the filepath named '{filepath}'")
-
-        elif valid_path_variable is True and os.path.isfile(filepath) is False:
-            if self.debug > 0:
-                logger.debug(f"filepath not found - '{filepath}'")
             try:
                 with open(file=filepath, **self.openargs) as _:
                     pass
+
             except FileNotFoundError:
                 error = f"""FATAL - Attempted to open(file='{filepath}', mode='r', encoding="{_encoding}"); the filepath named:"{filepath}" does not exist."""
                 logger.critical(error)
@@ -2561,10 +2546,11 @@ class CiscoConfParse:
                 logger.critical(f"Cannot open {filepath}")
                 raise
 
-        else:
-            error = f"Unexpected condition processing filepath: {filepath}"
-            logger.critical(error)
-            raise ValueError(error)
+        config_lines = None
+
+
+        if self.debug > 0:
+            logger.debug(f"reading config from the filepath named '{filepath}'")
 
         # Read the file from disk and return the list of config statements...
         try:
@@ -2574,15 +2560,10 @@ class CiscoConfParse:
             config_lines = rgx.split(text)
             return config_lines
 
-        except OSError:
-            error = f"CiscoConfParse could not open() the filepath named '{filepath}'"
-            logger.critical(error)
-            raise OSError(error)
-
         except BaseException as eee:
             error = f"FATAL - {eee}"
             logger.critical(error)
-            raise eee
+            raise
 
     # This method is on CiscoConfParse()
     @logger.catch(reraise=True)
