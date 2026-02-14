@@ -1430,12 +1430,12 @@ class ConfigList(UserList):
             mm = re.search(banner_re_str, parent.text)
             if mm is not None:
                 mm_results = mm.groupdict()
-                (banner_lead, bannerdelimit) = (
+                banner_lead, bannerdelimit = (
                     mm_results["btype"].rstrip(),
                     mm_results["bchar"],
                 )
             else:
-                (banner_lead, bannerdelimit) = ("", None)
+                banner_lead, bannerdelimit = ("", None)
 
             if self.debug > 0:
                 logger.debug(f"banner_lead = '{banner_lead}'")
@@ -2549,7 +2549,6 @@ class CiscoConfParse:
                 raise
 
         config_lines = None
-
 
         if self.debug > 0:
             logger.debug(f"reading config from the filepath named '{filepath}'")
