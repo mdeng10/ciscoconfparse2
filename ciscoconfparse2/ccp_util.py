@@ -1222,21 +1222,15 @@ class IPv4Obj:
     @property
     def broadcast(self):
         """Returns the broadcast address as an :class:`ipaddress.IPv4Address` object."""
-        if sys.version_info[0] < 3:
-            return self.network_object.broadcast
-        else:
-            return self.network_object.broadcast_address
+        return self.network_object.broadcast_address
 
     # do NOT wrap with @logger.catch(...)
     # On IPv4Obj()
     @property
     def network(self):
         """Returns an :class:`ipaddress.IPv4Network` object, which represents this network."""
-        if sys.version_info[0] < 3:
-            return self.network_object.network
-        else:
-            ## The ipaddress module returns an "IPAddress" object in Python3...
-            return IPv4Network(f"{self.network_object.compressed}", strict=False)
+        ## The ipaddress module returns an "IPAddress" object in Python3...
+        return IPv4Network(f"{self.network_object.compressed}", strict=False)
 
     # do NOT wrap with @logger.catch(...)
     # On IPv4Obj()
@@ -1413,10 +1407,7 @@ class IPv4Obj:
     @property
     def as_cidr_net(self):
         """Returns a string with the network in CIDR notation"""
-        if sys.version_info[0] < 3:
-            return str(self.network) + "/" + str(self.prefixlen)
-        else:
-            return str(self.network)
+        return str(self.network)
 
     # do NOT wrap with @logger.catch(...)
     # On IPv4Obj()
@@ -2148,10 +2139,7 @@ class IPv6Obj:
     @property
     def as_cidr_net(self):
         """Returns a string with the network in CIDR notation"""
-        if sys.version_info[0] < 3:
-            return str(self.network) + "/" + str(self.prefixlen)
-        else:
-            return str(self.network)
+        return str(self.network)
 
     # On IPv6Obj()
     @property
