@@ -1339,7 +1339,7 @@ def parse_f01_junos_01(request):
 
 ## parse_j01 yields configs/sample_01.junos
 @pytest.fixture(scope="function")
-def parse_j01(request):
+def parse_j01_deprecated(request):
     """Preparsed j01"""
     parse_j01 = CiscoConfParse(
         j01,

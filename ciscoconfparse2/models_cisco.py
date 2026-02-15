@@ -2633,15 +2633,17 @@ class BaseIOSIntfLine(IOSCfgLine, BaseFactoryInterfaceLine):
             return retval
 
         for cmd in self.all_children:
-            if cmd[0] == "standby" and cmd[1] == "ip":
+            parts = cmd.strip().split()
+            if parts[0] == "standby" and parts[1] == "ip":
                 # Standby with no explicit group number
                 hsrp_group = 0
-                hsrp_addr = cmd[2]
+                hsrp_addr = parts[2]
                 retval[hsrp_group] = hsrp_addr
-            elif cmd[0] == "standby" and cmd[2] == "ip":
+
+            elif parts[0] == "standby" and parts[2] == "ip":
                 # Standby with an explicit group number
-                hsrp_group = int(cmd[1])
-                hsrp_addr = cmd[3]
+                hsrp_group = int(parts[1])
+                hsrp_addr = parts[3]
                 retval[hsrp_group] = hsrp_addr
 
         return retval
@@ -2672,15 +2674,17 @@ class BaseIOSIntfLine(IOSCfgLine, BaseFactoryInterfaceLine):
             return retval
 
         for cmd in self.all_children:
-            if cmd[0] == "standby" and cmd[1] == "priority":
+            parts = cmd.strip().split()
+            if parts[0] == "standby" and parts[1] == "priority":
                 # Standby with no explicit group number
                 hsrp_group = 0
-                hsrp_priority = int(cmd[2])
+                hsrp_priority = int(parts[2])
                 retval[hsrp_group] = hsrp_priority
-            elif cmd[0] == "standby" and cmd[2] == "priority":
+
+            elif parts[0] == "standby" and parts[2] == "priority":
                 # Standby with an explicit group number
-                hsrp_group = int(cmd[1])
-                hsrp_priority = int(cmd[3])
+                hsrp_group = int(parts[1])
+                hsrp_priority = int(parts[3])
                 retval[hsrp_group] = hsrp_priority
 
         return retval
@@ -2728,22 +2732,22 @@ class BaseIOSIntfLine(IOSCfgLine, BaseFactoryInterfaceLine):
         for cmd in self.all_children:
             parts = cmd.split()
             if (
-                cmd[0] == "standby"
-                and cmd[1] == "authentication"
-                and cmd[3] == "key-chain"
+                parts[0] == "standby"
+                and parts[1] == "authentication"
+                and parts[3] == "key-chain"
             ):
                 # Standby with no explicit group number
                 hsrp_group = 0
                 hsrp_auth_name = cmd[4]
                 retval[hsrp_group] = hsrp_auth_name
             elif (
-                cmd[0] == "standby"
-                and cmd[2] == "authentication"
-                and cmd[4] == "key-chain"
+                parts[0] == "standby"
+                and parts[2] == "authentication"
+                and parts[4] == "key-chain"
             ):
                 # Standby with an explicit group number
-                hsrp_group = int(cmd[1])
-                hsrp_auth_name = cmd[5]
+                hsrp_group = int(parts[1])
+                hsrp_auth_name = parts[5]
                 retval[hsrp_group] = hsrp_auth_name
 
         return retval
