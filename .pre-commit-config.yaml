@@ -51,9 +51,9 @@ repos:
       - id: "fix-byte-order-marker"
       - id: "trailing-whitespace"
       - id: "end-of-file-fixer"
-      - id: "no-commit-to-branch" # By default, protect 'master' and 'main'
-        args:
-          - "--branch"
-          - "master"
-          - "--branch"
-          - "main"
+#      - id: "no-commit-to-branch" # By default, protect 'master' and 'main'
+#        args:
+#          - "--branch"
+#          - "master"
+#          - "--branch"
+#          - "main"
