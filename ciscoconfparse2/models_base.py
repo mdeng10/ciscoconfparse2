@@ -1,22 +1,21 @@
-from typing import Any
 import re
+from typing import Any
 
 import attrs
 from loguru import logger
 
-from ciscoconfparse2.errors import DynamicAddressException
-
+from ciscoconfparse2.ccp_abc import BaseCfgLine
 from ciscoconfparse2.ccp_util import (
     _IPV6_REGEX_STR_COMPRESSED1,
     _IPV6_REGEX_STR_COMPRESSED2,
+    _IPV6_REGEX_STR_COMPRESSED3,
+    CiscoIOSInterface,
+    CiscoIOSXRInterface,
+    CiscoRange,
+    IPv4Obj,
+    IPv6Obj,
 )
-
-from ciscoconfparse2.ccp_util import _IPV6_REGEX_STR_COMPRESSED3
-from ciscoconfparse2.ccp_util import CiscoIOSXRInterface
-from ciscoconfparse2.ccp_util import CiscoIOSInterface
-from ciscoconfparse2.ccp_util import CiscoRange
-from ciscoconfparse2.ccp_util import IPv4Obj, IPv6Obj
-from ciscoconfparse2.ccp_abc import BaseCfgLine
+from ciscoconfparse2.errors import DynamicAddressException
 
 ### HUGE UGLY WARNING:
 ###   Anything in models_cisco.py could change at any time, until I remove this
@@ -50,9 +49,7 @@ r""" models_base.py - Parse, Query, Build, and Modify IOS-style configurations
 """
 
 MAX_VLAN = 4094
-_VIRTUAL_INTF_REGEX_STR = (
-    r"""^interface\s+(Loopback|Vlan|Tunnel|Dialer|Virtual-Template|Port-Channel)"""
-)
+_VIRTUAL_INTF_REGEX_STR = r"""^interface\s+(Loopback|Vlan|Tunnel|Dialer|Virtual-Template|Port-Channel)"""
 _VIRTUAL_INTF_REGEX = re.compile(_VIRTUAL_INTF_REGEX_STR, re.I)
 
 ##
@@ -115,9 +112,7 @@ class BaseFactoryLine(BaseCfgLine):
 
     @classmethod
     @logger.catch(reraise=True)
-    def is_object_for(
-        cls, all_lines: list[str], line: str, index: int = None, re: re.Pattern = re
-    ) -> bool:
+    def is_object_for(cls, all_lines: list[str], line: str, index: int = None, re: re.Pattern = re) -> bool:
         """Return True if this object should be used for a given configuration line; otherwise return False"""
         raise NotImplementedError()
 
@@ -298,37 +293,14 @@ class BaseFactoryInterfaceLine(BaseFactoryLine):
     @logger.catch(reraise=True)
     def verbose(self) -> str:
         if not self.is_switchport:
-            return (
-                "<%s # %s '%s' info: '%s' (child_indent: %s / len(children): %s / family_endpoint: %s)>"
-                % (
-                    self.classname,
-                    self.linenum,
-                    self.text,
-                    self.ipv4_addr_object or "No IPv4",
-                    self.child_indent,
-                    len(self.children),
-                    self.family_endpoint,
-                )
-            )
+            return f"""<{self.classname} # {self.linenum} '{self.text}' """ f"""info: '{self.ipv4_addr_object or "No IPv4"}' """ f"""(child_indent: {self.child_indent} / len(children): {len(self.children)} """ f"""/ family_endpoint: {self.family_endpoint})>"""
         else:
-            return (
-                "<%s # %s '%s' info: 'switchport' (child_indent: %s / len(children): %s / family_endpoint: %s)>"
-                % (
-                    self.classname,
-                    self.linenum,
-                    self.text,
-                    self.child_indent,
-                    len(self.children),
-                    self.family_endpoint,
-                )
-            )
+            return f"""<{self.classname} # {self.linenum} '{self.text}' """ f"""info: 'switchport' (child_indent: {self.child_indent} """ f"""/ len(children): {len(self.children)} / family_endpoint: {self.family_endpoint})>"""
 
     # This method is on BaseFactoryInterfaceLine()
     @classmethod
     @logger.catch(reraise=True)
-    def is_object_for(
-        cls, all_lines: list[str], line: str, index: int = None, re: re.Pattern = re
-    ) -> bool:
+    def is_object_for(cls, all_lines: list[str], line: str, index: int = None, re: re.Pattern = re) -> bool:
         """Return a boolean for whether this object should be used based on the inputs"""
         raise NotImplementedError()
 
@@ -774,9 +746,7 @@ class BaseFactoryInterfaceLine(BaseFactoryLine):
 
     # This method is on BaseFactoryInterfaceLine()
     @logger.catch(reraise=True)
-    def in_ipv4_subnets(
-        self, subnets: set[IPv4Obj] | list[IPv4Obj] | tuple[IPv4Obj, ...] = None
-    ) -> bool:
+    def in_ipv4_subnets(self, subnets: set[IPv4Obj] | list[IPv4Obj] | tuple[IPv4Obj, ...] = None) -> bool:
         r"""
         :return: Whether the interface is in a sequence or set of ccp_util.IPv4Obj objects
         :rtype: bool
@@ -1368,12 +1338,7 @@ class IOSAccessLine(BaseFactoryLine):
     # This method is on IOSAccessLine()
     @logger.catch(reraise=True)
     def __repr__(self):
-        return "<{} # {} '{}' info: '{}'>".format(
-            self.classname,
-            self.linenum,
-            self.name,
-            self.range_str,
-        )
+        return f"<{self.classname} # {self.linenum} '{self.name}' info: '{self.range_str}'>"
 
     # This method is on IOSAccessLine()
     @classmethod
@@ -1443,12 +1408,7 @@ class BaseIOSRouteLine(BaseFactoryLine):
     # This method is on BaseIOSRouteLine()
     @logger.catch(reraise=True)
     def __repr__(self):
-        return "<{} # {} '{}' info: '{}'>".format(
-            self.classname,
-            self.linenum,
-            self.network_object,
-            self.routeinfo,
-        )
+        return f"<{self.classname} # {self.linenum} '{self.network_object}' info: '{self.routeinfo}'>"
 
     # This method is on BaseIOSRouteLine()
     @property
@@ -1532,12 +1492,12 @@ _RE_IP_ROUTE = re.compile(
 )
 
 _RE_IPV6_ROUTE = re.compile(
-    r"""^ipv6\s+route
+    rf"""^ipv6\s+route
 (?:\s+vrf\s+(?P<vrf>\S+))?
-(?:\s+(?P<prefix>{})\/(?P<masklength>\d+))    # Prefix detection
+(?:\s+(?P<prefix>{_IPV6_REGEX_STR_COMPRESSED1})\/(?P<masklength>\d+))    # Prefix detection
 (?:
-(?:\s+(?P<nh_addr1>{}))
-|(?:\s+(?P<nh_intf>\S+(?:\s+\d\S*?\/\S+)?)(?:\s+(?P<nh_addr2>{}))?)
+(?:\s+(?P<nh_addr1>{_IPV6_REGEX_STR_COMPRESSED2}))
+|(?:\s+(?P<nh_intf>\S+(?:\s+\d\S*?\/\S+)?)(?:\s+(?P<nh_addr2>{_IPV6_REGEX_STR_COMPRESSED3}))?)
 )
 (?:\s+nexthop-vrf\s+(?P<nexthop_vrf>\S+))?
 (?:\s+(?P<ad>\d+))?              # Administrative distance
@@ -1545,11 +1505,7 @@ _RE_IPV6_ROUTE = re.compile(
 (?:\s+tag\s+(?P<tag>\d+))?       # Route tag
 (?:\s+track\s+(?P<track>\d+))?   # Track object
 (?:\s+name\s+(?P<name>\S+))?     # Route name
-""".format(
-        _IPV6_REGEX_STR_COMPRESSED1,
-        _IPV6_REGEX_STR_COMPRESSED2,
-        _IPV6_REGEX_STR_COMPRESSED3,
-    ),
+""",
     re.VERBOSE,
 )
 

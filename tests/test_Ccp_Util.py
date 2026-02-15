@@ -34,14 +34,17 @@ mike [~at~] pennington [/dot\] net
 # pragma warning disable S6395
 
 
+import importlib.util
 import ipaddress
 import os
 import pickle
 import sys
 from ipaddress import IPv4Address, IPv4Network, IPv6Address, IPv6Network
-import importlib.util
 
 import pytest
+from hypothesis import given, strategies
+from macaddress import EUI48, EUI64, MAC, OUI
+
 from ciscoconfparse2.ccp_util import (
     _RGX_IPV4ADDR,
     _RGX_IPV6ADDR,
@@ -52,12 +55,9 @@ from ciscoconfparse2.ccp_util import (
     IPv6Obj,
     L4Object,
     MACObj,
+    ip_factory,
 )
 from ciscoconfparse2.ccp_util import collapse_addresses as ccp_collapse_addresses
-from ciscoconfparse2.ccp_util import ip_factory
-from macaddress import EUI48, EUI64, MAC, OUI
-
-from hypothesis import given, strategies
 
 sys.path.insert(0, "..")
 
@@ -196,9 +196,7 @@ def testL4Object_asa_lt02():
     assert pp.port_list == sorted(range(1, 7))
 
 
-@pytest.mark.skipif(
-    hypothesis_library_missing(), reason="hypothesis library is missing"
-)
+@pytest.mark.skipif(hypothesis_library_missing(), reason="hypothesis library is missing")
 @given(
     strategies.ip_addresses(),  # random_addr
     strategies.integers(min_value=1, max_value=32),  # random_v4_mask
@@ -278,11 +276,11 @@ def testIPv4Obj_parse(addr_mask):
 def testIPv4Obj_set_masklen01():
 
     MASK_RESET = 32
-    test_object = IPv4Obj("1.1.1.1/%s" % MASK_RESET)
+    test_object = IPv4Obj(f"1.1.1.1/{MASK_RESET}")
 
     for result_correct_masklen in [32, 24, 16, 8]:
 
-        test_object = IPv4Obj("1.1.1.1/%s" % MASK_RESET)
+        test_object = IPv4Obj(f"1.1.1.1/{MASK_RESET}")
 
         # Test the masklen setter method...
         test_object.masklen = result_correct_masklen
@@ -292,7 +290,7 @@ def testIPv4Obj_set_masklen01():
         assert test_object.prefixlen == result_correct_masklen
         assert test_object.prefixlength == result_correct_masklen
 
-        test_object = IPv4Obj("1.1.1.1/%s" % MASK_RESET)
+        test_object = IPv4Obj(f"1.1.1.1/{MASK_RESET}")
 
         # Test the prefixlen setter method...
         test_object.prefixlen = result_correct_masklen
@@ -697,9 +695,7 @@ def testIPv6Obj_IPv4_embedded_in_IPv6_01():
 
 def testIPv6Obj_IPv4_embedded_in_IPv6_02():
     """Test IPv6Obj with an IPv4 address (192.0.2.33) embedded in an IPv6 address"""
-    assert IPv6Obj("2001:db8:122:344::192.0.2.33") == IPv6Obj(
-        "2001:db8:122:344::c000:221"
-    )
+    assert IPv6Obj("2001:db8:122:344::192.0.2.33") == IPv6Obj("2001:db8:122:344::c000:221")
 
 
 def testIPv6Obj_IPv4_embedded_in_IPv6_03():
@@ -824,9 +820,7 @@ def testEUI64Obj_equality_04():
 
 def test_collapse_addresses_01():
     """Test ipaddress.collapse_addresses() can collapse a list of IPv4Network objects with ipaddress.collapse_addresses()"""
-    net_collapsed = ipaddress.collapse_addresses(
-        [IPv4Network("192.0.0.0/22"), IPv4Network("192.0.2.128/25")]
-    )
+    net_collapsed = ipaddress.collapse_addresses([IPv4Network("192.0.0.0/22"), IPv4Network("192.0.2.128/25")])
     for idx, entry in enumerate(net_collapsed):
         if idx == 0:
             assert entry == IPv4Network("192.0.0.0/22")
@@ -988,45 +982,35 @@ def test_CiscoRange_01():
     """Basic vlan range test"""
     result_correct = {1, 2, 3}
     uut_str = "1-3"
-    assert (
-        CiscoRange(uut_str, result_type=int).as_set(result_type=int) == result_correct
-    )
+    assert CiscoRange(uut_str, result_type=int).as_set(result_type=int) == result_correct
 
 
 def test_CiscoRange_02():
     """Basic vlan range test"""
     result_correct = {1, 3}
     uut_str = "1,3"
-    assert (
-        CiscoRange(uut_str, result_type=int).as_set(result_type=int) == result_correct
-    )
+    assert CiscoRange(uut_str, result_type=int).as_set(result_type=int) == result_correct
 
 
 def test_CiscoRange_03():
     """Basic vlan range test"""
     result_correct = {1, 2, 3, 4, 5}
     uut_str = "1,2-4,5"
-    assert (
-        CiscoRange(uut_str, result_type=int).as_set(result_type=int) == result_correct
-    )
+    assert CiscoRange(uut_str, result_type=int).as_set(result_type=int) == result_correct
 
 
 def test_CiscoRange_04():
     """Basic vlan range test"""
     result_correct = {1, 2, 3, 4, 5}
     uut_str = "1-3,4,5"
-    assert (
-        CiscoRange(uut_str, result_type=int).as_set(result_type=int) == result_correct
-    )
+    assert CiscoRange(uut_str, result_type=int).as_set(result_type=int) == result_correct
 
 
 def test_CiscoRange_05():
     """Basic vlan range test"""
     result_correct = {1, 2, 3, 4, 5}
     uut_str = "1,2,3-5"
-    assert (
-        CiscoRange(uut_str, result_type=int).as_set(result_type=int) == result_correct
-    )
+    assert CiscoRange(uut_str, result_type=int).as_set(result_type=int) == result_correct
 
 
 def test_CiscoRange_06():
@@ -1035,10 +1019,7 @@ def test_CiscoRange_06():
     uut_str = "1/1-3,4,5"
     # the CiscoRange() result_type None is a CiscoIOSInterface() type with a
     #     port attribute...
-    assert (
-        CiscoRange(uut_str, result_type=CiscoIOSInterface).as_set(result_type=str)
-        == result_correct
-    )
+    assert CiscoRange(uut_str, result_type=CiscoIOSInterface).as_set(result_type=str) == result_correct
     assert CiscoRange(uut_str).iterate_attribute == "port"
 
 
@@ -1182,9 +1163,7 @@ def test_CiscoRange_23():
     }
     uut_str = "Eth1/1,Eth1/1-5,Eth1/16"
     # CiscoRange(text="foo", result_type=None) returns CiscoIOSInterface() instances...
-    assert (
-        CiscoRange(uut_str, result_type=None).as_set(result_type=None) == result_correct
-    )
+    assert CiscoRange(uut_str, result_type=None).as_set(result_type=None) == result_correct
 
 
 def test_CiscoRange_24():
@@ -1199,10 +1178,7 @@ def test_CiscoRange_24():
     ]
     uut_str = "Eth1/1,Eth1/1-5,Eth1/16"
     # CiscoRange(text="foo", result_type=None) returns CiscoIOSInterface() instances...
-    assert (
-        CiscoRange(uut_str, result_type=None).as_list(result_type=None)
-        == result_correct
-    )
+    assert CiscoRange(uut_str, result_type=None).as_list(result_type=None) == result_correct
 
 
 def test_CiscoRange_25():

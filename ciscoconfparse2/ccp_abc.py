@@ -17,6 +17,7 @@ mike [~at~] pennington [/dot\] net
 
 # Silence pylint warnings about type hints with a pipe
 from __future__ import annotations
+
 import math
 import re
 from collections.abc import Sequence
@@ -687,9 +688,7 @@ class BaseCfgLine:
             raise ConfigListItemDoesNotExist(error)
 
         if self.confobj.debug >= 1:
-            logger.debug(
-                f"Executing <IOSCfgLine line #{self.linenum}>.delete(recurse=True)"
-            )
+            logger.debug(f"Executing <IOSCfgLine line #{self.linenum}>.delete(recurse=True)")
 
         # NOTE - 1.5.30 changed this from iterating over self.children
         #        to self.all_children
@@ -814,9 +813,7 @@ class BaseCfgLine:
 
     # On BaseCfgLine()
     @logger.catch(reraise=True)
-    def append_to_family(
-        self, insertstr: str, indent: int = -1, auto_indent: bool = False
-    ) -> None:
+    def append_to_family(self, insertstr: str, indent: int = -1, auto_indent: bool = False) -> None:
         """Append an :py:class:`~ciscoconfparse2.ccp_abc.BaseCfgLine` object with ``insertstr``
         as a child at the top of the current configuration family.
 
@@ -872,10 +869,7 @@ class BaseCfgLine:
             insertstr = insertstr.text
 
         if auto_indent is not None:
-            warning_msg = (
-                "BaseCfgLine().append_to_family(auto_indent) is "
-                "no longer supported; instead use BaseCfgLine().insert_after()."
-            )
+            warning_msg = "BaseCfgLine().append_to_family(auto_indent) is " "no longer supported; instead use BaseCfgLine().insert_after()."
             logger.warning(warning_msg)
             warn(warning_msg)
 
@@ -885,11 +879,7 @@ class BaseCfgLine:
         auto_indent_width = self.ccp_ref.auto_indent_width
 
         if indent == 0:
-            error = (
-                "BaseCfgLine().append_to_family() with indent=0 "
-                "is not supported since all child family members "
-                "must be indented"
-            )
+            error = "BaseCfgLine().append_to_family() with indent=0 " "is not supported since all child family members " "must be indented"
             logger.error(error)
             raise NotImplementedError(error)
 
@@ -910,10 +900,7 @@ class BaseCfgLine:
             indent = self.indent + self.ccp_ref.get_indent_from_syntax()
 
         else:
-            error = (
-                f"BaseCfgLine().append_to_family(indent={indent}) "
-                "and CiscoConfParse().auto_indent_width={auto_indent_width}"
-            )
+            error = f"BaseCfgLine().append_to_family(indent={indent}) " "and CiscoConfParse().auto_indent_width={auto_indent_width}"
             logger.error(error)
             raise ValueError(error)
 
@@ -1045,9 +1032,7 @@ class BaseCfgLine:
         if isinstance(chars, str):
             return self._text.rstrip(chars)
 
-        raise NotImplementedError(
-            f"BaseCfgLine().rstrip() got an unexpected type: {type(chars)}"
-        )
+        raise NotImplementedError(f"BaseCfgLine().rstrip() got an unexpected type: {type(chars)}")
 
     # On BaseCfgLine()
     @logger.catch(reraise=True)
@@ -1083,9 +1068,7 @@ class BaseCfgLine:
         if isinstance(chars, str):
             return self._text.strip(chars)
 
-        raise NotImplementedError(
-            f"BaseCfgLine().strip() got an unexpected type: {type(chars)}"
-        )
+        raise NotImplementedError(f"BaseCfgLine().strip() got an unexpected type: {type(chars)}")
 
     # On BaseCfgLine()
     @logger.catch(reraise=True)
@@ -1156,9 +1139,7 @@ class BaseCfgLine:
 
     # On BaseCfgLine()
     @logger.catch(reraise=True)
-    def endswith(
-        self, suffix, start: int | None = None, end: int | None = None
-    ) -> bool:
+    def endswith(self, suffix, start: int | None = None, end: int | None = None) -> bool:
         if start is not None:
             return self.text.endswith(suffix)
         if end is not None:
@@ -1194,9 +1175,7 @@ class BaseCfgLine:
 
     # On BaseCfgLine()
     @logger.catch(reraise=True)
-    def startswith(
-        self, prefix: str, start: int | None = None, end: int | None = None
-    ) -> int:
+    def startswith(self, prefix: str, start: int | None = None, end: int | None = None) -> int:
         if start is not None:
             return self.text.startswith(prefix)
         if end is not None:
@@ -1335,9 +1314,7 @@ class BaseCfgLine:
         """
         retval = {}
         if debug is True:
-            logger.info(
-                f"{self}.get_regex_typed_dict(`regex`={regex}, `type_dict`={type_dict}, `default`='{default}', debug={debug}) was called"
-            )
+            logger.info(f"{self}.get_regex_typed_dict(`regex`={regex}, `type_dict`={type_dict}, `default`='{default}', debug={debug}) was called")
 
         # If the `regex` is a string, compile so we can access match group info
         if isinstance(regex, str):
@@ -1788,15 +1765,11 @@ class BaseCfgLine:
         #   this while I build the API
         #    raise NotImplementedError
         if debug:
-            logger.info(
-                f"{self}.re_match_iter_typed(`regex`={regex}, `group`={group}, `result_type`={result_type}, `recurse`={recurse}, `untyped_default`={untyped_default}, `default`='{default}', `groupdict`={groupdict}, `debug`={debug}) was called"
-            )
+            logger.info(f"{self}.re_match_iter_typed(`regex`={regex}, `group`={group}, `result_type`={result_type}, `recurse`={recurse}, `untyped_default`={untyped_default}, `default`='{default}', `groupdict`={groupdict}, `debug`={debug}) was called")
 
         if groupdict is None:
             if debug is True:
-                logger.debug(
-                    f"    {self}.re_match_iter_typed() is checking with `groupdict`=None"
-                )
+                logger.debug(f"    {self}.re_match_iter_typed() is checking with `groupdict`=None")
 
             # Return the result if the parent line matches the regex...
             mm = re.search(regex, self.text)
@@ -1807,9 +1780,7 @@ class BaseCfgLine:
                 # Only work on direct children if not recurse
                 for cobj in self.children:
                     if debug is True:
-                        logger.debug(
-                            f"    {self}.re_match_iter_typed() is checking match of r'''{regex}''' on -->{cobj}<--"
-                        )
+                        logger.debug(f"    {self}.re_match_iter_typed() is checking match of r'''{regex}''' on -->{cobj}<--")
                     mm = re.search(regex, cobj.text)
                     if isinstance(mm, re.Match):
                         return result_type(mm.group(group))
@@ -1822,9 +1793,7 @@ class BaseCfgLine:
             # Work on all children if recurse is True
             for cobj in self.all_children:
                 if debug is True:
-                    logger.debug(
-                        f"    {self}.re_match_iter_typed() is checking match of r'''{regex}''' on -->{cobj}<--"
-                    )
+                    logger.debug(f"    {self}.re_match_iter_typed() is checking match of r'''{regex}''' on -->{cobj}<--")
                 mm = re.search(regex, cobj.text)
                 if isinstance(mm, re.Match):
                     return result_type(mm.group(group))
@@ -1836,9 +1805,7 @@ class BaseCfgLine:
 
         elif isinstance(groupdict, dict):
             if debug is True:
-                logger.debug(
-                    f"    {self}.re_match_iter_typed() is checking with `groupdict`={groupdict}"
-                )
+                logger.debug(f"    {self}.re_match_iter_typed() is checking with `groupdict`={groupdict}")
 
             # Return the result if the parent line matches the regex...
             mm = re.search(regex, self.text)
@@ -1882,9 +1849,7 @@ class BaseCfgLine:
                 debug=debug,
             )
         else:
-            error = (
-                f"`groupdict` must be None or a `dict`, but we got {type(groupdict)}."
-            )
+            error = f"`groupdict` must be None or a `dict`, but we got {type(groupdict)}."
             logger.critical(error)
             raise ValueError(error)
 
@@ -1967,9 +1932,7 @@ class BaseCfgLine:
         #   to be sure I build the correct API for match=False
         #
         if debug is True:
-            logger.info(
-                f"{self}.re_list_iter_typed(`regex`={regex}, `group`={group}, `result_type`={result_type}, `recurse`={recurse}, `groupdict`={groupdict}, `debug`={debug}) was called"
-            )
+            logger.info(f"{self}.re_list_iter_typed(`regex`={regex}, `group`={group}, `result_type`={result_type}, `recurse`={recurse}, `groupdict`={groupdict}, `debug`={debug}) was called")
 
         if groupdict is None:
             return self.re_list_iter_typed_groupdict_none(
@@ -2005,14 +1968,10 @@ class BaseCfgLine:
         debug: bool = False,
     ):
         if debug is True:
-            logger.debug(
-                f"    {self}.re_list_iter_typed_groupdict_none() is checking with `groupdict`=None"
-            )
+            logger.debug(f"    {self}.re_list_iter_typed_groupdict_none() is checking with `groupdict`=None")
 
         if groupdict is not None:
-            raise NotImplementedError(
-                "re_list_iter_typed_groupdict_none() must be called without groupdict argument"
-            )
+            raise NotImplementedError("re_list_iter_typed_groupdict_none() must be called without groupdict argument")
 
         retval = []
 
@@ -2024,18 +1983,14 @@ class BaseCfgLine:
         if recurse is False:
             for cobj in self.children:
                 if debug is True:
-                    logger.debug(
-                        f"    {self}.re_list_iter_typed() is checking match of r'''{regex}''' on -->{cobj}<--"
-                    )
+                    logger.debug(f"    {self}.re_list_iter_typed() is checking match of r'''{regex}''' on -->{cobj}<--")
                 mm = re.search(regex, cobj.text)
                 if isinstance(mm, re.Match):
                     retval.append(result_type(mm.group(group)))
         else:
             for cobj in self.all_children:
                 if debug is True:
-                    logger.debug(
-                        f"    {self}.re_list_iter_typed() is checking match of r'''{regex}''' on -->{cobj}<--"
-                    )
+                    logger.debug(f"    {self}.re_list_iter_typed() is checking match of r'''{regex}''' on -->{cobj}<--")
                 mm = re.search(regex, cobj.text)
                 if isinstance(mm, re.Match):
                     retval.append(result_type(mm.group(group)))
@@ -2052,14 +2007,10 @@ class BaseCfgLine:
         debug: bool = False,
     ):
         if debug is True:
-            logger.debug(
-                f"    {self}.re_list_iter_typed() is checking with `groupdict`={groupdict}"
-            )
+            logger.debug(f"    {self}.re_list_iter_typed() is checking with `groupdict`={groupdict}")
 
         if not isinstance(groupdict, dict):
-            raise NotImplementedError(
-                "re_list_iter_typed_groupdict_dict() must be called with a dict in groupdict"
-            )
+            raise NotImplementedError("re_list_iter_typed_groupdict_dict() must be called with a dict in groupdict")
 
         retval = []
 

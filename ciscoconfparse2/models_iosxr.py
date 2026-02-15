@@ -1,27 +1,27 @@
-from typing import Any
 import re
+from typing import Any
 
 import attrs
 from loguru import logger
 
-from ciscoconfparse2.errors import DynamicAddressException
-
+from ciscoconfparse2.ccp_abc import BaseCfgLine
 from ciscoconfparse2.ccp_util import (
     _IPV6_REGEX_STR_COMPRESSED1,
     _IPV6_REGEX_STR_COMPRESSED2,
+    _IPV6_REGEX_STR_COMPRESSED3,
+    CiscoIOSInterface,
+    CiscoIOSXRInterface,
+    CiscoRange,
+    IPv4Obj,
+    IPv6Obj,
 )
-from ciscoconfparse2.errors import InvalidCiscoEthernetTrunkAction
-from ciscoconfparse2.errors import InvalidCiscoEthernetVlan
-from ciscoconfparse2.errors import InvalidCiscoInterface
-
-from ciscoconfparse2.ccp_util import CiscoIOSInterface, CiscoIOSXRInterface
-from ciscoconfparse2.ccp_util import _IPV6_REGEX_STR_COMPRESSED3
-from ciscoconfparse2.ccp_util import IPv4Obj, IPv6Obj
-from ciscoconfparse2.ccp_util import CiscoRange
-from ciscoconfparse2.ccp_abc import BaseCfgLine
-
-from ciscoconfparse2.models_base import BaseFactoryLine
-from ciscoconfparse2.models_base import BaseFactoryInterfaceLine
+from ciscoconfparse2.errors import (
+    DynamicAddressException,
+    InvalidCiscoEthernetTrunkAction,
+    InvalidCiscoEthernetVlan,
+    InvalidCiscoInterface,
+)
+from ciscoconfparse2.models_base import BaseFactoryInterfaceLine, BaseFactoryLine
 from ciscoconfparse2.models_cisco import HSRPInterfaceGroup
 
 ### HUGE UGLY WARNING:
@@ -307,9 +307,7 @@ class IOSXRCfgLine(BaseFactoryLine):
             return True
         return False
 
-    _VIRTUAL_INTF_REGEX_STR = (
-        r"""^interface\s+(Loopback|Vlan|Tunnel|Dialer|Virtual-Template|Port-Channel)"""
-    )
+    _VIRTUAL_INTF_REGEX_STR = r"""^interface\s+(Loopback|Vlan|Tunnel|Dialer|Virtual-Template|Port-Channel)"""
     _VIRTUAL_INTF_REGEX = re.compile(_VIRTUAL_INTF_REGEX_STR, re.I)
 
     @property
@@ -406,9 +404,7 @@ class IOSXRCfgLine(BaseFactoryLine):
         :return: Return a boolean indicating whether this port is configured in a port-channel
         :rtype: bool
         """
-        retval = self.re_match_iter_typed(
-            r"^\s*channel-group\s+(\d+)", result_type=bool, default=False
-        )
+        retval = self.re_match_iter_typed(r"^\s*channel-group\s+(\d+)", result_type=bool, default=False)
         return retval
 
     @property
@@ -419,9 +415,7 @@ class IOSXRCfgLine(BaseFactoryLine):
         :return: Return an integer for the port-channel which it's configured in, default to -1
         :rtype: int
         """
-        retval = self.re_match_iter_typed(
-            r"^\s*channel-group\s+(\d+)", result_type=int, default=-1
-        )
+        retval = self.re_match_iter_typed(r"^\s*channel-group\s+(\d+)", result_type=int, default=-1)
         return retval
 
 
@@ -505,29 +499,23 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
     @logger.catch(reraise=True)
     def verbose(self) -> str:
         if not self.is_switchport:
-            return (
-                "<%s # %s '%s' info: '%s' (child_indent: %s / len(children): %s / family_endpoint: %s)>"
-                % (
-                    self.classname,
-                    self.linenum,
-                    self.text,
-                    self.ipv4_addr_object or "No IPv4",
-                    self.child_indent,
-                    len(self.children),
-                    self.family_endpoint,
-                )
+            return "<%s # %s '%s' info: '%s' (child_indent: %s / len(children): %s / family_endpoint: %s)>" % (
+                self.classname,
+                self.linenum,
+                self.text,
+                self.ipv4_addr_object or "No IPv4",
+                self.child_indent,
+                len(self.children),
+                self.family_endpoint,
             )
         else:
-            return (
-                "<%s # %s '%s' info: 'switchport' (child_indent: %s / len(children): %s / family_endpoint: %s)>"
-                % (
-                    self.classname,
-                    self.linenum,
-                    self.text,
-                    self.child_indent,
-                    len(self.children),
-                    self.family_endpoint,
-                )
+            return "<%s # %s '%s' info: 'switchport' (child_indent: %s / len(children): %s / family_endpoint: %s)>" % (
+                self.classname,
+                self.linenum,
+                self.text,
+                self.child_indent,
+                len(self.children),
+                self.family_endpoint,
             )
 
     # This method is on BaseIOSXRIntfLine()
@@ -854,9 +842,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         :return: Return the current interface description string, default to ''.
         :rtype: str
         """
-        retval = self.re_match_iter_typed(
-            r"^\s*description\s+(\S.*)$", result_type=str, default=""
-        )
+        retval = self.re_match_iter_typed(r"^\s*description\s+(\S.*)$", result_type=str, default="")
         return retval
 
     # This method is on BaseIOSXRIntfLine()
@@ -867,9 +853,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         :return: Return the integer bandwidth, default to -1
         :rtype: int
         """
-        retval = self.re_match_iter_typed(
-            r"^\s*bandwidth\s+(\d+)$", result_type=int, default=-1
-        )
+        retval = self.re_match_iter_typed(r"^\s*bandwidth\s+(\d+)$", result_type=int, default=-1)
         return retval
 
     # This method is on BaseIOSXRIntfLine()
@@ -880,9 +864,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         :return: Return the integer delay
         :rtype: int
         """
-        retval = self.re_match_iter_typed(
-            r"^\s*delay\s+(\d+)$", result_type=int, default=-1
-        )
+        retval = self.re_match_iter_typed(r"^\s*delay\s+(\d+)$", result_type=int, default=-1)
         return retval
 
     # This method is on BaseIOSXRIntfLine()
@@ -893,9 +875,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         :return: Return the current hold-queue out depth, default to -1
         :rtype: int
         """
-        retval = self.re_match_iter_typed(
-            r"^\s*hold-queue\s+(\d+)\s+out$", result_type=int, default=-1
-        )
+        retval = self.re_match_iter_typed(r"^\s*hold-queue\s+(\d+)\s+out$", result_type=int, default=-1)
         return retval
 
     # This method is on BaseIOSXRIntfLine()
@@ -906,9 +886,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         :return: Return the current hold-queue int depth, default to -1
         :rtype: int
         """
-        retval = self.re_match_iter_typed(
-            r"^\s*hold-queue\s+(\d+)\s+in$", result_type=int, default=-1
-        )
+        retval = self.re_match_iter_typed(r"^\s*hold-queue\s+(\d+)\s+in$", result_type=int, default=-1)
         return retval
 
     # This method is on BaseIOSXRIntfLine()
@@ -919,9 +897,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         :return: Return the current encapsulation (i.e. ppp, hdlc, ethernet, etc...), default to ''
         :rtype: str
         """
-        retval = self.re_match_iter_typed(
-            r"^\s*encapsulation\s+(\S+)", result_type=str, default=""
-        )
+        retval = self.re_match_iter_typed(r"^\s*encapsulation\s+(\S+)", result_type=str, default="")
         return retval
 
     # This method is on BaseIOSXRIntfLine()
@@ -932,9 +908,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         :return: Whether this interface is configured with MPLS
         :rtype: bool
         """
-        retval = self.re_match_iter_typed(
-            r"^\s*(mpls\s+ip)$", result_type=bool, default=False
-        )
+        retval = self.re_match_iter_typed(r"^\s*(mpls\s+ip)$", result_type=bool, default=False)
         return retval
 
     # This method is on BaseIOSXRIntfLine()
@@ -1069,9 +1043,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         """
         if not self.is_ethernet_intf:
             return False
-        elif self.is_ethernet_intf and (
-            self.manual_speed != "" and self.manual_duplex != ""
-        ):
+        elif self.is_ethernet_intf and (self.manual_speed != "" and self.manual_duplex != ""):
             return False
         elif self.is_ethernet_intf:
             return True
@@ -1086,12 +1058,8 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         :return: The manual carrier delay (in seconds) of the interface as a python float, default to -1.0
         :rtype: float
         """
-        cd_seconds = self.re_match_iter_typed(
-            r"^\s*carrier-delay\s+(\d+)$", result_type=float, default=-1.0
-        )
-        cd_msec = self.re_match_iter_typed(
-            r"^\s*carrier-delay\s+msec\s+(\d+)$", result_type=float, default=-1.0
-        )
+        cd_seconds = self.re_match_iter_typed(r"^\s*carrier-delay\s+(\d+)$", result_type=float, default=-1.0)
+        cd_msec = self.re_match_iter_typed(r"^\s*carrier-delay\s+msec\s+(\d+)$", result_type=float, default=-1.0)
 
         if cd_seconds > -1.0:
             return cd_seconds
@@ -1108,9 +1076,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         :return: Return the clock rate of the interface as a python integer, default to -1
         :rtype: int
         """
-        retval = self.re_match_iter_typed(
-            r"^\s*clock\s+rate\s+(\d+)$", result_type=int, default=-1
-        )
+        retval = self.re_match_iter_typed(r"^\s*clock\s+rate\s+(\d+)$", result_type=int, default=-1)
         return retval
 
     # This method is on BaseIOSXRIntfLine()
@@ -1153,9 +1119,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
            4470
            >>>
         """
-        retval = self.re_match_iter_typed(
-            r"^\s*mtu\s+(\d+)$", result_type=int, default=-1
-        )
+        retval = self.re_match_iter_typed(r"^\s*mtu\s+(\d+)$", result_type=int, default=-1)
         return retval
 
     # This method is on BaseIOSXRIntfLine()
@@ -1168,9 +1132,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         :return: Return the manual MPLS MTU of the interface as a python integer, default to -1
         :rtype: int
         """
-        retval = self.re_match_iter_typed(
-            r"^\s*mpls\s+mtu\s+(\d+)$", result_type=int, default=-1
-        )
+        retval = self.re_match_iter_typed(r"^\s*mpls\s+mtu\s+(\d+)$", result_type=int, default=-1)
         return retval
 
     # This method is on BaseIOSXRIntfLine()
@@ -1183,9 +1145,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         :return: Return the manual IP MTU of the interface as a python integer, default to -1
         :rtype: int
         """
-        retval = self.re_match_iter_typed(
-            r"^\s*ip\s+mtu\s+(\d+)$", result_type=int, default=-1
-        )
+        retval = self.re_match_iter_typed(r"^\s*ip\s+mtu\s+(\d+)$", result_type=int, default=-1)
         return retval
 
     # This method is on BaseIOSXRIntfLine()
@@ -1198,9 +1158,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         :return: Return the manual IPv6 MTU of the interface as a python integer, default to -1
         :rtype: int
         """
-        retval = self.re_match_iter_typed(
-            r"^\s*ipv6\s+mtu\s+(\d+)$", result_type=int, default=-1
-        )
+        retval = self.re_match_iter_typed(r"^\s*ipv6\s+mtu\s+(\d+)$", result_type=int, default=-1)
         return retval
 
     # This method is on BaseIOSXRIntfLine()
@@ -1211,9 +1169,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         :return: Return the manual speed of the interface as a python integer, default to -1
         :rtype: int
         """
-        retval = self.re_match_iter_typed(
-            r"^\s*speed\s+(\d+)$", result_type=int, default=-1
-        )
+        retval = self.re_match_iter_typed(r"^\s*speed\s+(\d+)$", result_type=int, default=-1)
         return retval
 
     # This method is on BaseIOSXRIntfLine()
@@ -1224,9 +1180,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         :return: Return the manual duplex of the interface as a python integer, default to ''
         :rtype: str
         """
-        retval = self.re_match_iter_typed(
-            r"^\s*duplex\s+(\S.+)$", result_type=str, default=""
-        )
+        retval = self.re_match_iter_typed(r"^\s*duplex\s+(\S.+)$", result_type=str, default="")
         return retval
 
     # This method is on BaseIOSXRIntfLine()
@@ -1237,9 +1191,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         :return: Whether the interface is shutdown
         :rtype: bool
         """
-        retval = self.re_match_iter_typed(
-            r"^\s*(shut\S*)\s*$", result_type=bool, default=False
-        )
+        retval = self.re_match_iter_typed(r"^\s*(shut\S*)\s*$", result_type=bool, default=False)
         return retval
 
     # This method is on BaseIOSXRIntfLine()
@@ -1250,9 +1202,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         :return: The name of the VRF configured on the interface, default to ''
         :rtype: str
         """
-        retval = self.re_match_iter_typed(
-            r"^\s*(ip\s+)*vrf\sforwarding\s(\S+)$", result_type=str, group=2, default=""
-        )
+        retval = self.re_match_iter_typed(r"^\s*(ip\s+)*vrf\sforwarding\s(\S+)$", result_type=str, group=2, default="")
         return retval
 
     # This method is on BaseIOSXRIntfLine()
@@ -1278,12 +1228,8 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
             result_type=str,
             default="",
         )
-        condition1 = self.re_match_iter_typed(
-            r"^\s+ip\s+address\s+(dhcp)\s*$", result_type=str, default=""
-        )
-        condition2 = self.re_match_iter_typed(
-            r"^\s+ip\s+address\s+(negotiated)\s*$", result_type=str, default=""
-        )
+        condition1 = self.re_match_iter_typed(r"^\s+ip\s+address\s+(dhcp)\s*$", result_type=str, default="")
+        condition2 = self.re_match_iter_typed(r"^\s+ip\s+address\s+(negotiated)\s*$", result_type=str, default="")
         if condition1.lower() == "dhcp":
             return ""
         elif condition2.lower() == "negotiated":
@@ -1332,15 +1278,9 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
             result_type=str,
             default="",
         )
-        condition1 = self.re_match_iter_typed(
-            r"^\s+ipv6\s+address\s+(dhcp)\s*$", result_type=str, default=""
-        )
-        condition2 = self.re_match_iter_typed(
-            r"^\s+ipv6\s+address\s+(autoconfig)\s*$", result_type=str, default=""
-        )
-        condition3 = self.re_match_iter_typed(
-            r"^\s+ipv6\s+address\s+(negotiated)\s*$", result_type=str, default=""
-        )
+        condition1 = self.re_match_iter_typed(r"^\s+ipv6\s+address\s+(dhcp)\s*$", result_type=str, default="")
+        condition2 = self.re_match_iter_typed(r"^\s+ipv6\s+address\s+(autoconfig)\s*$", result_type=str, default="")
+        condition3 = self.re_match_iter_typed(r"^\s+ipv6\s+address\s+(negotiated)\s*$", result_type=str, default="")
         if condition1.lower() == "dhcp":
             return ""
         elif condition2.lower() == "autoconfig":
@@ -1425,17 +1365,13 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
 
     # This method is on BaseIOSXRIntfLine()
     @logger.catch(reraise=True)
-    def in_ipv4_subnets(
-        self, subnets: set[IPv4Obj] | list[IPv4Obj] | tuple[IPv4Obj, ...] = None
-    ) -> bool:
+    def in_ipv4_subnets(self, subnets: set[IPv4Obj] | list[IPv4Obj] | tuple[IPv4Obj, ...] = None) -> bool:
         r"""
         :return: Whether the interface is in a sequence or set of ccp_util.IPv4Obj objects
         :rtype: bool
         """
         if subnets is None:
-            raise ValueError(
-                "A python list or set of ccp_util.IPv4Obj objects must be supplied"
-            )
+            raise ValueError("A python list or set of ccp_util.IPv4Obj objects must be supplied")
         for subnet in subnets:
             if subnet.empty is True:
                 continue
@@ -1460,9 +1396,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         if self.ipv4_addr == "":
             return False
 
-        retval = self.re_match_iter_typed(
-            r"^\s*no\sip\s(unreachables)\s*$", result_type=bool, default=False
-        )
+        retval = self.re_match_iter_typed(r"^\s*no\sip\s(unreachables)\s*$", result_type=bool, default=False)
         return retval
 
     # This method is on BaseIOSXRIntfLine()
@@ -1481,9 +1415,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         if self.ipv4_addr == "":
             return False
 
-        retval = self.re_match_iter_typed(
-            r"^\s*no\sip\s(redirects)\s*$", result_type=bool, default=False
-        )
+        retval = self.re_match_iter_typed(r"^\s*no\sip\s(redirects)\s*$", result_type=bool, default=False)
         return retval
 
     # This method is on BaseIOSXRIntfLine()
@@ -1522,9 +1454,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         ## By default, Cisco IOSXR answers proxy-arp
         ## By default, Nexus disables proxy-arp
         ## By default, IOSXR-XR disables proxy-arp
-        retval = self.re_match_iter_typed(
-            r"^\s*no\sip\s(proxy-arp)\s*$", result_type=bool, default=False
-        )
+        retval = self.re_match_iter_typed(r"^\s*no\sip\s(proxy-arp)\s*$", result_type=bool, default=False)
         return retval
 
     # This method is on BaseIOSXRIntfLine()
@@ -1543,9 +1473,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         if self.ipv4_addr == "":
             return False
 
-        retval = self.re_match_iter_typed(
-            r"^\s*(ip\spim\sdense-mode)\s*$", result_type=bool, default=False
-        )
+        retval = self.re_match_iter_typed(r"^\s*(ip\spim\sdense-mode)\s*$", result_type=bool, default=False)
         return retval
 
     # This method is on BaseIOSXRIntfLine()
@@ -1564,9 +1492,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         if self.ipv4_addr == "":
             return False
 
-        retval = self.re_match_iter_typed(
-            r"^\s*(ip\spim\ssparse-mode)\s*$", result_type=bool, default=False
-        )
+        retval = self.re_match_iter_typed(r"^\s*(ip\spim\ssparse-mode)\s*$", result_type=bool, default=False)
         return retval
 
     # This method is on BaseIOSXRIntfLine()
@@ -1585,9 +1511,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         if self.ipv4_addr == "":
             return False
 
-        retval = self.re_match_iter_typed(
-            r"^\s*(ipv6\spim\ssparse-mode)\s*$", result_type=bool, default=False
-        )
+        retval = self.re_match_iter_typed(r"^\s*(ipv6\spim\ssparse-mode)\s*$", result_type=bool, default=False)
         return retval
 
     # This method is on BaseIOSXRIntfLine()
@@ -1629,9 +1553,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
 
         ## By default, Cisco IOSXR defaults to 4 hour arp timers
         ## By default, Nexus defaults to 15 minute arp timers
-        retval = self.re_match_iter_typed(
-            r"^\s*arp\s+timeout\s+(\d+)\s*$", result_type=int, default=-1
-        )
+        retval = self.re_match_iter_typed(r"^\s*arp\s+timeout\s+(\d+)\s*$", result_type=int, default=-1)
         return retval
 
     # This method is on BaseIOSXRIntfLine()
@@ -1663,15 +1585,9 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         retval = list()
         for child in self.children:
             if "helper-address" in child.text:
-                addr = child.re_match_typed(
-                    r"ip\s+helper-address\s.*?(\d+\.\d+\.\d+\.\d+)"
-                )
-                global_addr = child.re_match_typed(
-                    r"ip\s+helper-address\s+(global)", result_type=bool, default=False
-                )
-                vrf = child.re_match_typed(
-                    r"ip\s+helper-address\s+vrf\s+(\S+)", default=""
-                )
+                addr = child.re_match_typed(r"ip\s+helper-address\s.*?(\d+\.\d+\.\d+\.\d+)")
+                global_addr = child.re_match_typed(r"ip\s+helper-address\s+(global)", result_type=bool, default=False)
+                vrf = child.re_match_typed(r"ip\s+helper-address\s+vrf\s+(\S+)", default="")
                 if global_addr:
                     retval.append({"addr": addr, "vrf": vrf, "scope": "global"})
                 else:
@@ -2040,9 +1956,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         :return: The virtual circuit ID of the xconnect on this interface, default to -1 (even if no xconnect)
         :rtype: int
         """
-        retval = self.re_match_iter_typed(
-            r"^\s*xconnect\s+\S+\s+(\d+)\s+\S+", result_type=int, default=-1
-        )
+        retval = self.re_match_iter_typed(r"^\s*xconnect\s+\S+\s+(\d+)\s+\S+", result_type=int, default=-1)
         return retval
 
     ##-------------  HSRP
@@ -2174,21 +2088,13 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         #   standby 110 authentication md5 key-chain KEYCHAINNAME
         for cmd in self.all_children:
             parts = cmd.strip().split()
-            if (
-                parts[0] == "standby"
-                and parts[1] == "authentication"
-                and parts[3] == "key-chain"
-            ):
+            if parts[0] == "standby" and parts[1] == "authentication" and parts[3] == "key-chain":
                 # Standby with no explicit group number
                 hsrp_group = 0
                 hsrp_auth_name = parts[4]
                 retval[hsrp_group] = hsrp_auth_name
 
-            elif (
-                parts[0] == "standby"
-                and parts[2] == "authentication"
-                and parts[4] == "key-chain"
-            ):
+            elif parts[0] == "standby" and parts[2] == "authentication" and parts[4] == "key-chain":
                 # Standby with an explicit group number
                 hsrp_group = int(parts[1])
                 hsrp_auth_name = parts[5]
@@ -2258,9 +2164,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         :return: The name or number of the inbound IPv4 access-group
         :rtype: str
         """
-        retval = self.re_match_iter_typed(
-            r"^\s*ip\saccess-group\s+(\S+)\s+in\s*$", result_type=str, default=""
-        )
+        retval = self.re_match_iter_typed(r"^\s*ip\saccess-group\s+(\S+)\s+in\s*$", result_type=str, default="")
         return retval
 
     # This method is on BaseIOSXRIntfLine()
@@ -2271,9 +2175,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         :return: The name or number of the outbound IPv4 access-group
         :rtype: str
         """
-        retval = self.re_match_iter_typed(
-            r"^\s*ip\saccess-group\s+(\S+)\s+out\s*$", result_type=str, default=""
-        )
+        retval = self.re_match_iter_typed(r"^\s*ip\saccess-group\s+(\S+)\s+out\s*$", result_type=str, default="")
         return retval
 
     # This method is on BaseIOSXRIntfLine()
@@ -2284,9 +2186,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         :return: The name or number of the inbound IPv6 ACL
         :rtype: str
         """
-        retval = self.re_match_iter_typed(
-            r"^\s*ipv6\straffic-filter\s+(\S+)\s+in\s*$", result_type=str, default=""
-        )
+        retval = self.re_match_iter_typed(r"^\s*ipv6\straffic-filter\s+(\S+)\s+in\s*$", result_type=str, default="")
         return retval
 
     # This method is on BaseIOSXRIntfLine()
@@ -2297,9 +2197,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         :return: The name or number of the outbound IPv6 ACL
         :rtype: str
         """
-        retval = self.re_match_iter_typed(
-            r"^\s*ipv6\straffic-filter\s+(\S+)\s+out\s*$", result_type=str, default=""
-        )
+        retval = self.re_match_iter_typed(r"^\s*ipv6\straffic-filter\s+(\S+)\s+out\s*$", result_type=str, default="")
         return retval
 
     # This method is on BaseIOSXRIntfLine()
@@ -2470,80 +2368,58 @@ class IOSXRvPCLine(BaseCfgLine):
 
     @property
     def vpc_domain_id(self):
-        retval = self.re_match_typed(
-            r"^vpc\s+domain\s+(\d+)$", result_type=str, default=-1
-        )
+        retval = self.re_match_typed(r"^vpc\s+domain\s+(\d+)$", result_type=str, default=-1)
         return retval
 
     @property
     def vpc_role_priority(self):
-        retval = self.re_match_iter_typed(
-            r"^\s+role\s+priority\s+(\d+)", result_type=int, default=-1
-        )
+        retval = self.re_match_iter_typed(r"^\s+role\s+priority\s+(\d+)", result_type=int, default=-1)
         return retval
 
     @property
     def vpc_system_priority(self):
-        retval = self.re_match_iter_typed(
-            r"^\s+system-priority\s+(\d+)", result_type=int, default=-1
-        )
+        retval = self.re_match_iter_typed(r"^\s+system-priority\s+(\d+)", result_type=int, default=-1)
         return retval
 
     @property
     def vpc_system_mac(self):
-        retval = self.re_match_iter_typed(
-            r"^\s+system-mac\s+(\S+)", result_type=str, default=""
-        )
+        retval = self.re_match_iter_typed(r"^\s+system-mac\s+(\S+)", result_type=str, default="")
         return retval
 
     @property
     def has_peer_config_check_bypass(self):
-        retval = self.re_match_iter_typed(
-            r"^\s+(peer-config-check-bypass)", result_type=bool, default=False
-        )
+        retval = self.re_match_iter_typed(r"^\s+(peer-config-check-bypass)", result_type=bool, default=False)
         return retval
 
     @property
     def has_peer_switch(self):
-        retval = self.re_match_iter_typed(
-            r"^\s+(peer-switch)", result_type=bool, default=False
-        )
+        retval = self.re_match_iter_typed(r"^\s+(peer-switch)", result_type=bool, default=False)
         return retval
 
     @property
     def has_layer3_peer_router(self):
-        retval = self.re_match_iter_typed(
-            r"^\s+(layer3\s+peer-router)", result_type=bool, default=False
-        )
+        retval = self.re_match_iter_typed(r"^\s+(layer3\s+peer-router)", result_type=bool, default=False)
         return retval
 
     @property
     def has_peer_gateway(self):
-        retval = self.re_match_iter_typed(
-            r"^\s+(peer-gateway)", result_type=bool, default=False
-        )
+        retval = self.re_match_iter_typed(r"^\s+(peer-gateway)", result_type=bool, default=False)
         return retval
 
     @property
     def has_auto_recovery(self):
-        retval = self.re_match_iter_typed(
-            r"^\s+(auto-recovery)", result_type=bool, default=False
-        )
+        retval = self.re_match_iter_typed(r"^\s+(auto-recovery)", result_type=bool, default=False)
         return retval
 
     @property
     def vpc_auto_recovery_reload_delay(self):
         reload_delay_regex = r"^\s+auto-recovery\s+reload-delay\s+(\d+)"
-        retval = self.re_match_iter_typed(
-            reload_delay_regex, result_type=int, default=-1
-        )
+        retval = self.re_match_iter_typed(reload_delay_regex, result_type=int, default=-1)
         return retval
 
     @property
     def has_ip_arp_synchronize(self):
-        retval = self.re_match_iter_typed(
-            r"(ip\s+arp\s+synchronize)", result_type=bool, default=False
-        )
+        retval = self.re_match_iter_typed(r"(ip\s+arp\s+synchronize)", result_type=bool, default=False)
         return retval
 
     @property
@@ -2554,35 +2430,19 @@ class IOSXRvPCLine(BaseCfgLine):
             result_type=str,
             default="",
         )
-        hold_timeout = self.re_match_iter_typed(
-            r"peer-keepalive\s+.*?hold-timeout\s+(\d+)", result_type=int, default=-1
-        )
-        interval = self.re_match_iter_typed(
-            r"peer-keepalive\s+.*?interval\s+(\d+)", result_type=int, default=-1
-        )
-        timeout = self.re_match_iter_typed(
-            r"peer-keepalive\s+.*?timeout\s+(\d+)", result_type=int, default=-1
-        )
-        prec = self.re_match_iter_typed(
-            r"peer-keepalive\s+.*?precedence\s+(\S+)", result_type=str, default=""
-        )
+        hold_timeout = self.re_match_iter_typed(r"peer-keepalive\s+.*?hold-timeout\s+(\d+)", result_type=int, default=-1)
+        interval = self.re_match_iter_typed(r"peer-keepalive\s+.*?interval\s+(\d+)", result_type=int, default=-1)
+        timeout = self.re_match_iter_typed(r"peer-keepalive\s+.*?timeout\s+(\d+)", result_type=int, default=-1)
+        prec = self.re_match_iter_typed(r"peer-keepalive\s+.*?precedence\s+(\S+)", result_type=str, default="")
         source = self.re_match_iter_typed(
             r"peer-keepalive\s+.*?source\s+(\d+\.\d+\.\d+\.\d+)",
             result_type=str,
             default="",
         )
-        tos = self.re_match_iter_typed(
-            r"peer-keepalive\s+.*?tos\s+(\S+)", result_type=str, default=""
-        )
-        tos_byte = self.re_match_iter_typed(
-            r"peer-keepalive\s+.*?tos-byte\s+(\S+)", result_type=int, default=-1
-        )
-        udp_port = self.re_match_iter_typed(
-            r"peer-keepalive\s+.*?udp-port\s+(\d+)", result_type=int, default=-1
-        )
-        vrf = self.re_match_iter_typed(
-            r"peer-keepalive\s+.*?vrf\s+(\S+)", result_type=str, default=""
-        )
+        tos = self.re_match_iter_typed(r"peer-keepalive\s+.*?tos\s+(\S+)", result_type=str, default="")
+        tos_byte = self.re_match_iter_typed(r"peer-keepalive\s+.*?tos-byte\s+(\S+)", result_type=int, default=-1)
+        udp_port = self.re_match_iter_typed(r"peer-keepalive\s+.*?udp-port\s+(\d+)", result_type=int, default=-1)
+        vrf = self.re_match_iter_typed(r"peer-keepalive\s+.*?vrf\s+(\S+)", result_type=str, default="")
         retval = {
             "destination": dest,
             "hold-timeout": hold_timeout,
@@ -2623,12 +2483,7 @@ class IOSXRAccessLine(IOSXRCfgLine):
         return self.get_unique_identifier()
 
     def __repr__(self):
-        return "<{} # {} '{}' info: '{}'>".format(
-            self.classname,
-            self.linenum,
-            self.name,
-            self.range_str,
-        )
+        return f"<{self.classname} # {self.linenum} '{self.name}' info: '{self.range_str}'>"
 
     @classmethod
     @logger.catch(reraise=True)
@@ -2663,9 +2518,7 @@ class IOSXRAccessLine(IOSXRCfgLine):
         ## Return the access-line's numerical range as a list
         ## line con 0 => [0]
         ## line 33 48 => [33, 48]
-        retval = self.re_match_typed(
-            r"([a-zA-Z]+\s+)*(\d+\s*\d*)$", group=2, result_type=str, default=""
-        )
+        retval = self.re_match_typed(r"([a-zA-Z]+\s+)*(\d+\s*\d*)$", group=2, result_type=str, default="")
         tmp = map(int, retval.strip().split())
         return tmp
 
@@ -2684,9 +2537,7 @@ class IOSXRAccessLine(IOSXRCfgLine):
     @property
     @logger.catch(reraise=True)
     def parse_exectimeout(self):
-        retval = self.re_match_iter_typed(
-            r"^\s*exec-timeout\s+(\d+\s*\d*)\s*$", group=1, result_type=str, default=""
-        )
+        retval = self.re_match_iter_typed(r"^\s*exec-timeout\s+(\d+\s*\d*)\s*$", group=1, result_type=str, default="")
         tmp = list(map(int, retval.strip().split()))
         return tmp
 
@@ -2703,25 +2554,14 @@ class BaseIOSXRRouteLine(IOSXRCfgLine):
         super().__init__(*args, **kwargs)
 
     def __repr__(self):
-        return "<{} # {} '{}' info: '{}'>".format(
-            self.classname,
-            self.linenum,
-            self.network,
-            self.routeinfo,
-        )
+        return f"<{self.classname} # {self.linenum} '{self.network}' info: '{self.routeinfo}'>"
 
     @property
     @logger.catch(reraise=True)
     def routeinfo(self):
         ### Route information for the repr string
         if self.tracking_object_name:
-            return (
-                self.nexthop_str
-                + " AD: "
-                + str(self.admin_distance)
-                + " Track: "
-                + self.tracking_object_name
-            )
+            return self.nexthop_str + " AD: " + str(self.admin_distance) + " Track: " + self.tracking_object_name
         else:
             return self.nexthop_str + " AD: " + str(self.admin_distance)
 
@@ -2793,12 +2633,12 @@ _RE_IP_ROUTE = re.compile(
 )
 
 _RE_IPV6_ROUTE = re.compile(
-    r"""^ipv6\s+route
+    rf"""^ipv6\s+route
 (?:\s+vrf\s+(?P<vrf>\S+))?
-(?:\s+(?P<prefix>{})\/(?P<masklength>\d+))    # Prefix detection
+(?:\s+(?P<prefix>{_IPV6_REGEX_STR_COMPRESSED1})\/(?P<masklength>\d+))    # Prefix detection
 (?:
-  (?:\s+(?P<nh_addr1>{}))
-  |(?:\s+(?P<nh_intf>\S+(?:\s+\d\S*?\/\S+)?)(?:\s+(?P<nh_addr2>{}))?)
+  (?:\s+(?P<nh_addr1>{_IPV6_REGEX_STR_COMPRESSED2}))
+  |(?:\s+(?P<nh_intf>\S+(?:\s+\d\S*?\/\S+)?)(?:\s+(?P<nh_addr2>{_IPV6_REGEX_STR_COMPRESSED3}))?)
 )
 (?:\s+nexthop-vrf\s+(?P<nexthop_vrf>\S+))?
 (?:\s+(?P<ad>\d+))?              # Administrative distance
@@ -2806,11 +2646,7 @@ _RE_IPV6_ROUTE = re.compile(
 (?:\s+tag\s+(?P<tag>\d+))?       # Route tag
 (?:\s+track\s+(?P<track>\d+))?   # Track object
 (?:\s+name\s+(?P<name>\S+))?     # Route name
-""".format(
-        _IPV6_REGEX_STR_COMPRESSED1,
-        _IPV6_REGEX_STR_COMPRESSED2,
-        _IPV6_REGEX_STR_COMPRESSED3,
-    ),
+""",
     re.VERBOSE,
 )
 
@@ -2972,15 +2808,9 @@ class IOSXRRouteLine(IOSXRCfgLine):
             return True
         elif self._address_family == "ipv6":
             ## ipv6 uses nexthop_vrf
-            raise ValueError(
-                "[FATAL] ipv6 doesn't support a global_next_hop for '{}'".format(
-                    self.text
-                )
-            )
+            raise ValueError(f"[FATAL] ipv6 doesn't support a global_next_hop for '{self.text}'")
         else:
-            raise ValueError(
-                f"[FATAL] Could not identify global next-hop for '{self.text}'"
-            )
+            raise ValueError(f"[FATAL] Could not identify global next-hop for '{self.text}'")
 
     @property
     @logger.catch(reraise=True)
@@ -2988,11 +2818,7 @@ class IOSXRRouteLine(IOSXRCfgLine):
         if self._address_family == "ipv6":
             return self.route_info["nexthop_vrf"] or ""
         else:
-            raise ValueError(
-                "[FATAL] ip doesn't support a global_next_hop for '{}'".format(
-                    self.text
-                )
-            )
+            raise ValueError(f"[FATAL] ip doesn't support a global_next_hop for '{self.text}'")
 
     @property
     @logger.catch(reraise=True)

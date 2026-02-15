@@ -23,9 +23,9 @@ import sys
 
 sys.path.insert(0, "..")
 
-from ciscoconfparse2.ciscoconfparse2 import CiscoConfParse
-from ciscoconfparse2.ciscoconfparse2 import BraceParse
 import pytest
+
+from ciscoconfparse2.ciscoconfparse2 import BraceParse, CiscoConfParse
 
 c01 = """policy-map QOS_1
  class GOLD
@@ -1305,9 +1305,7 @@ def parse_c03_factory(request):
 @pytest.fixture(scope="function")
 def parse_f01_ios(request):
     """Preparsed F5 f01 configuration as ios syntax"""
-    parse_f01_ios = CiscoConfParse(
-        f01, syntax="ios", comment_delimiters=["#"], factory=False
-    )
+    parse_f01_ios = CiscoConfParse(f01, syntax="ios", comment_delimiters=["#"], factory=False)
 
     yield parse_f01_ios
 
@@ -1330,9 +1328,7 @@ def parse_f02_junos_01(request):
 @pytest.fixture(scope="function")
 def parse_f01_junos_01(request):
     """Preparsed F5 f01 configuration as junos syntax"""
-    parse_f01_junos_01 = CiscoConfParse(
-        f01, syntax="junos", comment_delimiters=["#"], factory=False
-    )
+    parse_f01_junos_01 = CiscoConfParse(f01, syntax="junos", comment_delimiters=["#"], factory=False)
 
     yield parse_f01_junos_01
 
@@ -1356,9 +1352,7 @@ def parse_j01_deprecated(request):
 @pytest.fixture(scope="function")
 def parse_j01_factory(request):
     """Preparsed j01 with factory option"""
-    parse_j01_factory = CiscoConfParse(
-        j01, syntax="junos", comment_delimiters=["#", "!"], factory=True
-    )
+    parse_j01_factory = CiscoConfParse(j01, syntax="junos", comment_delimiters=["#", "!"], factory=True)
 
     yield parse_j01_factory
 
@@ -1475,9 +1469,7 @@ def config_n01(request):
 @pytest.fixture(scope="function")
 def parse_n01_w_blanklines(request):
     """Preparsed n01 with no ignored blank lines"""
-    parse_n01_blanklines = CiscoConfParse(
-        n01, syntax="nxos", ignore_blank_lines=False, factory=False
-    )
+    parse_n01_blanklines = CiscoConfParse(n01, syntax="nxos", ignore_blank_lines=False, factory=False)
 
     yield parse_n01_blanklines
 

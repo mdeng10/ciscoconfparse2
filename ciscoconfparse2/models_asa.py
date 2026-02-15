@@ -27,20 +27,17 @@ mike [~at~] pennington [/dot\] net
 ###
 ###   Use models_asa.py at your own risk.  You have been warned :-)
 
-from typing import Any
 import ipaddress
 import re
+from typing import Any
 
-from loguru import logger
 import attrs
-
-from ciscoconfparse2.protocol_values import ASA_IP_PROTOCOLS
-from ciscoconfparse2.ccp_util import L4Object
-from ciscoconfparse2.ccp_util import IPv4Obj, IPv6Obj
+from loguru import logger
 
 from ciscoconfparse2.ccp_abc import BaseCfgLine
-
+from ciscoconfparse2.ccp_util import IPv4Obj, IPv6Obj, L4Object
 from ciscoconfparse2.errors import InvalidParameters
+from ciscoconfparse2.protocol_values import ASA_IP_PROTOCOLS
 
 ##
 ##-------------  ASA Configuration line object
@@ -195,30 +192,9 @@ class BaseASAIntfLine(ASACfgLine):
     @logger.catch(reraise=True)
     def verbose(self):
         if not self.is_switchport:
-            return (
-                "<%s # %s '%s' info: '%s' (child_indent: %s / len(children): %s / family_endpoint: %s)>"
-                % (
-                    self.classname,
-                    self.linenum,
-                    self.text,
-                    self.ipv4_addr_object or "No IPv4",
-                    self.child_indent,
-                    len(self.children),
-                    self.family_endpoint,
-                )
-            )
+            return f"""<{self.classname} # {self.linenum} '{self.text}' """ f"""info: '{self.ipv4_addr_object or "No IPv4"}' """ f"""(child_indent: {self.child_indent} / len(children): {len(self.children)} """ f"""/ family_endpoint: {self.family_endpoint})>"""
         else:
-            return (
-                "<%s # %s '%s' info: 'switchport' (child_indent: %s / len(children): %s / family_endpoint: %s)>"
-                % (
-                    self.classname,
-                    self.linenum,
-                    self.text,
-                    self.child_indent,
-                    len(self.children),
-                    self.family_endpoint,
-                )
-            )
+            return f"""<{self.classname} # {self.linenum} '{self.text}' """ f"""info: 'switchport' (child_indent: {self.child_indent} / """ f"""len(children): {len(self.children)} / family_endpoint: {self.family_endpoint})>"""
 
     @classmethod
     @logger.catch(reraise=True)
@@ -268,17 +244,13 @@ class BaseASAIntfLine(ASACfgLine):
     @property
     @logger.catch(reraise=True)
     def description(self):
-        retval = self.re_match_iter_typed(
-            r"^\s*description\s+(\S.+)$", result_type=str, default=""
-        )
+        retval = self.re_match_iter_typed(r"^\s*description\s+(\S.+)$", result_type=str, default="")
         return retval
 
     @property
     @logger.catch(reraise=True)
     def manual_delay(self):
-        retval = self.re_match_iter_typed(
-            r"^\s*delay\s+(\d+)$", result_type=int, default=0
-        )
+        retval = self.re_match_iter_typed(r"^\s*delay\s+(\d+)$", result_type=int, default=0)
         return retval
 
     # This method is on BaseIOSIntfLine()
@@ -355,9 +327,7 @@ class BaseASAIntfLine(ASACfgLine):
     @logger.catch(reraise=True)
     def ip_network_object(self):
         try:
-            return IPv4Obj(
-                f"{self.ipv4_addr}/{self.ipv4_netmask}", strict=False
-            ).network
+            return IPv4Obj(f"{self.ipv4_addr}/{self.ipv4_netmask}", strict=False).network
         except AttributeError:
             err_text = f"{self.ipv4_addr}/{self.ipv4_netmask} does not have a .network attribute."
             raise AttributeError(err_text)
@@ -397,9 +367,7 @@ class BaseASAIntfLine(ASACfgLine):
     def has_autonegotiation(self):
         if not self.is_ethernet_intf:
             return False
-        elif self.is_ethernet_intf and (
-            self.has_manual_speed or self.has_manual_duplex
-        ):
+        elif self.is_ethernet_intf and (self.has_manual_speed or self.has_manual_duplex):
             return False
         elif self.is_ethernet_intf:
             return True
@@ -410,27 +378,21 @@ class BaseASAIntfLine(ASACfgLine):
     @property
     @logger.catch(reraise=True)
     def has_manual_speed(self):
-        retval = self.re_match_iter_typed(
-            r"^\s*speed\s+(\d+)$", result_type=bool, default=False
-        )
+        retval = self.re_match_iter_typed(r"^\s*speed\s+(\d+)$", result_type=bool, default=False)
         return retval
 
     # This method is on BaseIOSIntfLine()
     @property
     @logger.catch(reraise=True)
     def has_manual_duplex(self):
-        retval = self.re_match_iter_typed(
-            r"^\s*duplex\s+(\S.+)$", result_type=bool, default=False
-        )
+        retval = self.re_match_iter_typed(r"^\s*duplex\s+(\S.+)$", result_type=bool, default=False)
         return retval
 
     # This method is on BaseIOSIntfLine()
     @property
     @logger.catch(reraise=True)
     def is_shutdown(self):
-        retval = self.re_match_iter_typed(
-            r"^\s*(shut\S*)\s*$", result_type=bool, default=False
-        )
+        retval = self.re_match_iter_typed(r"^\s*(shut\S*)\s*$", result_type=bool, default=False)
         return retval
 
     # This method is on BaseIOSIntfLine()
@@ -494,11 +456,7 @@ class BaseASAIntfLine(ASACfgLine):
                 # Return a boolean for whether the interface is in that network and mask
                 return self.ipv4_addr_object in ipv4network
             except BaseException:
-                raise ValueError(
-                    "FATAL: %s.in_ipv4_subnet(ipv4network={}) is an invalid arg".format(
-                        ipv4network
-                    )
-                )
+                raise ValueError(f"FATAL: %s.in_ipv4_subnet(ipv4network={ipv4network}) is an invalid arg")
         else:
             return None
 
@@ -507,9 +465,7 @@ class BaseASAIntfLine(ASACfgLine):
     def in_ipv4_subnets(self, subnets=None):
         """Accept a set or list of ccp_util.IPv4Obj objects, and return a boolean for whether this interface is within the requested subnets."""
         if subnets is None:
-            raise ValueError(
-                "A python list or set of ccp_util.IPv4Obj objects must be supplied"
-            )
+            raise ValueError("A python list or set of ccp_util.IPv4Obj objects must be supplied")
         for subnet in subnets:
             tmp = self.in_ipv4_subnet(ipv4network=subnet)
             if self.ipv4_addr_object in subnet:
@@ -528,36 +484,28 @@ class BaseASAIntfLine(ASACfgLine):
         if self.ipv4_addr == "":
             return False
 
-        retval = self.re_match_iter_typed(
-            r"^\s*ip\spim\ssparse-mode\s*$)\s*$", result_type=bool, default=False
-        )
+        retval = self.re_match_iter_typed(r"^\s*ip\spim\ssparse-mode\s*$)\s*$", result_type=bool, default=False)
         return retval
 
     # This method is on BaseIOSIntfLine()
     @property
     @logger.catch(reraise=True)
     def is_switchport(self):
-        retval = self.re_match_iter_typed(
-            r"^\s*(switchport)\s*", result_type=bool, default=False
-        )
+        retval = self.re_match_iter_typed(r"^\s*(switchport)\s*", result_type=bool, default=False)
         return retval
 
     # This method is on BaseIOSIntfLine()
     @property
     @logger.catch(reraise=True)
     def has_manual_switch_access(self):
-        retval = self.re_match_iter_typed(
-            r"^\s*(switchport\smode\s+access)\s*$", result_type=bool, default=False
-        )
+        retval = self.re_match_iter_typed(r"^\s*(switchport\smode\s+access)\s*$", result_type=bool, default=False)
         return retval
 
     # This method is on BaseIOSIntfLine()
     @property
     @logger.catch(reraise=True)
     def has_manual_switch_trunk(self):
-        retval = self.re_match_iter_typed(
-            r"^\s*(switchport\s+mode\s+trunk)\s*$", result_type=bool, default=False
-        )
+        retval = self.re_match_iter_typed(r"^\s*(switchport\s+mode\s+trunk)\s*$", result_type=bool, default=False)
         return retval
 
     # This method is on BaseIOSIntfLine()
@@ -565,9 +513,7 @@ class BaseASAIntfLine(ASACfgLine):
     @logger.catch(reraise=True)
     def access_vlan(self):
         """Return an integer with the access vlan number.  Return 0, if the port has no explicit vlan configured."""
-        retval = self.re_match_iter_typed(
-            r"^\s*switchport\s+access\s+vlan\s+(\d+)$", result_type=int, default=0
-        )
+        retval = self.re_match_iter_typed(r"^\s*switchport\s+access\s+vlan\s+(\d+)$", result_type=int, default=0)
         return retval
 
 
@@ -716,9 +662,7 @@ class ASAObjGroupNetwork(ASACfgLine):
         attributes"""
         super().__init__(*args, **kwargs)
 
-        self.name = self.re_match_typed(
-            r"^object-group\s+network\s+(\S+)", group=1, result_type=str
-        )
+        self.name = self.re_match_typed(r"^object-group\s+network\s+(\S+)", group=1, result_type=str)
 
     @logger.catch(reraise=True)
     def __eq__(self, other):
@@ -786,19 +730,11 @@ class ASAObjGroupNetwork(ASACfgLine):
                 groupobject = net_obj["groupobject"]
                 if groupobject == self.name:
                     ## Throw an error when importing self
-                    raise ValueError(
-                        "FATAL: Cannot recurse through group-object {} in object-group network {}".format(
-                            groupobject, self.name
-                        )
-                    )
+                    raise ValueError(f"FATAL: Cannot recurse through group-object {groupobject} in object-group network {self.name}")
 
-                group_nets = self.confobj.asa_object_group_network.get(
-                    groupobject, None
-                )
+                group_nets = self.confobj.asa_object_group_network.get(groupobject, None)
                 if group_nets is None:
-                    raise ValueError(
-                        f"FATAL: Cannot find group-object named {self.name}"
-                    )
+                    raise ValueError(f"FATAL: Cannot find group-object named {self.name}")
                 else:
                     retval.extend(group_nets.network_strings)
             elif "description " in obj.text:
@@ -859,9 +795,7 @@ class ASAObjGroupService(ASACfgLine):
             default="",
             result_type=str,
         ).strip()
-        self.name = self.re_match_typed(
-            r"^object-group\s+service\s+(\S+)", group=1, default="", result_type=str
-        )
+        self.name = self.re_match_typed(r"^object-group\s+service\s+(\S+)", group=1, default="", result_type=str)
         ## If *no protocol* is specified in the object-group statement, the
         ##   object-group can be used for both source or destination ports
         ##   at the same time.  Thus L4Objects_are_directional is True if we
@@ -892,9 +826,7 @@ class ASAObjGroupService(ASACfgLine):
 
     @logger.catch(reraise=True)
     def __repr__(self):
-        return "<ASAObjGroupService {} protocol: {}>".format(
-            self.name, self.protocol_type
-        )
+        return f"<ASAObjGroupService {self.name} protocol: {self.protocol_type}>"
 
     @property
     @logger.catch(reraise=True)
@@ -918,16 +850,10 @@ class ASAObjGroupService(ASACfgLine):
                 port = svc_obj.get("s_port", "")
 
                 if protocol == "tcp-udp":
-                    retval.append(
-                        L4Object(protocol="tcp", port_spec=port, syntax="asa")
-                    )
-                    retval.append(
-                        L4Object(protocol="udp", port_spec=port, syntax="asa")
-                    )
+                    retval.append(L4Object(protocol="tcp", port_spec=port, syntax="asa"))
+                    retval.append(L4Object(protocol="udp", port_spec=port, syntax="asa"))
                 else:
-                    retval.append(
-                        L4Object(protocol=protocol, port_spec=port, syntax="asa")
-                    )
+                    retval.append(L4Object(protocol=protocol, port_spec=port, syntax="asa"))
 
             elif svc_obj.get("operator", None):
                 op = svc_obj.get("operator", "")
@@ -935,12 +861,8 @@ class ASAObjGroupService(ASACfgLine):
                 port_spec = f"{op} {port}"
 
                 if self.protocol_type == "tcp-udp":
-                    retval.append(
-                        L4Object(protocol="tcp", port_spec=port_spec, syntax="asa")
-                    )
-                    retval.append(
-                        L4Object(protocol="udp", port_spec=port_spec, syntax="asa")
-                    )
+                    retval.append(L4Object(protocol="tcp", port_spec=port_spec, syntax="asa"))
+                    retval.append(L4Object(protocol="udp", port_spec=port_spec, syntax="asa"))
                 else:
                     retval.append(
                         L4Object(
@@ -955,11 +877,7 @@ class ASAObjGroupService(ASACfgLine):
                 group_ports = self.confobj.object_group_service.get(name, None)
                 if name == self.name:
                     ## Throw an error when importing self
-                    raise ValueError(
-                        "FATAL: Cannot recurse through group-object {} in object-group service {}".format(
-                            name, self.name
-                        )
-                    )
+                    raise ValueError(f"FATAL: Cannot recurse through group-object {name} in object-group service {self.name}")
                 if group_ports is None:
                     raise ValueError(f"FATAL: Cannot find group-object named {name}")
                 else:
@@ -1107,25 +1025,14 @@ class BaseASARouteLine(BaseCfgLine):
 
     @logger.catch(reraise=True)
     def __repr__(self):
-        return "<{} # {} '{}' info: '{}'>".format(
-            self.classname,
-            self.linenum,
-            self.network,
-            self.routeinfo,
-        )
+        return f"<{self.classname} # {self.linenum} '{self.network}' info: '{self.routeinfo}'>"
 
     @property
     @logger.catch(reraise=True)
     def routeinfo(self):
         ### Route information for the repr string
         if self.tracking_object_name:
-            return (
-                self.nexthop_str
-                + " AD: "
-                + str(self.admin_distance)
-                + " Track: "
-                + self.tracking_object_name
-            )
+            return self.nexthop_str + " AD: " + str(self.admin_distance) + " Track: " + self.tracking_object_name
         else:
             return self.nexthop_str + " AD: " + str(self.admin_distance)
 
@@ -1204,22 +1111,16 @@ class ASARouteLine(BaseASARouteLine):
     @logger.catch(reraise=True)
     def address_family(self):
         ## ipv4, ipv6, etc
-        retval = self.re_match_typed(
-            r"^(ip|ipv6)\s+route\s+*(\S+)", group=1, result_type=str, default=""
-        )
+        retval = self.re_match_typed(r"^(ip|ipv6)\s+route\s+*(\S+)", group=1, result_type=str, default="")
         return retval
 
     @property
     @logger.catch(reraise=True)
     def network(self):
         if self.address_family == "ip":
-            retval = self.re_match_typed(
-                r"^ip\s+route\s+*(\S+)", group=2, result_type=str, default=""
-            )
+            retval = self.re_match_typed(r"^ip\s+route\s+*(\S+)", group=2, result_type=str, default="")
         elif self.address_family == "ipv6":
-            retval = self.re_match_typed(
-                r"^ipv6\s+route\s+*(\S+?)\/\d+", group=2, result_type=str, default=""
-            )
+            retval = self.re_match_typed(r"^ipv6\s+route\s+*(\S+?)\/\d+", group=2, result_type=str, default="")
             return retval
         raise NotImplementedError
 
@@ -1227,13 +1128,9 @@ class ASARouteLine(BaseASARouteLine):
     @logger.catch(reraise=True)
     def netmask(self):
         if self.address_family == "ip":
-            retval = self.re_match_typed(
-                r"^ip\s+route\s+*\S+\s+(\S+)", group=2, result_type=str, default=""
-            )
+            retval = self.re_match_typed(r"^ip\s+route\s+*\S+\s+(\S+)", group=2, result_type=str, default="")
         elif self.address_family == "ipv6":
-            retval = self.re_match_typed(
-                r"^ipv6\s+route\s+*\S+?\/(\d+)", group=2, result_type=str, default=""
-            )
+            retval = self.re_match_typed(r"^ipv6\s+route\s+*\S+?\/(\d+)", group=2, result_type=str, default="")
             return retval
         raise NotImplementedError
 
@@ -1259,9 +1156,7 @@ class ASARouteLine(BaseASARouteLine):
                 default="",
             )
         elif self.address_family == "ipv6":
-            retval = self.re_match_typed(
-                r"^ipv6\s+route\s+*\S+\s+(\S+)", group=2, result_type=str, default=""
-            )
+            retval = self.re_match_typed(r"^ipv6\s+route\s+*\S+\s+(\S+)", group=2, result_type=str, default="")
             return retval
         raise NotImplementedError
 
@@ -1274,18 +1169,14 @@ class ASARouteLine(BaseASARouteLine):
     @property
     @logger.catch(reraise=True)
     def tracking_object_name(self):
-        retval = self.re_match_typed(
-            r"^ip(v6)*\s+route\s+.+?track\s+(\S+)", group=2, result_type=str, default=""
-        )
+        retval = self.re_match_typed(r"^ip(v6)*\s+route\s+.+?track\s+(\S+)", group=2, result_type=str, default="")
         return retval
 
 
-_ACL_PROTOCOLS = (
-    r"ip|tcp|udp|ah|eigrp|esp|gre|igmp|igrp|ipinip|ipsec|ospf|pcp|pim|pptp|snp|\d+"
-)
+_ACL_PROTOCOLS = r"ip|tcp|udp|ah|eigrp|esp|gre|igmp|igrp|ipinip|ipsec|ospf|pcp|pim|pptp|snp|\d+"
 _ACL_ICMP_PROTOCOLS = "alternate-address|conversion-error|echo-reply|echo|information-reply|information-request|mask-reply|mask-request|mobile-redirect|parameter-problem|redirect|router-advertisement|router-solicitation|source-quench|time-exceeded|timestamp-reply|timestamp-request|traceroute|unreachable"
 _ACL_LOGLEVELS = r"alerts|critical|debugging|emergencies|errors|informational|notifications|warnings|[0-7]"
-_RE_ACLOBJECT_STR = r"""(?:                         # Non-capturing parenthesis
+_RE_ACLOBJECT_STR = rf"""(?:                         # Non-capturing parenthesis
 # remark
  (^access-list\s+(?P<acl_name0>\S+)\s+(?P<action0>remark)\s+(?P<remark>\S.+?)$)
 
@@ -1294,7 +1185,7 @@ _RE_ACLOBJECT_STR = r"""(?:                         # Non-capturing parenthesis
   \s+extended\s+(?P<action1>permit|deny)
   \s+(?:
      (?:object-group\s+(?P<service_object1>\S+))
-    |(?P<protocol1>{0})
+    |(?P<protocol1>{_ACL_PROTOCOLS})
   )
   \s+(?:                       # 10.0.0.0 255.255.255.0
      (?:object-group\s+(?P<src_networkobject1>\S+))
@@ -1308,7 +1199,7 @@ _RE_ACLOBJECT_STR = r"""(?:                         # Non-capturing parenthesis
   )
   (?:\s+
     (?P<log1>log)
-    (?:\s+(?P<loglevel1>{1}))?
+    (?:\s+(?P<loglevel1>{_ACL_LOGLEVELS}))?
     (?:\s+interval\s+(?P<log_interval1>\d+))?
   )?
   (?:\s+(?P<disable1>disable))?
@@ -1325,7 +1216,7 @@ _RE_ACLOBJECT_STR = r"""(?:                         # Non-capturing parenthesis
   \s+(?P<action2>permit|deny)
   \s+(?:                       # service-object or protocol
      (?:object-group\s+(?P<service_object2>\S+))
-    |(?P<protocol2>{0})
+    |(?P<protocol2>{_ACL_PROTOCOLS})
   )
   (?:\s+       # any, any4, host foo, object-group FOO or 10.0.0.0 255.255.255.0
      (?:
@@ -1361,7 +1252,7 @@ _RE_ACLOBJECT_STR = r"""(?:                         # Non-capturing parenthesis
   )?
   (?:\s+
     (?P<log2>log)
-    (?:\s+(?P<loglevel2>{1}))?
+    (?:\s+(?P<loglevel2>{_ACL_LOGLEVELS}))?
     (?:\s+interval\s+(?P<log_interval2>\d+))?
   )?
   (?:\s+(?P<disable2>disable))?
@@ -1405,10 +1296,10 @@ _RE_ACLOBJECT_STR = r"""(?:                         # Non-capturing parenthesis
       |(?:(?P<dst_network4c>\S+)\s+(?P<dst_netmask4c>\d+\.\d+\.\d+\.\d+))
     )
   )
-  (?:\s+(?P<icmp_proto4>{2}|\d+))?
+  (?:\s+(?P<icmp_proto4>{_ACL_ICMP_PROTOCOLS}|\d+))?
   (?:\s+
     (?P<log4>log)
-    (?:\s+(?P<loglevel4>{1}))?
+    (?:\s+(?P<loglevel4>{_ACL_LOGLEVELS}))?
     (?:\s+interval\s+(?P<log_interval4>\d+))?
   )?
   (?:\s+(?P<disable4>disable))?
@@ -1418,7 +1309,7 @@ _RE_ACLOBJECT_STR = r"""(?:                         # Non-capturing parenthesis
   )?
   )
 )                                                   # Close non-capture parens
-""".format(_ACL_PROTOCOLS, _ACL_LOGLEVELS, _ACL_ICMP_PROTOCOLS)
+"""
 _RE_ACLOBJECT = re.compile(_RE_ACLOBJECT_STR, re.VERBOSE)
 
 
@@ -1475,23 +1366,11 @@ class ASAAclLine(ASACfgLine):
         if mm_r["action0"] and (mm_r["action0"] == "remark"):
             # remarks return an empty string
             return ""
-        elif (
-            mm_r["src_networkobject1"]
-            or mm_r["src_networkobject2"]
-            or mm_r["src_networkobject4"]
-        ):
+        elif mm_r["src_networkobject1"] or mm_r["src_networkobject2"] or mm_r["src_networkobject4"]:
             return "object-group"
         elif mm_r["src_object1"] or mm_r["src_object2"] or mm_r["src_object4"]:
             return "object"
-        elif (
-            mm_r["src_network1a"]
-            or mm_r["src_network2a"]
-            or mm_r["src_network2b"]
-            or mm_r["src_network2c"]
-            or mm_r["src_network4a"]
-            or mm_r["src_network4b"]
-            or mm_r["src_network4c"]
-        ):
+        elif mm_r["src_network1a"] or mm_r["src_network2a"] or mm_r["src_network2b"] or mm_r["src_network2c"] or mm_r["src_network4a"] or mm_r["src_network4b"] or mm_r["src_network4c"]:
             return "network"
         ## NOTE: I intended to match dst addrs here...
         elif mm_r["acl_name3"]:
@@ -1499,9 +1378,7 @@ class ASAAclLine(ASACfgLine):
             self._mm_results["src_network3"] = "any4"
             return "network"
         else:
-            raise ValueError(
-                f"Cannot parse ACL source address method for '{self.text}'"
-            )
+            raise ValueError(f"Cannot parse ACL source address method for '{self.text}'")
 
     @property
     @logger.catch(reraise=True)
@@ -1510,30 +1387,16 @@ class ASAAclLine(ASACfgLine):
         if mm_r["action0"] and (mm_r["action0"] == "remark"):
             # remarks return an empty string
             return ""
-        elif (
-            mm_r["dst_networkobject1"]
-            or mm_r["dst_networkobject2"]
-            or mm_r["dst_networkobject4"]
-        ):
+        elif mm_r["dst_networkobject1"] or mm_r["dst_networkobject2"] or mm_r["dst_networkobject4"]:
             return "object-group"
         elif mm_r["dst_object1"] or mm_r["dst_object2"] or mm_r["dst_object4"]:
             return "object"
-        elif (
-            mm_r["dst_network1a"]
-            or mm_r["dst_network2a"]
-            or mm_r["dst_network2b"]
-            or mm_r["dst_network2c"]
-            or mm_r["dst_network4a"]
-            or mm_r["dst_network4b"]
-            or mm_r["dst_network4c"]
-        ):
+        elif mm_r["dst_network1a"] or mm_r["dst_network2a"] or mm_r["dst_network2b"] or mm_r["dst_network2c"] or mm_r["dst_network4a"] or mm_r["dst_network4b"] or mm_r["dst_network4c"]:
             return "network"
         elif mm_r["dst_network3a"] or mm_r["dst_network3b"] or mm_r["dst_network3c"]:
             return "network"
         else:
-            raise ValueError(
-                f"Cannot parse ACL destination address method for '{self.text}'"
-            )
+            raise ValueError(f"Cannot parse ACL destination address method for '{self.text}'")
 
     @property
     @logger.catch(reraise=True)
@@ -1560,9 +1423,7 @@ class ASAAclLine(ASACfgLine):
         elif mm_r["service_object1"] or mm_r["service_object2"]:
             # protocol service objects get a special protocol number
             retval["protocol"] = 65535
-            retval["protocol_object"] = (
-                mm_r["service_object1"] or mm_r["service_object2"]
-            )
+            retval["protocol_object"] = mm_r["service_object1"] or mm_r["service_object2"]
             return retval
         else:
             raise ValueError(f"Cannot parse ACL protocol value for '{self.text}'")
@@ -1576,46 +1437,20 @@ class ASAAclLine(ASACfgLine):
         proto_dict = self.acl_protocol_dict
         retval["ip_protocol"] = proto_dict["protocol"]
         retval["ip_protocol_object"] = proto_dict["protocol_object"]
-        retval["acl_name"] = (
-            mm_r["acl_name0"]
-            or mm_r["acl_name1"]
-            or mm_r["acl_name2"]
-            or mm_r["acl_name3"]
-            or mm_r["acl_name4"]
-        )
-        retval["action"] = (
-            mm_r["action0"]
-            or mm_r["action1"]
-            or mm_r["action2"]
-            or mm_r["action3"]
-            or mm_r["action4"]
-        )
+        retval["acl_name"] = mm_r["acl_name0"] or mm_r["acl_name1"] or mm_r["acl_name2"] or mm_r["acl_name3"] or mm_r["acl_name4"]
+        retval["action"] = mm_r["action0"] or mm_r["action1"] or mm_r["action2"] or mm_r["action3"] or mm_r["action4"]
         retval["remark"] = mm_r["remark"]
         retval["src_addr_method"] = self.src_addr_method
         retval["dst_addr_method"] = self.dst_addr_method
-        retval["disable"] = bool(
-            mm_r["disable1"] or mm_r["disable2"] or mm_r["disable4"]
-        )
-        retval["time_range"] = (
-            mm_r["time_range1"] or mm_r["time_range2"] or mm_r["time_range4"]
-        )
+        retval["disable"] = bool(mm_r["disable1"] or mm_r["disable2"] or mm_r["disable4"])
+        retval["time_range"] = mm_r["time_range1"] or mm_r["time_range2"] or mm_r["time_range4"]
         retval["log"] = bool(mm_r["log1"] or mm_r["log2"] or mm_r["log4"])
         if not retval["log"]:
             retval["log_interval"] = -1
             retval["log_level"] = ""
         else:
-            retval["log_level"] = (
-                mm_r["loglevel1"]
-                or mm_r["loglevel2"]
-                or mm_r["loglevel4"]
-                or "informational"
-            )
-            retval["log_interval"] = int(
-                mm_r["log_interval1"]
-                or mm_r["log_interval2"]
-                or mm_r["log_interval4"]
-                or 300
-            )
+            retval["log_level"] = mm_r["loglevel1"] or mm_r["loglevel2"] or mm_r["loglevel4"] or "informational"
+            retval["log_interval"] = int(mm_r["log_interval1"] or mm_r["log_interval2"] or mm_r["log_interval4"] or 300)
 
         return retval
 

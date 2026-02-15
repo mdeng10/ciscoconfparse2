@@ -1,6 +1,7 @@
 import sys
 
 import pytest
+
 from ciscoconfparse2.ccp_util import CiscoRange, IPv4Obj
 from ciscoconfparse2.ciscoconfparse2 import CiscoConfParse
 from ciscoconfparse2.models_cisco import HSRPInterfaceGroup
@@ -298,9 +299,7 @@ def testVal_IOSIntfLine_trunk_vlan_allowed_01():
     ]
     cfg = CiscoConfParse(lines, factory=True)
     intf_obj = cfg.find_objects("^interface")[0]
-    assert len(intf_obj.trunk_vlans_allowed.as_set(result_type=int)) == len(
-        range(1, 4095)
-    )
+    assert len(intf_obj.trunk_vlans_allowed.as_set(result_type=int)) == len(range(1, 4095))
     assert intf_obj.trunk_vlans_allowed.as_list(result_type=int) == list(range(1, 4095))
 
 
@@ -1749,9 +1748,7 @@ def testVal_IOSRouteLine_07():
 
 
 def testVal_IOSRouteLine_08():
-    line = (
-        "ip route vrf mgmtVrf 12.0.0.0 255.255.0.0 FastEthernet0/0 254 track 35 tag 20"
-    )
+    line = "ip route vrf mgmtVrf 12.0.0.0 255.255.0.0 FastEthernet0/0 254 track 35 tag 20"
     cfg = CiscoConfParse([line], factory=True)
     obj = cfg.config_objs[0]
     assert obj.address_family == "ip"
@@ -1790,9 +1787,7 @@ def testVal_IOSRouteLine_09():
     assert obj.tag == "20"
 
 
-@pytest.mark.skip(
-    "Skipping due to need to reimplement ipv6 route parse in models_cisco.py"
-)
+@pytest.mark.skip("Skipping due to need to reimplement ipv6 route parse in models_cisco.py")
 def testVal_IOSRouteLine_10():
     line = "ipv6 route ::/0 2001:DEAD:BEEF::1"
     cfg = CiscoConfParse([line], factory=True)
@@ -1813,9 +1808,7 @@ def testVal_IOSRouteLine_10():
     assert obj.tag == ""
 
 
-@pytest.mark.skip(
-    "Skipping due to need to reimplement ipv6 route parse in models_cisco.py"
-)
+@pytest.mark.skip("Skipping due to need to reimplement ipv6 route parse in models_cisco.py")
 def testVal_IOSRouteLine_11():
     line = "ipv6 route 2001:DEAD::/32 Serial 1/0 201"
     cfg = CiscoConfParse([line], factory=True)
@@ -1836,9 +1829,7 @@ def testVal_IOSRouteLine_11():
     assert obj.tag == ""
 
 
-@pytest.mark.skip(
-    "Skipping due to need to reimplement ipv6 route parse in models_cisco.py"
-)
+@pytest.mark.skip("Skipping due to need to reimplement ipv6 route parse in models_cisco.py")
 def testVal_IOSRouteLine_12():
     line = "ipv6 route 2001::/16 Tunnel0 2002::1 multicast"
     cfg = CiscoConfParse([line], factory=True)
@@ -2109,30 +2100,20 @@ def testVal_IOSIPv4HelperAddress_01():
 
 def testVal_IOSSDWAN_systemip_01():
     """Test that we can parse out the SDWAN system ip address (i.e. one child level)"""
-    parse = CiscoConfParse(
-        "fixtures/configs/sample_10.ios", syntax="ios", factory=False
-    )
+    parse = CiscoConfParse("fixtures/configs/sample_10.ios", syntax="ios", factory=False)
     system_ip = parse.find_child_objects(["system", "system-ip"])[0]
     assert system_ip.split()[-1] == "192.168.11.1"
 
 
 def testVal_IOSSDWAN_vrf_route_target_01():
     """Test that we can parse out the SDWAN vrf 3001 export route-target (i.e. two child levels)"""
-    parse = CiscoConfParse(
-        "fixtures/configs/sample_10.ios", syntax="ios", factory=False
-    )
-    route_target_export = parse.find_child_objects(
-        ["vrf definition 3001", "address-family ipv4", "route-target export"]
-    )[0]
+    parse = CiscoConfParse("fixtures/configs/sample_10.ios", syntax="ios", factory=False)
+    route_target_export = parse.find_child_objects(["vrf definition 3001", "address-family ipv4", "route-target export"])[0]
     assert route_target_export.split()[-1] == "65111:3001"
 
 
 def testVal_IOSSDWAN_sdwan_interface_tunnel_color():
     """Test that we can parse out the SDWAN interface tunnel color (i.e. three child levels)"""
-    parse = CiscoConfParse(
-        "fixtures/configs/sample_10.ios", syntax="ios", factory=False
-    )
-    intf_tunnel_color = parse.find_child_objects(
-        ["sdwan", "interface GigabitEthernet1$", "tunnel-interface", "color"]
-    )[0]
+    parse = CiscoConfParse("fixtures/configs/sample_10.ios", syntax="ios", factory=False)
+    intf_tunnel_color = parse.find_child_objects(["sdwan", "interface GigabitEthernet1$", "tunnel-interface", "color"])[0]
     assert intf_tunnel_color.split()[-1] == "gold"

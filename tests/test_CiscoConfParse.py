@@ -19,30 +19,30 @@ If you need to contact the author, you can do so by emailing:
 mike [~at~] pennington [.dot.] net
 """
 
+import os
 import pickle
+from collections.abc import Iterator
 from copy import deepcopy
 from itertools import repeat
 from operator import attrgetter
 from unittest.mock import patch
-from collections.abc import Iterator
-
-import os
 
 import pytest
+from passlib.hash import cisco_type7
+
 from ciscoconfparse2.ccp_abc import BaseCfgLine
 from ciscoconfparse2.ccp_util import IPv4Obj
 from ciscoconfparse2.ciscoconfparse2 import (
     Branch,
     CiscoConfParse,
     CiscoPassword,
+    ConfigList,
     Diff,
     IOSCfgLine,
     IOSIntfLine,
 )
-from ciscoconfparse2.ciscoconfparse2 import ConfigList
 from ciscoconfparse2.errors import InvalidParameters
 from ciscoconfparse2.models_junos import JunosCfgLine
-from passlib.hash import cisco_type7
 
 THIS_TEST_PATH = os.path.dirname(os.path.abspath(__file__))
 
@@ -762,8 +762,7 @@ routing-options {
         "        building HQ_005",
         "        floor 1",
         "    root-authentication",
-        '        encrypted-password "$1$y7ArHxKU$zUbdeLfBirgkCsKiOJ5Qa0"; ## '
-        "SECRET-DATA",
+        '        encrypted-password "$1$y7ArHxKU$zUbdeLfBirgkCsKiOJ5Qa0"; ## ' "SECRET-DATA",
         "    name-server",
         "        172.16.3.222",
         "    login",
@@ -774,8 +773,7 @@ routing-options {
         "            uid 1000",
         "            class super-user",
         "            authentication",
-        '                encrypted-password "$1$y7ArHxKU$zUbdeLfBirgkCsKiOJ5Qa0"; ## '
-        "SECRET-DATA",
+        '                encrypted-password "$1$y7ArHxKU$zUbdeLfBirgkCsKiOJ5Qa0"; ## ' "SECRET-DATA",
         "    services",
         "        ssh",
         "            root-login allow",
@@ -838,9 +836,7 @@ routing-options {
         == "    ge-0/0/1"
     )
     assert uut.find_parent_objects("interfaces", "ge-0/0/1")[0].text == "interfaces"
-    assert (
-        len(uut.find_parent_objects_wo_child("interfaces", "vlan", recurse=True)) == 0
-    )
+    assert len(uut.find_parent_objects_wo_child("interfaces", "vlan", recurse=True)) == 0
 
 
 def testParse_parse_syntax_junos_as_junos_nofactory_ioscfg_02():
@@ -1788,9 +1784,7 @@ def testValues_find_object_branches_01():
         r"(\S+?):(\d+)",
         r"state\s(up|down)",
     )
-    test_result = parse.find_object_branches(
-        branchspec=branchspec, regex_groups=True, empty_branches=True
-    )
+    test_result = parse.find_object_branches(branchspec=branchspec, regex_groups=True, empty_branches=True)
 
     assert len(test_result) == 3
 
@@ -1884,9 +1878,7 @@ def testValues_find_object_branches_03(parse_c01):
         r"^interface",
         r"switchport",
     )
-    test_result = parse_c01.find_object_branches(
-        branchspec=branchspec, empty_branches=True
-    )
+    test_result = parse_c01.find_object_branches(branchspec=branchspec, empty_branches=True)
 
     assert len(test_result) == 19
 
@@ -1974,9 +1966,7 @@ def testValues_find_object_branches_04(parse_c01):
     # negative testing to ensure we get the right matches for NO regex
     # matches...
     branchspec = (r"this", r"dont", "match", "at", "all")
-    test_result = parse_c01.find_object_branches(
-        branchspec=branchspec, empty_branches=True
-    )
+    test_result = parse_c01.find_object_branches(branchspec=branchspec, empty_branches=True)
     correct_result = [Branch([None, None, None, None, None])]
     assert test_result == correct_result
 
@@ -2030,9 +2020,7 @@ def testValues_find_object_branches_06():
 
     retval = list()
     parse = CiscoConfParse(config)
-    branches = parse.find_object_branches(
-        [r"pool", r"members", r"snack", "address|session"]
-    )
+    branches = parse.find_object_branches([r"pool", r"members", r"snack", "address|session"])
     for branch in branches:
         retval.append([ii.text for ii in branch])
     assert retval == []
@@ -2062,9 +2050,7 @@ def testValues_find_object_branches_07():
 
     retval = list()
     parse = CiscoConfParse(config)
-    branches = parse.find_object_branches(
-        [r"pool", r"members", r"lunch", "address|session"]
-    )
+    branches = parse.find_object_branches([r"pool", r"members", r"lunch", "address|session"])
     for branch in branches:
         retval.append([ii.text for ii in branch])
     assert retval[0] == [
@@ -2129,12 +2115,7 @@ def testValues_find_objects_w_parents(parse_c01):
         " switchport voice vlan 150",
     ]
     # test find_children_w_parents
-    test_result = [
-        ii.text
-        for ii in parse_c01.find_child_objects(
-            "interface GigabitEthernet4/1", "switchport"
-        )
-    ]
+    test_result = [ii.text for ii in parse_c01.find_child_objects("interface GigabitEthernet4/1", "switchport")]
     assert correct_result == test_result
 
 
@@ -2169,9 +2150,7 @@ def testValues_delete_objects_01():
     ]
 
     parse = CiscoConfParse(config, syntax="ios")
-    objs = parse.find_child_objects(
-        parentspec="interface FastEthernet0/2", childspec="port-security"
-    )
+    objs = parse.find_child_objects(parentspec="interface FastEthernet0/2", childspec="port-security")
     objs.reverse()
     for obj in objs:
         obj.delete()
@@ -2290,9 +2269,7 @@ def testValues_replace_children_01(parse_c01):
     ]
 
     uut = list()
-    for obj in parse_c01.find_child_objects(
-        "GigabitEthernet4/", "power inline static max 7000"
-    ):
+    for obj in parse_c01.find_child_objects("GigabitEthernet4/", "power inline static max 7000"):
         obj.re_sub("max 7000", "max 30000")
         uut.append(obj.text)
 
@@ -2696,9 +2673,7 @@ def testValues_ignore_ws():
     config = ["set snmp community read-only     myreadonlystring"]
     correct_result = config
     parse = CiscoConfParse(config)
-    uut = parse.find_objects(
-        "set snmp community read-only myreadonlystring", ignore_ws=True
-    )
+    uut = parse.find_objects("set snmp community read-only myreadonlystring", ignore_ws=True)
     assert correct_result == [ii.text for ii in uut]
 
 
@@ -2706,9 +2681,7 @@ def testValues_negative_ignore_ws():
     config = ["set snmp community read-only     myreadonlystring"]
     correct_result = list()
     parse = CiscoConfParse(config)
-    uut = parse.find_objects(
-        "set snmp community read-only myreadonlystring", ignore_ws=False
-    )
+    uut = parse.find_objects("set snmp community read-only myreadonlystring", ignore_ws=False)
     assert correct_result == uut
 
 
@@ -2747,9 +2720,7 @@ base_hello {
     }
 }
 """
-    parse = CiscoConfParse(
-        config.splitlines(), syntax="junos", comment_delimiters=["#"]
-    )
+    parse = CiscoConfParse(config.splitlines(), syntax="junos", comment_delimiters=["#"])
 
     #################################
     # test the .geneology attribute
@@ -2785,9 +2756,7 @@ base_hello {
     }
 }
 """
-    parse = CiscoConfParse(
-        config.splitlines(), syntax="junos", comment_delimiters=["#"]
-    )
+    parse = CiscoConfParse(config.splitlines(), syntax="junos", comment_delimiters=["#"])
 
     #####################################
     # test the .geneology_text attribute
@@ -3269,9 +3238,7 @@ def testValues_insert_after_commit_factory_01(parse_c01_factory):
         " switchport voice vlan 150",
         " power inline static max 7000",
     ]
-    test_result02 = [
-        ii.text for ii in parse_c01_factory.find_objects(linespec)[0].children
-    ]
+    test_result02 = [ii.text for ii in parse_c01_factory.find_objects(linespec)[0].children]
     assert correct_result02 == test_result02
 
 
@@ -3408,9 +3375,7 @@ def testValues_IOSIntfLine_find_objects_factory_01(parse_c01_factory):
         assert correct_result.ipv4_addr_object == test_result.ipv4_addr_object
 
 
-def testValues_IOSIntfLine_find_objects_factory_02(
-    parse_c01_factory, c01_insert_serial_replace
-):
+def testValues_IOSIntfLine_find_objects_factory_02(parse_c01_factory, c01_insert_serial_replace):
     """test whether find_objects() returns correct IOSIntfLine objects and tests IOSIntfLine methods"""
 
     assert parse_c01_factory.config_objs.auto_commit is True
@@ -3430,9 +3395,7 @@ def testValues_IOSIntfLine_find_objects_factory_02(
         uut = parse_c01_factory.find_objects("default interface Serial 1/0")[0]
         assert uut.text == "default interface Serial 1/0"
 
-        parse_c01_factory.find_objects("^interface Serial 1/0")[0].re_sub(
-            "Serial 1/0", "Serial 2/0"
-        )
+        parse_c01_factory.find_objects("^interface Serial 1/0")[0].re_sub("Serial 1/0", "Serial 2/0")
         uut = parse_c01_factory.find_objects("^interface Serial")[0]
         assert uut.text == "interface Serial 2/0"
 
@@ -3735,9 +3698,7 @@ def test_BaseCfgLine_has_child_with(parse_c03):
 
 def testValues_IOSCfgLine_ioscfg01(parse_c02):
 
-    test_result = parse_c02.find_objects(
-        r"^interface\sGigabitEthernet4/1", exactmatch=True
-    )[0].text
+    test_result = parse_c02.find_objects(r"^interface\sGigabitEthernet4/1", exactmatch=True)[0].text
     assert test_result == "interface GigabitEthernet4/1"
 
 

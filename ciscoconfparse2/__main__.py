@@ -22,8 +22,8 @@ mike [~at~] pennington [/dot\] net
 # Follow PEP366...
 # https://stackoverflow.com/a/6655098/667301
 if (__name__ == "__main__") and (__package__ is None):
-    import sys
     import os
+    import sys
 
     parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     sys.path.insert(1, parent_dir)

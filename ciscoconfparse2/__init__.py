@@ -19,23 +19,26 @@ If you need to contact the author, you can do so by emailing:
 mike [~at~] pennington [.dot.] net
 """
 
-from ciscoconfparse2.cli_script import ccp_script_entry
-
-from ciscoconfparse2.ccp_util import PythonOptimizeCheck
+from ciscoconfparse2.ccp_util import (
+    CiscoIOSInterface,
+    CiscoIOSXRInterface,
+    CiscoRange,
+    EUI64Obj,
+    IPv4Obj,
+    IPv6Obj,
+    L4Object,
+    MACObj,
+    PythonOptimizeCheck,
+    _get_ipv4,
+    _get_ipv6,
+    ccp_logger_control,
+    collapse_addresses,
+    configure_loguru,
+    dns_query,
+    ip_factory,
+)
 from ciscoconfparse2.ciscoconfparse2 import *
-from ciscoconfparse2.ccp_util import IPv4Obj
-from ciscoconfparse2.ccp_util import IPv6Obj
-from ciscoconfparse2.ccp_util import MACObj, EUI64Obj
-from ciscoconfparse2.ccp_util import CiscoIOSInterface, CiscoIOSXRInterface
-from ciscoconfparse2.ccp_util import CiscoRange
-from ciscoconfparse2.ccp_util import ccp_logger_control
-from ciscoconfparse2.ccp_util import configure_loguru
-from ciscoconfparse2.ccp_util import _get_ipv4
-from ciscoconfparse2.ccp_util import _get_ipv6
-from ciscoconfparse2.ccp_util import ip_factory
-from ciscoconfparse2.ccp_util import collapse_addresses
-from ciscoconfparse2.ccp_util import L4Object
-from ciscoconfparse2.ccp_util import dns_query
+from ciscoconfparse2.cli_script import ccp_script_entry
 
 # Throw errors for PYTHONOPTIMIZE and `python -O ...` by executing
 #     PythonOptimizeCheck()...

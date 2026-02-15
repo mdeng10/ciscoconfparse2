@@ -1,10 +1,10 @@
 """Compare methods on IPv4Obj() and IPv6Obj().  Flag missing methods"""
 
+import os
+import sys
+
 from ciscoconfparse import IPv4Obj, IPv6Obj
 from loguru import logger
-
-import sys
-import os
 
 sys.path.insert(0, "../")  # add the path to the local git repo copy
 # from this dev_tools/ directory

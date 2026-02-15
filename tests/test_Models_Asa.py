@@ -26,10 +26,10 @@ from collections.abc import MutableSequence
 sys.path.insert(0, "..")
 
 import pytest
+from loguru import logger
+
 from ciscoconfparse2.ccp_util import IPv4Obj, L4Object
 from ciscoconfparse2.ciscoconfparse2 import CiscoConfParse
-
-from loguru import logger
 
 
 def testVal_Access_List(parse_a01_factory):
@@ -381,11 +381,9 @@ def testVal_ASAAclLine_DNA_negative():
 
     # Ensure that parsing the bogus ACL line in a config list raises a ValueError
     #     but ValueError triggers a SystemExit
-    broken_config_list = [
-        "access-list TESTME_01 extended VpAAmit987 ip any any log deactivate"
-    ]
+    broken_config_list = ["access-list TESTME_01 extended VpAAmit987 ip any any log deactivate"]
     broken_config_list = ["access-list TESTME_01 extended VpAAmit987 ip any any log"]
-    broken_filepath = "/%s" % str(uuid.uuid4())
+    broken_filepath = f"/{str(uuid.uuid4())}"
 
     try:
         if isinstance(

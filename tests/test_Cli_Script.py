@@ -87,25 +87,19 @@ def testValues_ccp_script_entry_cliapplication_searchmaceui_08():
 # find_ip46_addr_matches()
 def testValues_ccp_script_entry_cliapplication_01():
     """Ensure that ccp_script_entry return value is an instance of CliApplication() from sample_01.ios"""
-    cliapp = ccp_script_entry(
-        "ccp_faked ipgrep -s 172.16.1.5/32 fixtures/configs/sample_01.ios"
-    )
+    cliapp = ccp_script_entry("ccp_faked ipgrep -s 172.16.1.5/32 fixtures/configs/sample_01.ios")
     assert isinstance(cliapp, CliApplication)
 
 
 def testValues_ccp_script_entry_cliapplication_args_01():
     """Ensure that CliApplication().args is a single-element list from sample_01.ios"""
-    cliapp = ccp_script_entry(
-        "ccp_faked ipgrep -s 172.16.1.5/32 fixtures/configs/sample_01.ios"
-    )
+    cliapp = ccp_script_entry("ccp_faked ipgrep -s 172.16.1.5/32 fixtures/configs/sample_01.ios")
     assert cliapp.args == [""]
 
 
 def testValues_ccp_script_entry_cliapplication_ipgrep_01():
     """Ensure that CliApplication() ipgrep with the unique flag clear is a list of six IP addresses from sample_01.ios"""
-    cliapp = ccp_script_entry(
-        "ccp_faked ipgrep -s 172.16.1.5/32 fixtures/configs/sample_01.ios"
-    )
+    cliapp = ccp_script_entry("ccp_faked ipgrep -s 172.16.1.5/32 fixtures/configs/sample_01.ios")
     assert len(cliapp.stdout) == 6
     assert cliapp.unique is False
     assert cliapp.subnets == "172.16.1.5/32"
@@ -121,9 +115,7 @@ def testValues_ccp_script_entry_cliapplication_ipgrep_01():
 
 def testValues_ccp_script_entry_cliapplication_ipgrep_02():
     """Ensure that CliApplication() ipgrep with the unique flag clear is a list of seven IP addresses from sample_01.ios"""
-    cliapp = ccp_script_entry(
-        "ccp_faked ipgrep -s 172.16.1.5,172.16.1.50 fixtures/configs/sample_01.ios"
-    )
+    cliapp = ccp_script_entry("ccp_faked ipgrep -s 172.16.1.5,172.16.1.50 fixtures/configs/sample_01.ios")
     assert len(cliapp.stdout) == 7
     assert cliapp.unique is False
     assert cliapp.subnets == "172.16.1.5,172.16.1.50"
@@ -140,9 +132,7 @@ def testValues_ccp_script_entry_cliapplication_ipgrep_02():
 
 def testValues_ccp_script_entry_cliapplication_ipgrep_03():
     """Ensure that CliApplication() ipgrep with the unique flag clear is a list of eight IPv6 addresses from sample_08.ios"""
-    cliapp = ccp_script_entry(
-        "ccp_faked ipgrep -s fd01::/16 fixtures/configs/sample_08.ios"
-    )
+    cliapp = ccp_script_entry("ccp_faked ipgrep -s fd01::/16 fixtures/configs/sample_08.ios")
     assert len(cliapp.stdout) == 8
     assert cliapp.unique is False
     assert cliapp.subnets == "fd01::/16"
@@ -160,9 +150,7 @@ def testValues_ccp_script_entry_cliapplication_ipgrep_03():
 
 def testValues_ccp_script_entry_cliapplication_ipgrep_04():
     """Ensure that CliApplication() ipgrep with the unique flag set is a list of one IP address from sample_01.ios"""
-    cliapp = ccp_script_entry(
-        "ccp_faked ipgrep -u -s 172.16.1.5/32 fixtures/configs/sample_01.ios"
-    )
+    cliapp = ccp_script_entry("ccp_faked ipgrep -u -s 172.16.1.5/32 fixtures/configs/sample_01.ios")
     assert len(cliapp.stdout) == 1
     assert cliapp.unique is True
     assert cliapp.subnets == "172.16.1.5/32"
@@ -173,9 +161,7 @@ def testValues_ccp_script_entry_cliapplication_ipgrep_04():
 
 def testValues_ccp_script_entry_cliapplication_ipgrep_05():
     """Ensure that CliApplication() ipgrep with the unique flag set is a list of two IP addresses from sample_08.ios"""
-    cliapp = ccp_script_entry(
-        "ccp_faked ipgrep -u -s 172.16.1.5,172.16.1.50 fixtures/configs/sample_01.ios"
-    )
+    cliapp = ccp_script_entry("ccp_faked ipgrep -u -s 172.16.1.5,172.16.1.50 fixtures/configs/sample_01.ios")
     assert len(cliapp.stdout) == 2
     assert cliapp.unique is True
     assert cliapp.subnets == "172.16.1.5,172.16.1.50"
@@ -184,9 +170,7 @@ def testValues_ccp_script_entry_cliapplication_ipgrep_05():
 
 def testValues_ccp_script_entry_cliapplication_ipgrep_06():
     """Ensure that CliApplication() ipgrep with the unique flag set is a list of six IPv6 addresses from sample_08.ios"""
-    cliapp = ccp_script_entry(
-        "ccp_faked ipgrep -u -s fd01::/16 fixtures/configs/sample_08.ios"
-    )
+    cliapp = ccp_script_entry("ccp_faked ipgrep -u -s fd01::/16 fixtures/configs/sample_08.ios")
     assert len(cliapp.stdout) == 5
     assert cliapp.unique is True
     assert cliapp.subnets == "fd01::/16"
@@ -201,9 +185,7 @@ def testValues_ccp_script_entry_cliapplication_ipgrep_06():
 
 def testValues_ccp_script_entry_cliapplication_ipgrep_07():
     """Ensure that CliApplication() ipgrep with --show-networks is seven IPv4 / IPv6 addrs from sample_01.txt"""
-    cliapp = ccp_script_entry(
-        "ccp_faked ipgrep -4 -6 fixtures/plain_text/sample_01.txt"
-    )
+    cliapp = ccp_script_entry("ccp_faked ipgrep -4 -6 fixtures/plain_text/sample_01.txt")
     assert len(cliapp.stdout) == 7
     assert cliapp.unique is False
     assert cliapp.subnets == "0.0.0.0/0,::/0"
@@ -220,9 +202,7 @@ def testValues_ccp_script_entry_cliapplication_ipgrep_07():
 
 def testValues_ccp_script_entry_cliapplication_ipgrep_08():
     """Ensure that CliApplication() ipgrep with --show-networks and --show-cidr is seven IPv4 / IPv6 addrs from sample_01.txt"""
-    cliapp = ccp_script_entry(
-        "ccp_faked ipgrep -4 -6 --show-cidr fixtures/plain_text/sample_01.txt"
-    )
+    cliapp = ccp_script_entry("ccp_faked ipgrep -4 -6 --show-cidr fixtures/plain_text/sample_01.txt")
     assert len(cliapp.stdout) == 7
     assert cliapp.unique is False
     assert cliapp.subnets == "0.0.0.0/0,::/0"
@@ -239,9 +219,7 @@ def testValues_ccp_script_entry_cliapplication_ipgrep_08():
 
 def testValues_ccp_script_entry_cliapplication_ipgrep_09():
     """Ensure that CliApplication() ipgrep with --show-networks and --show-cidr is five IPv4 / IPv6 addrs from sample_01.txt"""
-    cliapp = ccp_script_entry(
-        "ccp_faked ipgrep -u -4 -6 --show-cidr fixtures/plain_text/sample_01.txt"
-    )
+    cliapp = ccp_script_entry("ccp_faked ipgrep -u -4 -6 --show-cidr fixtures/plain_text/sample_01.txt")
     assert len(cliapp.stdout) == 5
     assert cliapp.unique is True
     assert cliapp.subnets == "0.0.0.0/0,::/0"
@@ -256,9 +234,7 @@ def testValues_ccp_script_entry_cliapplication_ipgrep_09():
 
 def testValues_ccp_script_entry_cliapplication_ipgrep_10():
     """Ensure that CliApplication() ipgrep with --exclude-hosts and --show-cidr is two IPv6 networks from sample_01.txt"""
-    cliapp = ccp_script_entry(
-        "ccp_faked ipgrep --exclude-hosts -4 -6 --show-cidr fixtures/plain_text/sample_01.txt"
-    )
+    cliapp = ccp_script_entry("ccp_faked ipgrep --exclude-hosts -4 -6 --show-cidr fixtures/plain_text/sample_01.txt")
     assert len(cliapp.stdout) == 2
     assert cliapp.unique is False
     assert cliapp.subnets == "0.0.0.0/0,::/0"
@@ -267,9 +243,7 @@ def testValues_ccp_script_entry_cliapplication_ipgrep_10():
 
 def testValues_ccp_script_entry_cliapplication_ipgrep_11():
     """Ensure that CliApplication() ipgrep with --show-networks and --show-cidr is seven IPv4 / IPv6 networks (including host networks) from sample_01.txt"""
-    cliapp = ccp_script_entry(
-        "ccp_faked ipgrep --show-networks -4 -6 fixtures/plain_text/sample_01.txt"
-    )
+    cliapp = ccp_script_entry("ccp_faked ipgrep --show-networks -4 -6 fixtures/plain_text/sample_01.txt")
     assert len(cliapp.stdout) == 7
     assert cliapp.unique is False
     assert cliapp.subnets == "0.0.0.0/0,::/0"
@@ -286,9 +260,7 @@ def testValues_ccp_script_entry_cliapplication_ipgrep_11():
 
 def testValues_ccp_script_entry_cliapplication_ipgrep_12():
     """Ensure that CliApplication() ipgrep with --show-networks and --exclude-hosts is four IPv4 / IPv6 networks (including host networks) from sample_01.txt"""
-    cliapp = ccp_script_entry(
-        "ccp_faked ipgrep --exclude-hosts --show-networks -4 -6 fixtures/plain_text/sample_01.txt"
-    )
+    cliapp = ccp_script_entry("ccp_faked ipgrep --exclude-hosts --show-networks -4 -6 fixtures/plain_text/sample_01.txt")
     assert len(cliapp.stdout) == 4
     assert cliapp.unique is False
     assert cliapp.subnets == "0.0.0.0/0,::/0"
@@ -302,9 +274,7 @@ def testValues_ccp_script_entry_cliapplication_ipgrep_12():
 
 def testValues_ccp_script_entry_cliapplication_ipgrep_13():
     """Ensure that CliApplication() ipgrep with --show-networks --exclude-hosts and --show-cidr is four IPv4 / IPv6 networks (including host networks) from sample_01.txt"""
-    cliapp = ccp_script_entry(
-        "ccp_faked ipgrep --show-networks --exclude-hosts -4 -6 fixtures/plain_text/sample_01.txt"
-    )
+    cliapp = ccp_script_entry("ccp_faked ipgrep --show-networks --exclude-hosts -4 -6 fixtures/plain_text/sample_01.txt")
     assert len(cliapp.stdout) == 4
     assert cliapp.unique is False
     assert cliapp.subnets == "0.0.0.0/0,::/0"
@@ -318,9 +288,7 @@ def testValues_ccp_script_entry_cliapplication_ipgrep_13():
 
 def testValues_ccp_script_entry_cliapplication_ipgrep_14():
     """Ensure that CliApplication() ipgrep with --show-networks --exclude-hosts and --show-cidr is one IPv4 network from sample_01.txt"""
-    cliapp = ccp_script_entry(
-        "ccp_faked ipgrep --show-networks --exclude-hosts -4 fixtures/plain_text/sample_01.txt"
-    )
+    cliapp = ccp_script_entry("ccp_faked ipgrep --show-networks --exclude-hosts -4 fixtures/plain_text/sample_01.txt")
     assert len(cliapp.stdout) == 1
     assert cliapp.unique is False
     assert cliapp.subnets == "0.0.0.0/0"
@@ -331,9 +299,7 @@ def testValues_ccp_script_entry_cliapplication_ipgrep_14():
 
 def testValues_ccp_script_entry_cliapplication_ipgrep_15():
     """Ensure that CliApplication() ipgrep with --show-networks --exclude-hosts and --show-cidr is three IPv6 networks from sample_01.txt"""
-    cliapp = ccp_script_entry(
-        "ccp_faked ipgrep --show-networks --exclude-hosts -6 fixtures/plain_text/sample_01.txt"
-    )
+    cliapp = ccp_script_entry("ccp_faked ipgrep --show-networks --exclude-hosts -6 fixtures/plain_text/sample_01.txt")
     assert len(cliapp.stdout) == 3
     assert cliapp.unique is False
     assert cliapp.subnets == "::/0"
@@ -346,9 +312,7 @@ def testValues_ccp_script_entry_cliapplication_ipgrep_15():
 
 def testValues_ccp_script_entry_cliapplication_ipgrep_16():
     """Ensure that CliApplication() ipgrep with --show-networks --exclude-hosts is no IPv6 networks from sample_01.txt"""
-    cliapp = ccp_script_entry(
-        "ccp_faked ipgrep --exclude-hosts --show-networks -6 fixtures/plain_text/sample_01.txt"
-    )
+    cliapp = ccp_script_entry("ccp_faked ipgrep --exclude-hosts --show-networks -6 fixtures/plain_text/sample_01.txt")
     assert len(cliapp.stdout) == 3
     assert cliapp.unique is False
     assert cliapp.subnets == "::/0"
@@ -361,9 +325,7 @@ def testValues_ccp_script_entry_cliapplication_ipgrep_16():
 
 def testValues_ccp_script_entry_cliapplication_ipgrep_17():
     """Ensure that CliApplication() ipgrep with --unique --show-networks -ipv4 -ipv6 is no IPv6 networks from sample_01.txt"""
-    cliapp = ccp_script_entry(
-        "ccp_faked ipgrep --unique --show-networks -4 -6 fixtures/plain_text/sample_01.txt"
-    )
+    cliapp = ccp_script_entry("ccp_faked ipgrep --unique --show-networks -4 -6 fixtures/plain_text/sample_01.txt")
     assert len(cliapp.stdout) == 5
     assert cliapp.unique is True
     assert cliapp.subnets == "0.0.0.0/0,::/0"
@@ -378,9 +340,7 @@ def testValues_ccp_script_entry_cliapplication_ipgrep_17():
 
 def testValues_ccp_script_entry_cliapplication_branch_01():
     """Ensure that CliApplication() branch as original output flag set is a list of one IP address"""
-    cliapp = ccp_script_entry(
-        "ccp_faked branch -o original -a 'interface Null0' fixtures/configs/sample_01.ios"
-    )
+    cliapp = ccp_script_entry("ccp_faked branch -o original -a 'interface Null0' fixtures/configs/sample_01.ios")
     assert len(cliapp.stdout) == 2
     assert cliapp.output_format == "original"
     assert cliapp.args == ["interface Null0"]
@@ -392,9 +352,7 @@ def testValues_ccp_script_entry_cliapplication_branch_01():
 
 def testValues_ccp_script_entry_cliapplication_branch_02():
     """Ensure that CliApplication() branch as original output flag set is a list of one IP address"""
-    cliapp = ccp_script_entry(
-        "ccp_faked branch -a 'interface Null0,unreachables' fixtures/configs/sample_01.ios"
-    )
+    cliapp = ccp_script_entry("ccp_faked branch -a 'interface Null0,unreachables' fixtures/configs/sample_01.ios")
     assert len(cliapp.stdout) == 2
     assert cliapp.output_format == "raw_text"
     assert cliapp.args == ["interface Null0", "unreachables"]
@@ -406,9 +364,7 @@ def testValues_ccp_script_entry_cliapplication_branch_02():
 
 def testValues_ccp_script_entry_cliapplication_parent_01():
     """Ensure that CliApplication() parent as original output flag set is a list of one IP address"""
-    cliapp = ccp_script_entry(
-        "ccp_faked parent -a 'interface Null0' fixtures/configs/sample_01.ios"
-    )
+    cliapp = ccp_script_entry("ccp_faked parent -a 'interface Null0' fixtures/configs/sample_01.ios")
     assert len(cliapp.stdout) == 1
     assert cliapp.output_format == "raw_text"
     assert cliapp.args == ["interface Null0"]
@@ -417,9 +373,7 @@ def testValues_ccp_script_entry_cliapplication_parent_01():
 
 def testValues_ccp_script_entry_cliapplication_child_01():
     """Ensure that CliApplication() parent as original output flag set is a list of one IP address"""
-    cliapp = ccp_script_entry(
-        "ccp_faked child -a 'interface Null0,unreachables' fixtures/configs/sample_01.ios"
-    )
+    cliapp = ccp_script_entry("ccp_faked child -a 'interface Null0,unreachables' fixtures/configs/sample_01.ios")
     assert len(cliapp.stdout) == 1
     assert cliapp.output_format == "raw_text"
     assert cliapp.args == ["interface Null0", "unreachables"]

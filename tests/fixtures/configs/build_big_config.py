@@ -1,5 +1,5 @@
-from random import randint, choice
 import sys
+from random import choice, randint
 
 if sys.argv[1] == "1":
     print("!")
@@ -39,11 +39,7 @@ if sys.argv[1] == "1":
         if mode == "vrf":
             print(f"ip vrf forwarding VRF_{vlan}")
         print(f" description Layer3 SVI: vlan {vlan}")
-        print(
-            " ip address {}.{}.{}.0 255.255.255.0".format(
-                randint(1, 224), randint(1, 255), randint(1, 255)  # nosec
-            )
-        )  # nosec
+        print(f" ip address {randint(1, 224)}.{randint(1, 255)}.{randint(1, 255)}.0 255.255.255.0")  # nosec  # nosec
         print("!")
 
 elif sys.argv[1] == "5":

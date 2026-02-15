@@ -3,6 +3,7 @@ import sys
 sys.path.insert(0, "..")
 
 import pytest
+
 from ciscoconfparse2.ciscoconfparse2 import CiscoConfParse
 
 r""" test_Models_Junos.py - Parse, Query, Build, and Modify IOS-style configs
@@ -45,9 +46,7 @@ def testVal_JunosCfgLine_dna_parent_01(parse_j01):
     assert obj.confobj is not None
 
 
-@pytest.mark.xfail(
-    True, reason="parse_j01 ge-0/0/1 is not correctly identified by `is_intf`"
-)
+@pytest.mark.xfail(True, reason="parse_j01 ge-0/0/1 is not correctly identified by `is_intf`")
 def testVal_JunosCfgLine_child_01(parse_j01):
     parse = parse_j01
     obj = parse.find_child_objects("interfaces", "ge-0/0/1")[0]
@@ -60,9 +59,7 @@ def testVal_JunosCfgLine_child_01(parse_j01):
 
 def testVal_JunosCfgLine_child_02():
     """Identify a JunOS physical interface"""
-    parse = CiscoConfParse(
-        "fixtures/configs/sample_01.junos", syntax="junos", factory=False
-    )
+    parse = CiscoConfParse("fixtures/configs/sample_01.junos", syntax="junos", factory=False)
     obj = parse.find_child_objects("interfaces", "ge-0/0/1")[0]
     assert obj.dna == "JunosCfgLine"
     assert obj.text.strip() == "ge-0/0/1"
@@ -74,9 +71,7 @@ def testVal_JunosCfgLine_child_02():
 
 def testVal_JunosCfgLine_child_03():
     """Identify a JunOS logical interface unit"""
-    parse = CiscoConfParse(
-        "fixtures/configs/sample_01.junos", syntax="junos", factory=False
-    )
+    parse = CiscoConfParse("fixtures/configs/sample_01.junos", syntax="junos", factory=False)
     obj = parse.find_child_objects("ge-0/0/1", "unit 0")[0]
     assert obj.dna == "JunosCfgLine"
     assert obj.text.strip() == "unit 0"
@@ -88,9 +83,7 @@ def testVal_JunosCfgLine_child_03():
 
 def testVal_JunosCfgLine_child_04():
     """Identify a JunOS logical interface unit"""
-    parse = CiscoConfParse(
-        "fixtures/configs/sample_01.junos", syntax="junos", factory=False
-    )
+    parse = CiscoConfParse("fixtures/configs/sample_01.junos", syntax="junos", factory=False)
     obj = parse.find_child_objects("vlan", "unit 0")[0]
     assert obj.dna == "JunosCfgLine"
     assert obj.text.strip() == "unit 0"

@@ -85,9 +85,7 @@ class ArgParser:
             description="ciscoconfparse2 CLI script",
             add_help=True,
         )
-        self.subparsers = self.parser.add_subparsers(
-            help="commands", required=True, dest="command"
-        )
+        self.subparsers = self.parser.add_subparsers(help="commands", required=True, dest="command")
 
         self.build_command_args_parent()
         self.build_command_args_child()
@@ -107,18 +105,12 @@ class ArgParser:
     @logger.catch(reraise=True)
     def build_command_args_parent(self) -> None:
         """Build the parent command as a subparser"""
-        parser = self.subparsers.add_parser(
-            "parent", help="Find configuration parent text"
-        )
+        parser = self.subparsers.add_parser("parent", help="Find configuration parent text")
 
         parser_required = parser.add_argument_group("required")
-        parser_required.add_argument(
-            "-a", "--args", required=True, type=str, help="Find this text."
-        )
+        parser_required.add_argument("-a", "--args", required=True, type=str, help="Find this text.")
 
-        parser_required.add_argument(
-            "file", nargs="+", type=str, help="Find text in this file glob."
-        )
+        parser_required.add_argument("file", nargs="+", type=str, help="Find text in this file glob.")
 
         parser_optional = parser.add_argument_group("optional")
         parser_optional.add_argument(
@@ -164,18 +156,12 @@ class ArgParser:
     @logger.catch(reraise=True)
     def build_command_args_child(self) -> None:
         """Build the child command as a subparser"""
-        parser = self.subparsers.add_parser(
-            "child", help="Find configuration child text"
-        )
+        parser = self.subparsers.add_parser("child", help="Find configuration child text")
 
         parser_required = parser.add_argument_group("required")
-        parser_required.add_argument(
-            "-a", "--args", required=True, type=str, help="Find this text."
-        )
+        parser_required.add_argument("-a", "--args", required=True, type=str, help="Find this text.")
 
-        parser_required.add_argument(
-            "file", nargs="+", type=str, help="Find text in this file glob."
-        )
+        parser_required.add_argument("file", nargs="+", type=str, help="Find text in this file glob.")
 
         parser_optional = parser.add_argument_group("optional")
         parser_optional.add_argument(
@@ -212,18 +198,12 @@ class ArgParser:
     @logger.catch(reraise=True)
     def build_command_args_branch(self) -> None:
         """Build the branch command as a subparser"""
-        parser = self.subparsers.add_parser(
-            "branch", help="Find configuration branch text"
-        )
+        parser = self.subparsers.add_parser("branch", help="Find configuration branch text")
 
         parser_required = parser.add_argument_group("required")
-        parser_required.add_argument(
-            "-a", "--args", required=True, type=str, help="Find this text."
-        )
+        parser_required.add_argument("-a", "--args", required=True, type=str, help="Find this text.")
 
-        parser_required.add_argument(
-            "file", nargs="+", type=str, help="Find text in this file glob."
-        )
+        parser_required.add_argument("file", nargs="+", type=str, help="Find text in this file glob.")
 
         parser_optional = parser.add_argument_group("optional")
         parser_optional.add_argument(
@@ -264,9 +244,7 @@ class ArgParser:
         parser = self.subparsers.add_parser("diff", help="Show a Cisco IOS-style diff")
 
         parser_required = parser.add_argument_group("required")
-        parser_required.add_argument(
-            "file", nargs=2, type=str, help="Diff text in these files."
-        )
+        parser_required.add_argument("file", nargs=2, type=str, help="Diff text in these files.")
 
         parser_optional = parser.add_argument_group("optional")
         parser_optional.add_argument(
@@ -295,9 +273,7 @@ class ArgParser:
     def build_command_args_ipgrep(self) -> None:
         """An IPv4 / IPv6 address in subnet grep command"""
 
-        parser = self.subparsers.add_parser(
-            "ipgrep", help="grep for IPv4 / IPv6 addresses contained in an IP subnet"
-        )
+        parser = self.subparsers.add_parser("ipgrep", help="grep for IPv4 / IPv6 addresses contained in an IP subnet")
 
         parser.add_argument_group("required")
 
@@ -393,9 +369,7 @@ class ArgParser:
     def build_command_args_macgrep(self) -> None:
         """A mac address / EUI address grep command"""
 
-        parser = self.subparsers.add_parser(
-            "macgrep", help="grep for MAC / EUI addresses, optionally matching a regex"
-        )
+        parser = self.subparsers.add_parser("macgrep", help="grep for MAC / EUI addresses, optionally matching a regex")
 
         parser_required = parser.add_argument_group("required")
 
@@ -537,11 +511,7 @@ class CliApplication:
             self.parse = CiscoConfParse([""])
 
             # Conditionally print the file name header...
-            if (
-                self.subparser_name != "diff"
-                and self.subparser_name != "ipgrep"
-                and self.subparser_name != "macgrep"
-            ):
+            if self.subparser_name != "diff" and self.subparser_name != "ipgrep" and self.subparser_name != "macgrep":
                 self.print_file_name_centered(filename)
 
             if self.subparser_name == "parent":
@@ -603,9 +573,7 @@ class CliApplication:
                     self.arg_parser.parser.error(error)
 
                 # See the if clause, outdented one-level
-                self.macgrep_command(
-                    mac_regex=self.mac_regex, text=self.macgrep_file.read()
-                )
+                self.macgrep_command(mac_regex=self.mac_regex, text=self.macgrep_file.read())
 
             else:
                 error = f"This ccp subparser name is missing an if-clause: {self.subparser_name}"
@@ -751,18 +719,14 @@ class CliApplication:
 
         if not self.line:
             words = re.split(self.word_delimiter, text)
-            retval = self.find_ip46_addr_matches(
-                _subnets, potential_matches=words, unique_matches=self.unique
-            )
+            retval = self.find_ip46_addr_matches(_subnets, potential_matches=words, unique_matches=self.unique)
         else:
             if self.show_cidr or self.show_networks:
                 error = "The --show_cidr and --show_networks args are not supported with --line"
                 self.arg_parser.parser.error(error)
 
             lines = text.splitlines()
-            retval = self.find_ip46_line_matches(
-                subnets=_subnets, potential_matches=lines, unique_matches=self.unique
-            )
+            retval = self.find_ip46_line_matches(subnets=_subnets, potential_matches=lines, unique_matches=self.unique)
         if len(retval) == 0:
             # potential_matches == [] is a special case where the text
             # had an invalid ip address like 172.16.355555
@@ -809,26 +773,14 @@ class CliApplication:
                         append_addr = False
 
                         if self.show_cidr is False:
-                            if (
-                                self.show_networks is False
-                                and str(addr.ip) not in retval
-                            ):
+                            if self.show_networks is False and str(addr.ip) not in retval:
                                 append_addr = True
-                            elif (
-                                self.show_networks is True
-                                and str(addr.as_cidr_net) not in retval
-                            ):
+                            elif self.show_networks is True and str(addr.as_cidr_net) not in retval:
                                 append_addr = True
                         else:
-                            if (
-                                self.show_networks is False
-                                and str(addr.as_cidr_addr) not in retval
-                            ):
+                            if self.show_networks is False and str(addr.as_cidr_addr) not in retval:
                                 append_addr = True
-                            elif (
-                                self.show_networks is True
-                                and str(addr.as_cidr_net) not in retval
-                            ):
+                            elif self.show_networks is True and str(addr.as_cidr_net) not in retval:
                                 append_addr = True
 
                         # Append if not already in retval...
@@ -972,14 +924,10 @@ class CliApplication:
 
         if not self.line:
             words = re.split(self.word_delimiter, text)
-            retval = self.find_maceui_addr_matches(
-                mac_regex_strs, potential_matches=words, unique_matches=self.unique
-            )
+            retval = self.find_maceui_addr_matches(mac_regex_strs, potential_matches=words, unique_matches=self.unique)
         else:
             lines = text.splitlines()
-            retval = self.find_maceui_line_matches(
-                mac_regex_strs, potential_matches=lines, unique_matches=self.unique
-            )
+            retval = self.find_maceui_line_matches(mac_regex_strs, potential_matches=lines, unique_matches=self.unique)
 
         if len(retval) == 0:
             # potential_matches == [] is a special case where the text
@@ -1046,26 +994,16 @@ class CliApplication:
     def print_command_header(self) -> None:
         """Print the command header including what is searched and the search terms"""
 
-        self.console.print(
-            f"[green1]Syntax      [/green1]: [purple]{self.syntax}[/purple]"
-        )
-        self.console.print(
-            f"[green1]Returing    [/green1]: [purple]{self.subparser_name}[/purple] text"
-        )
-        self.console.print(
-            f"[green1]Output as   [/green1]: [purple]{self.output_format}[/purple]"
-        )
+        self.console.print(f"[green1]Syntax      [/green1]: [purple]{self.syntax}[/purple]")
+        self.console.print(f"[green1]Returing    [/green1]: [purple]{self.subparser_name}[/purple] text")
+        self.console.print(f"[green1]Output as   [/green1]: [purple]{self.output_format}[/purple]")
 
         if self.subparser_name != "diff":
             for idx, term in enumerate(self.args):
                 if idx == 0:
-                    self.console.print(
-                        f"  [green1]parent[/green1]: [turquoise2]{term}[/turquoise2]"
-                    )
+                    self.console.print(f"  [green1]parent[/green1]: [turquoise2]{term}[/turquoise2]")
                 else:
-                    self.console.print(
-                        f"  [green1]child [/green1]: [red1]{term}[/red1]"
-                    )
+                    self.console.print(f"  [green1]child [/green1]: [red1]{term}[/red1]")
 
     @logger.catch(reraise=True)
     @typechecked
@@ -1075,9 +1013,7 @@ class CliApplication:
         _width = self.console.width
         prefix = "file:"
         _var_line = int((_width - len(prefix) - len(filename) - 3) / 2.0) * "-"
-        self.console.print(
-            f"[green1]{_var_line}[/green1] file: [turquoise2]{filename}[/turquoise2] [green1]{_var_line}[/green1]"
-        )
+        self.console.print(f"[green1]{_var_line}[/green1] file: [turquoise2]{filename}[/turquoise2] [green1]{_var_line}[/green1]")
 
 
 @attrs.define(repr=False)

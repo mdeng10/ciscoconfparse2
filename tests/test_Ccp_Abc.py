@@ -1,6 +1,7 @@
 import sys
 
 import pytest
+
 from ciscoconfparse2.ccp_abc import BaseCfgLine, get_brace_termination
 from ciscoconfparse2.ccp_util import IPv6Obj
 from ciscoconfparse2.ciscoconfparse2 import CiscoConfParse
@@ -331,9 +332,7 @@ def testVal_BaseCfgLine_CiscoIOS_delete_w_auto_commit_wo_reverse_01():
     # Ensure that the object exists...
     assert len(parse.find_objects(r"GigabitEthernet1/2")) == 1
     with pytest.raises(ConfigListItemDoesNotExist):
-        for obj in parse.find_objects(
-            r"GigabitEthernet1/1|GigabitEthernet1/2", reverse=False
-        ):
+        for obj in parse.find_objects(r"GigabitEthernet1/1|GigabitEthernet1/2", reverse=False):
             obj.delete()
 
 
@@ -365,9 +364,7 @@ def testVal_BaseCfgLine_CiscoIOS_delete_w_auto_commit_w_reverse_01():
     assert len(parse.find_objects(r"GigabitEthernet1/2")) == 1
 
     # Execute the delete operation...
-    for obj in parse.find_objects(
-        r"GigabitEthernet1/1|GigabitEthernet1/2", reverse=True
-    ):
+    for obj in parse.find_objects(r"GigabitEthernet1/1|GigabitEthernet1/2", reverse=True):
         obj.delete()
 
     # Ensure that the object was deleted...
@@ -594,9 +591,7 @@ def testVal_BaseCfgLine_append_to_family_06():
         ]
     )
     obj = parse.find_objects("proxy-arp")[0]
-    obj.append_to_family(
-        "a fake great-grandchild of interface Ethernet0/0", auto_indent=True
-    )
+    obj.append_to_family("a fake great-grandchild of interface Ethernet0/0", auto_indent=True)
     uut = parse.objs[-1]
     assert uut.children == []
     # Ensure the line is correctly indented after insert
@@ -606,10 +601,7 @@ def testVal_BaseCfgLine_append_to_family_06():
     assert len(parse.objs[0].children) == 1
     # Ensure this is the last line in the family
     assert parse.objs[0].all_children[-2].text == "  no ip proxy-arp"
-    assert (
-        parse.objs[0].all_children[-1].text
-        == "   a fake great-grandchild of interface Ethernet0/0"
-    )
+    assert parse.objs[0].all_children[-1].text == "   a fake great-grandchild of interface Ethernet0/0"
 
 
 def testVal_BaseCfgLine_append_to_family_07():
@@ -645,14 +637,8 @@ def testVal_BaseCfgLine_verbose_01():
     obj03 = BaseCfgLine(all_lines=None, line=" no ip proxy-arp")
     obj03.linenum = 3
     obj01.children = [obj02, obj03]
-    assert (
-        obj01.verbose
-        == "<BaseCfgLine # 1 'interface Ethernet0/0' (child_indent: 0 / len(children): 2 / family_endpoint: 3)>"
-    )
-    assert (
-        obj02.verbose
-        == "<BaseCfgLine # 2 ' ip address 192.0.2.1 255.255.255.0' (no_children / family_endpoint: 2)>"
-    )
+    assert obj01.verbose == "<BaseCfgLine # 1 'interface Ethernet0/0' (child_indent: 0 / len(children): 2 / family_endpoint: 3)>"
+    assert obj02.verbose == "<BaseCfgLine # 2 ' ip address 192.0.2.1 255.255.255.0' (no_children / family_endpoint: 2)>"
 
 
 def testVal_BaseCfgLine_is_comment_01():
@@ -1321,9 +1307,7 @@ def testVal_re_list_iter_typed_02():
     ]
     parse = CiscoConfParse(config)
     obj = parse.find_objects(r"interface Serial1/0")[0]
-    uut = obj.re_list_iter_typed(
-        r"this_should_not_match_anything\s+(\S+?\/\d+)", result_type=IPv6Obj
-    )
+    uut = obj.re_list_iter_typed(r"this_should_not_match_anything\s+(\S+?\/\d+)", result_type=IPv6Obj)
     assert isinstance(uut, list)
     assert len(uut) == 0
 

@@ -1,6 +1,6 @@
-from timeit import timeit
-import sys
 import os
+import sys
+from timeit import timeit
 
 iterations = 1000
 
@@ -44,7 +44,7 @@ print("LIST COMPREHENSION GETATTR", list_comprehension_getattr)
 
 vlan_text = "1-1000,1001-2000,2001-3000,3001-4000,4001-4094"
 time_CiscoRange_all_vlans_int = timeit(
-    'CiscoRange(text="%s", result_type=int)' % vlan_text,
+    f'CiscoRange(text="{vlan_text}", result_type=int)',
     setup="from ciscoconfparse.ccp_util import CiscoRange",
     number=iterations,
 )
