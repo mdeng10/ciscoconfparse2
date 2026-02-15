@@ -627,7 +627,15 @@ class IOSCfgLine(BaseFactoryLine):
     def is_object_for(cls, all_lines, line, index=None, re=re) -> bool:
         """Return True if this object should be used for a given configuration line; otherwise return False"""
         ## Default object, for now
-        return not (cls.is_object_for_hostname(line=line) or cls.is_object_for_interface(line=line) or cls.is_object_for_aaa_authentication(line=line) or cls.is_object_for_aaa_authorization(line=line) or cls.is_object_for_aaa_accounting(line=line) or cls.is_object_for_ip_route(line=line) or cls.is_object_for_ipv6_route(line=line))
+        return not (
+            cls.is_object_for_hostname(line=line)
+            or cls.is_object_for_interface(line=line)
+            or cls.is_object_for_aaa_authentication(line=line)
+            or cls.is_object_for_aaa_authorization(line=line)
+            or cls.is_object_for_aaa_accounting(line=line)
+            or cls.is_object_for_ip_route(line=line)
+            or cls.is_object_for_ipv6_route(line=line)
+        )
 
     @classmethod
     @logger.catch(reraise=True)

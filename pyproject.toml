@@ -228,4 +228,3 @@ ignore = [
     "TD004",    # Ignore missing TODO with colon
     "RUF052",   # Ignore ruff lints for accessing 'private' _variable names
 ]
-
