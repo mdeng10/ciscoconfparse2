@@ -1,11 +1,9 @@
 import sys
 
 import pytest
-from ciscoconfparse2.ccp_util import CiscoIOSInterface, CiscoRange, IPv4Obj
+from ciscoconfparse2.ccp_util import CiscoRange, IPv4Obj
 from ciscoconfparse2.ciscoconfparse2 import CiscoConfParse
-from ciscoconfparse2.errors import DynamicAddressException
 from ciscoconfparse2.models_cisco import HSRPInterfaceGroup
-from loguru import logger
 
 sys.path.insert(0, "..")
 
@@ -1201,22 +1199,22 @@ def testVal_IOSIntfLine_manual_duplex(parse_c03_factory):
     assert test_result == result_correct
 
 
-def testVal_IOSIntfLine_manual_carrierdelay(parse_c03_factory):
+def testVal_IOSIntfLine_manual_carrierdelay_01(parse_c03_factory):
     cfg = parse_c03_factory
     result_correct = {
-        "interface Serial 1/0": False,
-        "interface Serial 1/1": False,
-        "interface GigabitEthernet4/1": False,
-        "interface GigabitEthernet4/2": False,
-        "interface GigabitEthernet4/3": False,
-        "interface GigabitEthernet4/4": False,
-        "interface GigabitEthernet4/5": False,
-        "interface GigabitEthernet4/6": False,
-        "interface GigabitEthernet4/7": False,
-        "interface GigabitEthernet4/8.120": False,
+        "interface Serial 1/0": True,
+        "interface Serial 1/1": True,
+        "interface GigabitEthernet4/1": True,
+        "interface GigabitEthernet4/2": True,
+        "interface GigabitEthernet4/3": True,
+        "interface GigabitEthernet4/4": True,
+        "interface GigabitEthernet4/5": True,
+        "interface GigabitEthernet4/6": True,
+        "interface GigabitEthernet4/7": True,
+        "interface GigabitEthernet4/8.120": True,
         "interface ATM5/0/0": True,
-        "interface ATM5/0/0.32 point-to-point": False,
-        "interface ATM5/0/1": False,
+        "interface ATM5/0/0.32 point-to-point": True,
+        "interface ATM5/0/1": True,
     }
     test_result = dict()
     ## Parse all interface objects in self.c01 and check manual_carrierdelay
@@ -1225,7 +1223,7 @@ def testVal_IOSIntfLine_manual_carrierdelay(parse_c03_factory):
     assert test_result == result_correct
 
 
-def testVal_IOSIntfLine_manual_carrierdelay(parse_c03_factory):
+def testVal_IOSIntfLine_manual_carrierdelay_02(parse_c03_factory):
     cfg = parse_c03_factory
     result_correct = {
         "interface Serial 1/0": -1.0,
@@ -1979,7 +1977,7 @@ def testVal_IOSHSRPGroups_04(parse_sample_08_ios_factory):
     assert hsrp_groups[3].ip == "172.16.2.254"
 
 
-def testVal_IOSHSRPGroups_04(parse_sample_08_ios_factory):
+def testVal_IOSHSRPGroups_05(parse_sample_08_ios_factory):
     """Test that the correct HSRP preempt boolean is returned"""
     intf_obj = parse_sample_08_ios_factory.find_objects("^interface FastEthernet0/0")[0]
     hsrp_groups = intf_obj.get_hsrp_groups()
@@ -2000,7 +1998,7 @@ def testVal_IOSHSRPGroups_04(parse_sample_08_ios_factory):
     assert hsrp_groups[3].preempt is False
 
 
-def testVal_IOSHSRPGroups_05(parse_sample_08_ios_factory):
+def testVal_IOSHSRPGroups_06(parse_sample_08_ios_factory):
     """Test that the correct HSRP preempt_delay is returned"""
     intf_obj = parse_sample_08_ios_factory.find_objects("^interface FastEthernet0/0")[0]
     hsrp_groups = intf_obj.get_hsrp_groups()
@@ -2021,7 +2019,7 @@ def testVal_IOSHSRPGroups_05(parse_sample_08_ios_factory):
     assert hsrp_groups[3].preempt_delay == 0
 
 
-def testVal_IOSHSRPGroups_06(parse_sample_08_ios_factory):
+def testVal_IOSHSRPGroups_07(parse_sample_08_ios_factory):
     """Test that the correct HSRP tracking interfaces are returned"""
     intf_obj = parse_sample_08_ios_factory.find_objects("^interface FastEthernet0/0")[0]
     hsrp_groups = intf_obj.get_hsrp_groups()
@@ -2062,7 +2060,7 @@ def testVal_IOSHSRPGroups_06(parse_sample_08_ios_factory):
     assert track_intfs_02[0].decrement == 50
 
 
-def testVal_IOSHSRPGroups_07(parse_sample_08_ios_factory):
+def testVal_IOSHSRPGroups_08(parse_sample_08_ios_factory):
     """Test that the correct HSRP priority is returned for each HSRP Group"""
     intf_obj = parse_sample_08_ios_factory.find_objects("^interface FastEthernet0/0")[0]
     hsrp_groups = intf_obj.get_hsrp_groups()

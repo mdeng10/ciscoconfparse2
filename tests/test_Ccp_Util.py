@@ -46,7 +46,6 @@ from ciscoconfparse2.ccp_util import (
     _RGX_IPV4ADDR,
     _RGX_IPV6ADDR,
     CiscoIOSInterface,
-    CiscoIOSXRInterface,
     CiscoRange,
     EUI64Obj,
     IPv4Obj,
@@ -56,10 +55,9 @@ from ciscoconfparse2.ccp_util import (
 )
 from ciscoconfparse2.ccp_util import collapse_addresses as ccp_collapse_addresses
 from ciscoconfparse2.ccp_util import ip_factory
-from loguru import logger
 from macaddress import EUI48, EUI64, MAC, OUI
 
-from hypothesis import given, strategies, reproduce_failure
+from hypothesis import given, strategies
 
 sys.path.insert(0, "..")
 
@@ -965,7 +963,7 @@ def test_CiscoIOSInterface_09():
         }
     )
     assert uut.prefix == "Ethernet"
-    assert uut.slot == None
+    assert uut.slot is None
     assert uut.card is None
     assert uut.port == 1
     assert uut.subinterface is None

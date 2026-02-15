@@ -1,4 +1,4 @@
-from typing import Union, Any, Set, List, Tuple, Dict
+from typing import Any
 import re
 
 import attrs
@@ -10,9 +10,6 @@ from ciscoconfparse2.ccp_util import (
     _IPV6_REGEX_STR_COMPRESSED1,
     _IPV6_REGEX_STR_COMPRESSED2,
 )
-from ciscoconfparse2.errors import InvalidCiscoEthernetTrunkAction
-from ciscoconfparse2.errors import InvalidCiscoEthernetVlan
-from ciscoconfparse2.errors import InvalidCiscoInterface
 
 from ciscoconfparse2.ccp_util import _IPV6_REGEX_STR_COMPRESSED3
 from ciscoconfparse2.ccp_util import CiscoIOSXRInterface
@@ -30,7 +27,7 @@ from ciscoconfparse2.ccp_abc import BaseCfgLine
 ###   Use models_cisco.py at your own risk.  You have been warned :-)
 r""" models_base.py - Parse, Query, Build, and Modify IOS-style configurations
 
-     Copyright (C) 2021-2025 David Michael Pennington
+     Copyright (C) 2021-2026 David Michael Pennington
      Copyright (C) 2020-2021 David Michael Pennington at Cisco Systems
      Copyright (C) 2019      David Michael Pennington at ThousandEyes
      Copyright (C) 2014-2019 David Michael Pennington at Samsung Data Services

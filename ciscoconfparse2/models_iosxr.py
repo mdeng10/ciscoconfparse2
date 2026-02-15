@@ -1,4 +1,4 @@
-from typing import Union, Any, Set, Tuple, List, Dict
+from typing import Any
 import re
 
 import attrs
@@ -2076,7 +2076,6 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
             return retval
 
         for cmd in self.all_children:
-            parts = cmd.splilt()
             if cmd[0] == "standby" and cmd[1] == "ip":
                 # Standby with no explicit group number
                 hsrp_group = 0
@@ -2116,7 +2115,6 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
             return retval
 
         for cmd in self.all_children:
-            parts = cmd.split()
             if cmd[0] == "standby" and cmd[1] == "priority":
                 # Standby with no explicit group number
                 hsrp_group = 0
@@ -2171,7 +2169,6 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         # example:
         #   standby 110 authentication md5 key-chain KEYCHAINNAME
         for cmd in self.all_children:
-            parts = cmd.split()
             if (
                 cmd[0] == "standby"
                 and cmd[1] == "authentication"

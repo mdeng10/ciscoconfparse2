@@ -1,10 +1,8 @@
-import os
 import sys
 
 sys.path.insert(0, "..")
 
 import pytest
-from ciscoconfparse2.ccp_util import IPv4Obj
 from ciscoconfparse2.ciscoconfparse2 import CiscoConfParse
 
 r""" test_Models_Junos.py - Parse, Query, Build, and Modify IOS-style configs
@@ -106,7 +104,7 @@ def testVal_find_child_objects_01(parse_j01):
     """Identify the number of grandchildren of parse_j01 ge-0/0/1"""
     parse = parse_j01
     obj = parse.find_child_objects(["interfaces", "ge-0/0/1"])[0]
-    assert not ("{" in set(obj.text))  # Ensure there are no braces on this line
+    assert "{" not in set(obj.text)  # Ensure there are no braces on this line
     assert len(obj.all_children) == 6
 
 

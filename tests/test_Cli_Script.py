@@ -19,9 +19,6 @@ If you need to contact the author, you can do so by emailing:
 mike [~at~] pennington [.dot.] net
 """
 
-from argparse import Namespace
-
-import pytest
 from ciscoconfparse2.ccp_util import EUI64Obj, MACObj
 from ciscoconfparse2.cli_script import CliApplication, MACEUISearch, ccp_script_entry
 
@@ -80,7 +77,7 @@ def testValues_ccp_script_entry_cliapplication_searchmaceui_07():
     assert search.search_all_formats(mac_regex_strs={"reject_any_mac_regex"}) is False
 
 
-def testValues_ccp_script_entry_cliapplication_searchmaceui_07():
+def testValues_ccp_script_entry_cliapplication_searchmaceui_08():
     """Ensure that CliApplication() MACEUISearch() class can reject one EUI48 / MAC address correctly with one regex"""
     search = MACEUISearch("dead.beef.0001")
     assert search.mac_retval == MACObj("dead.beef.0001")
@@ -352,13 +349,17 @@ def testValues_ccp_script_entry_cliapplication_ipgrep_16():
     cliapp = ccp_script_entry(
         "ccp_faked ipgrep --exclude-hosts --show-networks -6 fixtures/plain_text/sample_01.txt"
     )
-    assert len(cliapp.stdout) == 0
+    assert len(cliapp.stdout) == 3
     assert cliapp.unique is False
     assert cliapp.subnets == "::/0"
-    assert cliapp.stdout == []
+    assert cliapp.stdout == [
+        "2001:db8::/127",
+        "2001:db8::/64",
+        "2001:db8::/64",
+    ]
 
 
-def testValues_ccp_script_entry_cliapplication_ipgrep_16():
+def testValues_ccp_script_entry_cliapplication_ipgrep_17():
     """Ensure that CliApplication() ipgrep with --unique --show-networks -ipv4 -ipv6 is no IPv6 networks from sample_01.txt"""
     cliapp = ccp_script_entry(
         "ccp_faked ipgrep --unique --show-networks -4 -6 fixtures/plain_text/sample_01.txt"

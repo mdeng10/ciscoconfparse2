@@ -544,7 +544,7 @@ def ip_factory(val="", stdlib=False, mode="auto_detect", debug=0):
         if isinstance(val, str) and (":" in val):
             obj = _get_ipv6(val=val, stdlib=stdlib, debug=debug)
 
-        elif isinstance(val, str) and not (":" in val):
+        elif isinstance(val, str) and (":" not in val):
             obj = _get_ipv4(val=val, stdlib=stdlib, debug=debug)
 
         elif isinstance(val, int):
@@ -2524,7 +2524,7 @@ def dns_query(input_str="", query_type="A", server="8.8.8.8", timeout=2.0):
         raise RequirementFailure(error)
 
     if server.strip() == "":
-        error = f"Empty server parameter is not supported. Use the IPv4 of a valid DNS Resolver."
+        error = "Empty server parameter is not supported. Use the IPv4 of a valid DNS Resolver."
         logger.error(error)
         raise RequirementFailure(error)
 

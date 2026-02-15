@@ -1,6 +1,5 @@
 from timeit import timeit
 import sys
-import re
 import os
 
 iterations = 1000

@@ -27,7 +27,6 @@ from unittest.mock import patch
 from collections.abc import Iterator
 
 import os
-import re
 
 import pytest
 from ciscoconfparse2.ccp_abc import BaseCfgLine
@@ -43,7 +42,6 @@ from ciscoconfparse2.ciscoconfparse2 import (
 from ciscoconfparse2.ciscoconfparse2 import ConfigList
 from ciscoconfparse2.errors import InvalidParameters
 from ciscoconfparse2.models_junos import JunosCfgLine
-from macaddress import EUI48, EUI64
 from passlib.hash import cisco_type7
 
 THIS_TEST_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -319,15 +317,16 @@ def testValues_find_objects_list_02():
     config = ["!", "banner motd ^   trivial banner here ^", "end"]
     parse = CiscoConfParse(config)
     with pytest.raises(InvalidParameters):
-        bannerobj = parse.find_objects(["banner", "trivial"])[0]
+        _ = parse.find_objects(["banner", "trivial"])[0]
 
 
 def testValues_find_object_branches_list_01():
     """Ensure that find_object_branches() accepts a list input of arbitrary length"""
+
     # Test banner delimiter on the same lines
     config = ["!", "banner motd ^   trivial banner here ^", "end"]
     parse = CiscoConfParse(config)
-    bannerobj = parse.find_object_branches(["banner", "trivial", "intentional-fail"])
+    _ = parse.find_object_branches(["banner", "trivial", "intentional-fail"])
 
 
 def testValues_find_object_branches_list_02():
@@ -335,7 +334,7 @@ def testValues_find_object_branches_list_02():
     # Test banner delimiter on the same lines
     config = ["!", "banner motd ^", "trivial banner here ^", "end"]
     parse = CiscoConfParse(config)
-    bannerobj = parse.find_object_branches(["banner", "trivial"])[0][0]
+    _ = parse.find_object_branches(["banner", "trivial"])[0][0]
 
 
 def testValues_find_object_branches_list_03():
@@ -391,9 +390,7 @@ def testValues_find_parent_objects_wo_child_list_02():
     config = ["!", "banner motd ^", "trivial banner here ^", "end"]
     parse = CiscoConfParse(config)
     with pytest.raises(InvalidParameters):
-        bannerobjs = parse.find_parent_objects_wo_child(
-            ["banner", "that", "intentional-fail"]
-        )
+        _ = parse.find_parent_objects_wo_child(["banner", "that", "intentional-fail"])
 
 
 def testValues_find_child_objects_list_01():
@@ -641,8 +638,9 @@ def testParse_parse_syntax_f5_as_junos_nofactory_ioscfg_01():
 
 
 def testParse_parse_syntax_f5_as_junos_01():
-    """Parse fixtures/configs/sample_03.f5 as `syntax='junos'`, `factory=False` and test multiple child searches"""
-    parse = CiscoConfParse(
+    """Test parsing fixtures/configs/sample_03.f5 as `syntax='junos'`, `factory=False` and test multiple child searches"""
+
+    CiscoConfParse(
         "fixtures/configs/sample_03.f5",
         # Use ignore_blank_lines to strip out F5 closing brace lines
         ignore_blank_lines=False,
@@ -2253,16 +2251,8 @@ def testValues_delete_objects_03():
 
 
 def testValues_replace_objects_01(parse_c01):
-    c01_replace_gige_no_exactmatch = [
-        "interface GigabitEthernet8/1",
-        "interface GigabitEthernet8/2",
-        "interface GigabitEthernet8/3",
-        "interface GigabitEthernet8/4",
-        "interface GigabitEthernet8/5",
-        "interface GigabitEthernet8/6",
-        "interface GigabitEthernet8/7",
-        "interface GigabitEthernet8/8",
-    ]
+    """Test replace text with BaseCfgLine().re_sub()"""
+
     for obj in parse_c01.objs:
         if obj.text == "interface Serial 1/0":
             obj.re_sub("interface Serial 1/0", "interface Serial 2/0")
@@ -2286,7 +2276,7 @@ def testValues_replace_objects_02():
     for idx, obj in enumerate(parse.config_objs):
         if obj.re_search(r"GigabitEthernet4.4"):
             continue
-        replaced = obj.re_sub("GigabitEthernet4", "GigabitEthernet8")
+        obj.re_sub("GigabitEthernet4", "GigabitEthernet8")
 
     assert len(parse.find_objects("GigabitEthernet4")) == 1
 
@@ -3433,8 +3423,6 @@ def testValues_IOSIntfLine_find_objects_factory_02(
         correct_result01.classname = "IOSIntfLine"
         correct_result01.ipv4_addr_object = IPv4Obj("1.1.1.1/30", strict=False)
 
-        correct_result02 = c01_insert_serial_replace
-
         obj = parse_c01_factory.find_objects("interface Serial 1/0")[0]
         obj.insert_before("default interface Serial 1/0")
 
@@ -3746,13 +3734,7 @@ def test_BaseCfgLine_has_child_with(parse_c03):
 
 
 def testValues_IOSCfgLine_ioscfg01(parse_c02):
-    correct_result = [
-        "interface GigabitEthernet4/1",
-        " switchport",
-        " switchport access vlan 100",
-        " switchport voice vlan 150",
-        " power inline static max 7000",
-    ]
+
     test_result = parse_c02.find_objects(
         r"^interface\sGigabitEthernet4/1", exactmatch=True
     )[0].text

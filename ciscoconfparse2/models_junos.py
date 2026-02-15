@@ -27,7 +27,6 @@ mike [~at~] pennington [/dot\] net
 ###
 ###   Use models_junos.py at your own risk.  You have been warned :-)
 
-from typing import List
 import ipaddress
 import re
 

@@ -27,7 +27,6 @@ if (__name__ == "__main__") and (__package__ is None):
 
     parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     sys.path.insert(1, parent_dir)
-    import ciscoconfparse2
 
     __package__ = "ciscoconfparse2"
     del sys, os

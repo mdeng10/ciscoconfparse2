@@ -4,7 +4,7 @@ import re
 import shlex
 import sys
 from argparse import Action, ArgumentParser, FileType, Namespace, _SubParsersAction
-from typing import Any, Set, Union
+from typing import Any
 
 import attrs
 import macaddress

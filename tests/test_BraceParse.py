@@ -24,9 +24,6 @@ import sys
 
 sys.path.insert(0, "..")
 
-import pytest
-from ciscoconfparse2.ciscoconfparse2 import BraceParse
-
 THIS_TEST_PATH = os.path.dirname(os.path.abspath(__file__))
 
 

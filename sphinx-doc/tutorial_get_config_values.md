@@ -24,6 +24,9 @@ First let's cover some details of how {class}`~ciscoconfparse2` represents confi
 >>> cmd
 <IOSCfgLine # 0 'hostname Foo'>
 >>>
+>>> str(cmd)
+'hostname Foo'
+>>>
 >>> issubclass(IOSCfgLine, BaseCfgLine)
 True
 >>>

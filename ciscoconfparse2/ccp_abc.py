@@ -497,7 +497,7 @@ class BaseCfgLine:
         string formatting delimiters.
         """
         # Bypass escaping curly braces if there aren't any...
-        if not ("{" in text) and not ("}" in text):
+        if ("{" not in text) and ("}" not in text):
             return text
 
         assert ("{" in text) or ("}" in text)

@@ -19,17 +19,12 @@ If you need to contact the author, you can do so by emailing:
 mike [~at~] pennington [/dot\] net
 """
 
-import platform
 import sys
-import os
 
 sys.path.insert(0, "..")
 
 from ciscoconfparse2.ciscoconfparse2 import CiscoConfParse
 from ciscoconfparse2.ciscoconfparse2 import BraceParse
-from ciscoconfparse2.ccp_util import PythonOptimizeCheck
-import dns.exception
-import dns.resolver
 import pytest
 
 c01 = """policy-map QOS_1

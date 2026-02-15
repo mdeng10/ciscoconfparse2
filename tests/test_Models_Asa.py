@@ -19,8 +19,6 @@ If you need to contact the author, you can do so by emailing:
 mike [~at~] pennington [.dot.] net
 """
 
-import os
-import re
 import sys
 import uuid
 from collections.abc import MutableSequence
@@ -30,17 +28,11 @@ sys.path.insert(0, "..")
 import pytest
 from ciscoconfparse2.ccp_util import IPv4Obj, L4Object
 from ciscoconfparse2.ciscoconfparse2 import CiscoConfParse
-from ciscoconfparse2.models_asa import ASAObjGroupService
-
-from conftest import parse_a01, parse_a01_factory
-
-from ipaddress import IPv4Network, IPv6Network, IPv4Address, IPv6Address
 
 from loguru import logger
 
 
 def testVal_Access_List(parse_a01_factory):
-    result_correct = {}
     assert len(parse_a01_factory.objs.asa_access_list["INSIDE_in"]) == 4
 
 

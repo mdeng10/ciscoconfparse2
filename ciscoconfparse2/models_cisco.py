@@ -1,4 +1,4 @@
-from typing import Union, Any, Set, Tuple, List, Dict
+from typing import Any
 import re
 
 import attrs
@@ -268,6 +268,7 @@ class HSRPInterfaceGroup(BaseCfgLine):
         for obj in self.parent.children:
             parts = obj.text.lower().strip().split()
             if parts[0] == "standby":
+
                 if len(parts) == 4:
                     # standby 100 ip 172.16.0.1
                     if (
@@ -276,9 +277,10 @@ class HSRPInterfaceGroup(BaseCfgLine):
                         and parts[2] == "ip"
                     ):
                         ipv4 = parts[3]
+
                 elif len(parts) == 3:
                     # standby ip 172.16.0.1
-                    if self.group == 0 and parts[2] == "ip":
+                    if self.group == 0 and parts[1] == "ip":
                         ipv4 = parts[2]
         return ipv4
 
@@ -1038,11 +1040,14 @@ class BaseIOSIntfLine(IOSCfgLine, BaseFactoryInterfaceLine):
         for obj in self.children:
             # Get each HSRP group number...
             tmp = obj.text.split()
+
             if tmp[0] == "standby" and tmp[1] == "ip":
                 retval.add(HSRPInterfaceGroup(grp=0, parent_obj=self))
+
             elif tmp[0] == "standby" and tmp[2] == "ip":
-                group = int(tmp[1])
-                retval.add(HSRPInterfaceGroup(grp=group, parent_obj=self))
+                hsrp_group = int(tmp[1])
+                retval.add(HSRPInterfaceGroup(grp=hsrp_group, parent_obj=self))
+
         # Return a sorted list of HSRPInterfaceGroup() instances...
         intf_groups = sorted(retval, key=lambda x: x.group, reverse=False)
         return intf_groups
@@ -2628,7 +2633,6 @@ class BaseIOSIntfLine(IOSCfgLine, BaseFactoryInterfaceLine):
             return retval
 
         for cmd in self.all_children:
-            parts = cmd.splilt()
             if cmd[0] == "standby" and cmd[1] == "ip":
                 # Standby with no explicit group number
                 hsrp_group = 0
@@ -2668,7 +2672,6 @@ class BaseIOSIntfLine(IOSCfgLine, BaseFactoryInterfaceLine):
             return retval
 
         for cmd in self.all_children:
-            parts = cmd.split()
             if cmd[0] == "standby" and cmd[1] == "priority":
                 # Standby with no explicit group number
                 hsrp_group = 0
