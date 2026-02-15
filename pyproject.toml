@@ -184,11 +184,13 @@ skip-magic-trailing-comma = false
 docstring-code-format = true
 
 [tool.ruff.lint]
+# Enable ruff experimental features
 preview = true
+
 # Enable core linting rules:
 select = [
-    "E",        # E/F: Pyflakes and pycodestyle errors (essential checks)
-    "W",        # W: Pycodestyle warnings
+    "W",        # PyCodeStyle warnings
+    "E",        # PyCodeStyle errors
     "F",        # Pyflakes rules
     "I",        # I: isort-compatible import sorting
     "C4",       # Catch incorrect use of comprehensions, dict, list, etc
@@ -197,8 +199,6 @@ select = [
 ]
 
 extend-select = [
-    "W",        # PyCodeStyle warnings
-    "E",        # PyCodeStyle errors
     "FA",       # Enforce from __future__ import annotations
     "ISC",      # Good use of string concatenation
     "ICN",      # Use common import conventions
@@ -211,10 +211,11 @@ extend-select = [
 ]
 
 ignore = [
-    "E266",     # Do not modify comments
+    "E266",     # Do not modify ###### comments to a single #
     "F401",     # Ignore obnoxious ruff imports (i.e import foo as foo)
     "RET504",   # Ignore variable assignment before return
     "SIM108",   # Do not recommend python ternary if-then-else oneliners
+    "TD001",    # Ignore FIXME complaints
     "TD002",    # Ignore missing TODO author
     "TD003",    # Ignore missing TODO issue url
     "TD004",    # Ignore missing TODO with colon
