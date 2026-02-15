@@ -189,13 +189,16 @@ preview = true
 
 # Enable core linting rules:
 select = [
-    "W",        # PyCodeStyle warnings
+    "C4",       # Catch incorrect use of comprehensions, dict, list, etc
     "E",        # PyCodeStyle errors
     "F",        # Pyflakes rules
     "I",        # I: isort-compatible import sorting
-    "C4",       # Catch incorrect use of comprehensions, dict, list, etc
     "PTH",      # Use pathlib instead of os.path
+    "PYI",      # Linting rules for some type annotations
+    "Q",        # Linting rules for quoting
+    "RUF",      # Ruff linting rules
     "UP",       # Warn if certain things can changed due to newer Python versions
+    "W",        # PyCodeStyle warnings
 ]
 
 extend-select = [
@@ -203,7 +206,7 @@ extend-select = [
     "ISC",      # Good use of string concatenation
     "ICN",      # Use common import conventions
     "RET",      # Good return practices
-    "SIM",      # Common simplification rules
+    "SIM",      # Common flake8 simplification rules
     "TID",      # Some good import practices
     "TC",       # Enforce importing certain types in a TYPE_CHECKING block
     "TD",       # Be diligent with TODO comments
