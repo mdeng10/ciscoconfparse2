@@ -6,6 +6,12 @@
 - Summary:
     - To be determined
 
+## Version: 0.9.15
+
+- Summary:
+    - Add `ruff` config to `pyproject.toml`
+    - Fix more ruff linter items
+
 ## Version: 0.9.14
 
 - Summary:
