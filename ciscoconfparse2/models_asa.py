@@ -580,6 +580,7 @@ class ASAObjNetwork(ASACfgLine):
     def is_object_for(cls, all_lines, line, index=None, re=re):
         return "object network " in line[0:15].lower()
 
+
 ##
 # -------------  ASA object service
 ##
@@ -884,6 +885,7 @@ class ASAIntfLine(BaseASAIntfLine):
     def is_object_for(cls, all_lines, line, index=None, re=re):
         intf_regex = r"^interface\s+(\S+.+)"
         return bool(re.search(intf_regex, line))
+
 
 ##
 # -------------  ASA Interface Globals
