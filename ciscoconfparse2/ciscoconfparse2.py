@@ -625,7 +625,7 @@ class ConfigList(UserList):
     auto_commit: bool = False
     debug: int = 0
 
-    data: list[BaseCfgLine] = []
+    data: list[BaseCfgLine] | None = None
     ccp_ref: Any = None
     dna: str = "ConfigList"
     current_checkpoint: int = 0
@@ -1756,8 +1756,6 @@ class ConfigList(UserList):
             parentobj.children.append(childobj)
             childobj.parent = parentobj
             childobj.parent.child_indent = indent
-        else:
-            pass
 
     # This method is on ConfigList()
     @logger.catch(reraise=True)
@@ -1855,7 +1853,7 @@ class CiscoConfParse:
     syntax: str = "ios"
     encoding: str = locale.getpreferredencoding()
     loguru: bool = True
-    comment_delimiters: list[str] = []
+    comment_delimiters: list[str] | None = None
     auto_indent_width: int = -1
     linesplit_rgx: str = r"\r*\n"
     ignore_blank_lines: bool = False
@@ -2005,7 +2003,7 @@ class CiscoConfParse:
             self.auto_indent_width = int(auto_indent_width)
 
         else:
-            error = "CiscoConfParse() auto_indent_width = {auto_indent_width} is invalid"
+            error = f"CiscoConfParse() auto_indent_width = {auto_indent_width} is invalid"
             logger.error(error)
             raise ValueError(error)
 
@@ -2254,7 +2252,7 @@ class CiscoConfParse:
             self.config_objs.commit()
 
         else:
-            raise NotImplementedError(f"Cannot append(); unknown object: '{repr(line)}'")
+            raise NotImplementedError(f"Cannot append(); unknown object: '{line!r}'")
 
     # This method is on CiscoConfParse()
     @logger.catch(reraise=True)
@@ -3731,8 +3729,8 @@ class Diff(HasTraits):
     @logger.catch(reraise=True)
     def __init__(
         self,
-        old_config: str | list[str] | tuple[str, ...] = None,
-        new_config: str | list[str] | tuple[str, ...] = None,
+        old_config: str | list[str] | tuple[str, ...] | None = None,
+        new_config: str | list[str] | tuple[str, ...] | None = None,
         syntax: str = "ios",
     ):
         """
@@ -4001,7 +3999,7 @@ class CiscoPassword(HasTraits):
         )
 
         dp = ""
-        regex = re.compile("^(..)(.+)")
+        regex = re.compile(r"^(..)(.+)")
         ep = ep or self.ep
         if not (len(ep) & 1):
             result = regex.search(ep)

@@ -70,7 +70,7 @@ def get_brace_termination(line: str) -> str:
             brace_open = True
 
         if char in brace_chars or char.isspace():
-            if brace_open and char.isspace() or char in brace_chars:
+            if (brace_open and char.isspace()) or char in brace_chars:
                 _retval.append(char)
 
         if brace_open and char == "{":
@@ -98,7 +98,7 @@ class BaseCfgLine:
     linenum: int = -1
     parent: Any = None
     child_indent: int = 0
-    _children: list = []
+    _children: list | None = None
     confobj: Any = None  # Reference to the list object which owns it
     blank_line_keep: bool = False  # CiscoConfParse() uses blank_line_keep
 
@@ -783,7 +783,7 @@ class BaseCfgLine:
 
         retval = None
         if self.confobj.debug >= 1:
-            logger.debug(f"Inserting '{insertstr}' after '{repr(self)}'")
+            logger.debug(f"Inserting '{insertstr}' after '{self!r}'")
 
         if isinstance(insertstr, str) is True:
             # Handle insertion of a plain-text line
@@ -888,7 +888,7 @@ class BaseCfgLine:
             indent = self.indent + self.ccp_ref.get_indent_from_syntax()
 
         else:
-            error = f"BaseCfgLine().append_to_family(indent={indent}) " "and CiscoConfParse().auto_indent_width={auto_indent_width}"
+            error = f"BaseCfgLine().append_to_family(indent={indent}) and CiscoConfParse().auto_indent_width={auto_indent_width}"
             logger.error(error)
             raise ValueError(error)
 

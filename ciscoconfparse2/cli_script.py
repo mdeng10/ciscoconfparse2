@@ -774,10 +774,10 @@ class CliApplication:
                         append_addr = False
 
                         if self.show_cidr is False:
-                            if self.show_networks is False and str(addr.ip) not in retval or self.show_networks is True and str(addr.as_cidr_net) not in retval:
+                            if (self.show_networks is False and str(addr.ip) not in retval) or (self.show_networks is True and str(addr.as_cidr_net) not in retval):
                                 append_addr = True
                         else:
-                            if self.show_networks is False and str(addr.as_cidr_addr) not in retval or self.show_networks is True and str(addr.as_cidr_net) not in retval:
+                            if (self.show_networks is False and str(addr.as_cidr_addr) not in retval) or (self.show_networks is True and str(addr.as_cidr_net) not in retval):
                                 append_addr = True
 
                         # Append if not already in retval...
@@ -1014,7 +1014,7 @@ class MACEUISearch:
 
     word: str
     mac_regex_strs: set[str]
-    mac_retval: None | MACObj | EUI64Obj
+    mac_retval: MACObj | EUI64Obj | None
 
     @logger.catch(reraise=True)
     @typechecked
@@ -1049,11 +1049,7 @@ class MACEUISearch:
 
         # Search through all valid mac formats for a regex match (contained
         #    in the mac_regex_strs set of regex strings...)
-        for rgx in mac_regex_strs:
-            if re.search(rgx, self.mac_retval.dash, re.I) or re.search(rgx, self.mac_retval.colon, re.I) or re.search(rgx, self.mac_retval.cisco, re.I) or re.search(rgx, self.mac_retval.dash.replace("-", ""), re.I):
-                return True
-        # return False if there was no match above...
-        return False
+        return any(re.search(rgx, self.mac_retval.dash, re.I) or re.search(rgx, self.mac_retval.colon, re.I) or re.search(rgx, self.mac_retval.cisco, re.I) or re.search(rgx, self.mac_retval.dash.replace("-", ""), re.I) for rgx in mac_regex_strs)
 
     def __str__(self):
         if isinstance(self.mac_retval, MACObj):

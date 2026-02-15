@@ -136,7 +136,7 @@ class IOSXRCfgLine(BaseFactoryLine):
     def is_object_for(cls, all_lines, line, index=None, re=re) -> bool:
         """Return True if this object should be used for a given configuration line; otherwise return False"""
         ## Default object, for now
-        if (
+        return not (
             cls.is_object_for_hostname(line=line)
             or cls.is_object_for_interface(line=line)
             or cls.is_object_for_aaa_authentication(line=line)
@@ -144,9 +144,7 @@ class IOSXRCfgLine(BaseFactoryLine):
             or cls.is_object_for_aaa_accounting(line=line)
             or cls.is_object_for_ip_route(line=line)
             or cls.is_object_for_ipv6_route(line=line)
-        ):
-            return False
-        return True
+        )
 
     @classmethod
     @logger.catch(reraise=True)
@@ -256,9 +254,7 @@ class IOSXRCfgLine(BaseFactoryLine):
            True
            >>>
         """
-        if self.text[0:10] == "interface " and self.text[10] != " ":
-            return True
-        return False
+        return self.text[0:10] == "interface " and self.text[10] != " "
 
     @property
     @logger.catch(reraise=True)
@@ -298,9 +294,7 @@ class IOSXRCfgLine(BaseFactoryLine):
            >>>
         """
         intf_regex = r"^interface\s+(\S+?\.\d+)"
-        if self.re_match(intf_regex):
-            return True
-        return False
+        return bool(self.re_match(intf_regex))
 
     _VIRTUAL_INTF_REGEX_STR = r"""^interface\s+(Loopback|Vlan|Tunnel|Dialer|Virtual-Template|Port-Channel)"""
     _VIRTUAL_INTF_REGEX = re.compile(_VIRTUAL_INTF_REGEX_STR, re.I)
@@ -1018,7 +1012,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         :return: Whether autonegotiation is enabled on this interface
         :rtype: bool
         """
-        if not self.is_ethernet_intf or self.is_ethernet_intf and (self.manual_speed != "" and self.manual_duplex != ""):
+        if not self.is_ethernet_intf or (self.is_ethernet_intf and (self.manual_speed != "" and self.manual_duplex != "")):
             return False
         if self.is_ethernet_intf:
             return True
@@ -1304,7 +1298,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
            False
            >>>
         """
-        if self.ipv4_addr_object.empty is True or ipv4network is None or isinstance(ipv4network, IPv4Obj) and ipv4network.empty is True:
+        if self.ipv4_addr_object.empty is True or ipv4network is None or (isinstance(ipv4network, IPv4Obj) and ipv4network.empty is True):
             return False
         if isinstance(ipv4network, IPv4Obj):
             intf_ipv4obj = self.ipv4_addr_object

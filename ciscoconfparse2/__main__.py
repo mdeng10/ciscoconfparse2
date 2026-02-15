@@ -24,8 +24,9 @@ mike [~at~] pennington [/dot\] net
 if (__name__ == "__main__") and (__package__ is None):
     import os
     import sys
+    from pathlib import Path
 
-    parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    parent_dir = Path.parent(Path.parent(Path.resolve(__file__)))
     sys.path.insert(1, parent_dir)
 
     __package__ = "ciscoconfparse2"

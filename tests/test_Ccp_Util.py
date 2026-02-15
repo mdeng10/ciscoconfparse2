@@ -56,9 +56,9 @@ from ciscoconfparse2.ccp_util import (
     IPv6Obj,
     L4Object,
     MACObj,
+    collapse_addresses as ccp_collapse_addresses,
     ip_factory,
 )
-from ciscoconfparse2.ccp_util import collapse_addresses as ccp_collapse_addresses
 
 sys.path.insert(0, "..")
 

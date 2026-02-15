@@ -346,7 +346,7 @@ class BaseASAIntfLine(ASACfgLine):
     @property
     @logger.catch(reraise=True)
     def has_autonegotiation(self):
-        if not self.is_ethernet_intf or self.is_ethernet_intf and (self.has_manual_speed or self.has_manual_duplex):
+        if not self.is_ethernet_intf or (self.is_ethernet_intf and (self.has_manual_speed or self.has_manual_duplex)):
             return False
         if self.is_ethernet_intf:
             return True

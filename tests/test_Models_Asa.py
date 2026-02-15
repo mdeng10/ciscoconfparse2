@@ -383,7 +383,7 @@ def testVal_ASAAclLine_DNA_negative():
     #     but ValueError triggers a SystemExit
     broken_config_list = ["access-list TESTME_01 extended VpAAmit987 ip any any log deactivate"]
     broken_config_list = ["access-list TESTME_01 extended VpAAmit987 ip any any log"]
-    broken_filepath = f"/{str(uuid.uuid4())}"
+    broken_filepath = f"/{uuid.uuid4()!s}"
 
     try:
         if isinstance(

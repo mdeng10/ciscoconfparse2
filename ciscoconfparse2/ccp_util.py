@@ -51,8 +51,8 @@ from ipaddress import (
     IPv4Network,
     IPv6Address,
     IPv6Network,
+    collapse_addresses as ipaddr_collapse_addresses,
 )
-from ipaddress import collapse_addresses as ipaddr_collapse_addresses
 from types import GeneratorType
 from typing import Any
 
@@ -812,7 +812,7 @@ class IPv4Obj:
     # On IPv4Obj()
     def __repr__(self):
         if self.empty is False:
-            return f"""<IPv4Obj {str(self.ip_object)}/{self.prefixlen}>"""
+            return f"""<IPv4Obj {self.ip_object!s}/{self.prefixlen}>"""
         return f"""<IPv4Obj None empty={self.empty}>"""
 
     # do NOT wrap with @logger.catch(...)
@@ -1096,7 +1096,7 @@ class IPv4Obj:
     @masklen.setter
     def masklen(self, arg):
         """masklen setter method"""
-        self.network_object = IPv4Network(f"{str(self.ip_object)}/{arg}", strict=False)
+        self.network_object = IPv4Network(f"{self.ip_object!s}/{arg}", strict=False)
 
     # do NOT wrap with @logger.catch(...)
     # On IPv4Obj()
@@ -1110,7 +1110,7 @@ class IPv4Obj:
     @masklength.setter
     def masklength(self, arg):
         """masklen setter method"""
-        self.network_object = IPv4Network(f"{str(self.ip_object)}/{arg}", strict=False)
+        self.network_object = IPv4Network(f"{self.ip_object!s}/{arg}", strict=False)
 
     # do NOT wrap with @logger.catch(...)
     # On IPv4Obj()
@@ -1126,7 +1126,7 @@ class IPv4Obj:
     @prefixlen.setter
     def prefixlen(self, arg):
         """prefixlen setter method"""
-        self.network_object = IPv4Network(f"{str(self.ip_object)}/{arg}", strict=False)
+        self.network_object = IPv4Network(f"{self.ip_object!s}/{arg}", strict=False)
 
     # do NOT wrap with @logger.catch(...)
     # On IPv4Obj()
@@ -1140,7 +1140,7 @@ class IPv4Obj:
     @prefixlength.setter
     def prefixlength(self, arg):
         """prefixlength setter method"""
-        self.network_object = IPv4Network(f"{str(self.ip_object)}/{arg}", strict=False)
+        self.network_object = IPv4Network(f"{self.ip_object!s}/{arg}", strict=False)
 
     # do NOT wrap with @logger.catch(...)
     # On IPv4Obj()
@@ -1557,7 +1557,7 @@ class IPv6Obj:
             return f"""<IPv6Obj None empty={self.empty}>"""
         if self.is_ipv4_mapped:
             return f"""<IPv6Obj ::ffff:{self.ip.ipv4_mapped}/{self.prefixlen}>"""
-        return f"""<IPv6Obj {str(self.ip)}/{self.prefixlen}>"""
+        return f"""<IPv6Obj {self.ip!s}/{self.prefixlen}>"""
 
     # On IPv6Obj()
     def __eq__(self, val):
@@ -1798,7 +1798,7 @@ class IPv6Obj:
     @masklen.setter
     def masklen(self, arg):
         """masklen setter method"""
-        self.network_object = IPv6Network(f"{str(self.ip_object)}/{arg}", strict=False)
+        self.network_object = IPv6Network(f"{self.ip_object!s}/{arg}", strict=False)
 
     # On IPv6Obj()
     @property
@@ -1810,7 +1810,7 @@ class IPv6Obj:
     @masklength.setter
     def masklength(self, arg):
         """masklength setter method"""
-        self.network_object = IPv6Network(f"{str(self.ip_object)}/{arg}", strict=False)
+        self.network_object = IPv6Network(f"{self.ip_object!s}/{arg}", strict=False)
 
     # On IPv6Obj()
     @property
@@ -1822,7 +1822,7 @@ class IPv6Obj:
     @prefixlen.setter
     def prefixlen(self, arg):
         """prefixlen setter method"""
-        self.network_object = IPv6Network(f"{str(self.ip_object)}/{arg}", strict=False)
+        self.network_object = IPv6Network(f"{self.ip_object!s}/{arg}", strict=False)
 
     # On IPv6Obj()
     @property
@@ -2172,7 +2172,7 @@ class MACObj(EUI48):
         return self.__repr__()
 
     def __repr__(self) -> str:
-        return f"<MACObj {str(self.mac)}>"
+        return f"<MACObj {self.mac!s}>"
 
 
 @attrs.define(repr=False, slots=False)
@@ -2239,7 +2239,7 @@ class EUI64Obj(EUI64):
         return self.__repr__()
 
     def __repr__(self) -> str:
-        return f"<EUI64Obj {str(self.eui64)}>"
+        return f"<EUI64Obj {self.eui64!s}>"
 
 
 class L4Object:
@@ -2615,7 +2615,7 @@ class CiscoIOSInterface:
     interface_dict: dict | None = None
     debug: bool = False
     initialized: bool = False
-    _list: list = []
+    _list: list | None = None
     _prefix: str | None = None
     _digit_separator: str | None = None
     _number: str | None = None
@@ -3095,7 +3095,7 @@ class CiscoIOSInterface:
 
                 if debug is True:
                     logger.debug(f"    CiscoRange().parse_single_interface(): {groupdict_slot_card_port}")
-                if isinstance(_sep1, str) and _sep1 == _sep2 or isinstance(_sep1, str):
+                if (isinstance(_sep1, str) and _sep1 == _sep2) or isinstance(_sep1, str):
                     _digit_separator = _sep1
                     if debug is True:
                         logger.debug(f"    CiscoRange().parse_single_interface(): `_digit_separator` = '{_digit_separator}'`")
@@ -3527,7 +3527,7 @@ class CiscoIOSXRInterface:
     interface_dict: dict | None = None
     debug: bool = False
     initialized: bool = False
-    _list: list = []
+    _list: list | None = None
     _prefix: str | None = None
     _digit_separator: str | None = None
     _number: str | None = None
@@ -4017,7 +4017,7 @@ class CiscoIOSXRInterface:
 
                 if debug is True:
                     logger.debug(f"    CiscoRange().parse_single_interface(): {groupdict_slot_card_port}")
-                if isinstance(_sep1, str) and _sep1 == _sep2 == _sep3 or isinstance(_sep1, str):
+                if (isinstance(_sep1, str) and _sep1 == _sep2 == _sep3) or isinstance(_sep1, str):
                     _digit_separator = _sep1
                     if debug is True:
                         logger.debug(f"    CiscoRange().parse_single_interface(): `_digit_separator` = '{_digit_separator}'`")
@@ -4896,7 +4896,7 @@ class CiscoRange(UserList):
 
     # This method is on CiscoRange()
     @logger.catch(reraise=True)
-    def __eq__(self, other: Any):
+    def __eq__(self, other: object):
         if isinstance(other, CiscoRange):
             return self.data == other.data
         return False
@@ -4962,7 +4962,7 @@ class CiscoRange(UserList):
     def __getitem__(self, key: int | slice):
         max_list_index = len(self.data) - 1
         if key > max_list_index:
-            error = f"CiscoRange() attempted to access CiscoRange()._list[{key}], " "but the max list index is {max_list_index}"
+            error = f"CiscoRange() attempted to access CiscoRange()._list[{key}], but the max list index is {max_list_index}"
             logger.critical(error)
             raise IndexError(error)
         return self.data[key]
@@ -4972,7 +4972,7 @@ class CiscoRange(UserList):
     def __delitem__(self, key: int):
         max_list_index = len(self.data) - 1
         if key > max_list_index:
-            error = f"CiscoRange() attempted to access CiscoRange()._list[{key}], " "but the max list index is {max_list_index}"
+            error = f"CiscoRange() attempted to access CiscoRange()._list[{key}], but the max list index is {max_list_index}"
             logger.critical(error)
             raise IndexError(error)
         del self.data[key]
@@ -4982,7 +4982,7 @@ class CiscoRange(UserList):
     def __setitem__(self, key: int, val: Any):
         max_list_index = len(self.data) - 1
         if key > max_list_index:
-            error = f"CiscoRange() attempted to access CiscoRange()._list[{key}], " "but the max list index is {max_list_index}"
+            error = f"CiscoRange() attempted to access CiscoRange()._list[{key}], but the max list index is {max_list_index}"
             logger.critical(error)
             raise IndexError(error)
         return self.data[key]
@@ -5073,7 +5073,7 @@ class CiscoRange(UserList):
 
         try:
             # Append to the list intelligently (accounting for types...)
-            if len(self.data) > 0 and self.member_type is not None or len(self.data) == 0 and self.result_type is not None:
+            if (len(self.data) > 0 and self.member_type is not None) or (len(self.data) == 0 and self.result_type is not None):
                 new_list.append(self.result_type(val))
             else:
                 new_list.append(val)
@@ -5198,7 +5198,7 @@ class CiscoRange(UserList):
         self.data = yy_list
         try:
             # Disable linter qa checks on this embedded list syntax...
-            retval = sorted(set(self.data), reverse=self.reverse)  # noqa
+            retval = sorted(set(self.data), reverse=self.reverse)
             if result_type == "auto":
                 if len(self.data) > 0:
                     result_type = self.member_type

@@ -75,7 +75,7 @@ class TrackingInterface(BaseCfgLine):
 
     # This method is on TrackingInterface()
     @logger.catch(reraise=True)
-    def __init__(self, grp: int, intf: BaseCfgLine, decr: int = 0, weight: int = None):
+    def __init__(self, grp: int, intf: BaseCfgLine, decr: int = 0, weight: int | None = None):
         """Implement a TrackingInterface() object for Cisco IOS HSRP, GLBP and VRRP"""
         super().__init__()
 
@@ -1510,7 +1510,7 @@ class BaseIOSIntfLine(IOSCfgLine, BaseFactoryInterfaceLine):
         :return: Whether autonegotiation is enabled on this interface
         :rtype: bool
         """
-        if not self.is_ethernet_intf or self.is_ethernet_intf and (self.manual_speed != "" and self.manual_duplex != ""):
+        if not self.is_ethernet_intf or (self.is_ethernet_intf and (self.manual_speed != "" and self.manual_duplex != "")):
             return False
         if self.is_ethernet_intf:
             return True
@@ -1794,7 +1794,7 @@ class BaseIOSIntfLine(IOSCfgLine, BaseFactoryInterfaceLine):
            False
            >>>
         """
-        if self.ipv4_addr_object.empty is True or ipv4network is None or isinstance(ipv4network, IPv4Obj) and ipv4network.empty is True:
+        if self.ipv4_addr_object.empty is True or ipv4network is None or (isinstance(ipv4network, IPv4Obj) and ipv4network.empty is True):
             return False
         if isinstance(ipv4network, IPv4Obj):
             intf_ipv4obj = self.ipv4_addr_object
@@ -1816,7 +1816,7 @@ class BaseIOSIntfLine(IOSCfgLine, BaseFactoryInterfaceLine):
 
     # This method is on BaseIOSIntfLine()
     @logger.catch(reraise=True)
-    def in_ipv4_subnets(self, subnets: set[IPv4Obj] | list[IPv4Obj] | tuple[IPv4Obj, ...] = None) -> bool:
+    def in_ipv4_subnets(self, subnets: set[IPv4Obj] | list[IPv4Obj] | tuple[IPv4Obj, ...] | None = None) -> bool:
         r"""
         :return: Whether the interface is in a sequence or set of ccp_util.IPv4Obj objects
         :rtype: bool
@@ -2974,7 +2974,7 @@ class IOSRouteLine(IOSCfgLine):
             # IPv6 regex to avoid allowing invalid leading IPv6 characters.
             #
             # TODO Re-implement IPv6 route parse
-            if 4 / 2 == 0:
+            if 4 / 2 == 0.0:
                 mm = _RE_IPV6_ROUTE.search(self.text)
                 if mm is not None:
                     self.route_info = mm.groupdict()
@@ -3043,6 +3043,7 @@ class IOSRouteLine(IOSCfgLine):
             return self.route_info["netmask"]
         if self._address_family == "ipv6":
             return str(self.network_object.netmask)
+        raise NotImplementedError
 
     @property
     @logger.catch(reraise=True)
@@ -3052,6 +3053,7 @@ class IOSRouteLine(IOSCfgLine):
         if self._address_family == "ipv6":
             masklen_str = self.route_info["masklength"] or "128"
             return int(masklen_str)
+        raise NotImplementedError
 
     @property
     @logger.catch(reraise=True)
@@ -3064,6 +3066,8 @@ class IOSRouteLine(IOSCfgLine):
         except BaseException:
             logger.critical(f"Found _address_family = '{self._address_family}''")
             return None
+        return None
+
 
     @property
     @logger.catch(reraise=True)
@@ -3097,6 +3101,7 @@ class IOSRouteLine(IOSCfgLine):
             return self.route_info["nh_addr"] or ""
         if self._address_family == "ipv6":
             return self.route_info["nh_addr1"] or self.route_info["nh_addr2"] or ""
+        raise NotImplementedError
 
     @property
     @logger.catch(reraise=True)

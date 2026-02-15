@@ -112,7 +112,7 @@ class BaseFactoryLine(BaseCfgLine):
 
     @classmethod
     @logger.catch(reraise=True)
-    def is_object_for(cls, all_lines: list[str], line: str, index: int = None, re: re.Pattern = re) -> bool:
+    def is_object_for(cls, all_lines: list[str], line: str, index: int | None = None, re: re.Pattern = re) -> bool:
         """Return True if this object should be used for a given configuration line; otherwise return False"""
         raise NotImplementedError()
 
@@ -298,7 +298,7 @@ class BaseFactoryInterfaceLine(BaseFactoryLine):
     # This method is on BaseFactoryInterfaceLine()
     @classmethod
     @logger.catch(reraise=True)
-    def is_object_for(cls, all_lines: list[str], line: str, index: int = None, re: re.Pattern = re) -> bool:
+    def is_object_for(cls, all_lines: list[str], line: str, index: int | None = None, re: re.Pattern = re) -> bool:
         """Return a boolean for whether this object should be used based on the inputs"""
         raise NotImplementedError()
 
@@ -744,7 +744,7 @@ class BaseFactoryInterfaceLine(BaseFactoryLine):
 
     # This method is on BaseFactoryInterfaceLine()
     @logger.catch(reraise=True)
-    def in_ipv4_subnets(self, subnets: set[IPv4Obj] | list[IPv4Obj] | tuple[IPv4Obj, ...] = None) -> bool:
+    def in_ipv4_subnets(self, subnets: set[IPv4Obj] | list[IPv4Obj] | tuple[IPv4Obj, ...] | None = None) -> bool:
         r"""
         :return: Whether the interface is in a sequence or set of ccp_util.IPv4Obj objects
         :rtype: bool
