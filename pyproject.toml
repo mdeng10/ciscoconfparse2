@@ -215,4 +215,5 @@ extend-select = [
 ignore = [
     "E266",     # Do not modify comments
     "F401",     # Ignore obnoxious ruff imports (i.e import foo as foo)
+    "RET504",   # Ignore variable assignment before return
 ]
