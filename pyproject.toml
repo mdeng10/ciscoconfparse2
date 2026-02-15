@@ -183,6 +183,9 @@ skip-magic-trailing-comma = false
 # Experimental docstring formatter
 docstring-code-format = true
 
+[tool.ruff.lint.isort]
+combine-as-imports = true
+
 [tool.ruff.lint]
 # Enable ruff experimental features
 preview = true
@@ -192,11 +195,13 @@ select = [
     "C4",       # Catch incorrect use of comprehensions, dict, list, etc
     "E",        # PyCodeStyle errors
     "F",        # Pyflakes rules
+    "FA",       # Verifies files use from __future__ import annotations if PEP 563 applies to the file.
     "I",        # I: isort-compatible import sorting
     "PTH",      # Use pathlib instead of os.path
     "PYI",      # Linting rules for some type annotations
     "Q",        # Linting rules for quoting
     "RUF",      # Ruff linting rules
+    "SIM",      # Common flake8 simplification rules
     "UP",       # Warn if certain things can changed due to newer Python versions
     "W",        # PyCodeStyle warnings
 ]
@@ -206,7 +211,6 @@ extend-select = [
     "ISC",      # Good use of string concatenation
     "ICN",      # Use common import conventions
     "RET",      # Good return practices
-    "SIM",      # Common flake8 simplification rules
     "TID",      # Some good import practices
     "TC",       # Enforce importing certain types in a TYPE_CHECKING block
     "TD",       # Be diligent with TODO comments
@@ -222,4 +226,6 @@ ignore = [
     "TD002",    # Ignore missing TODO author
     "TD003",    # Ignore missing TODO issue url
     "TD004",    # Ignore missing TODO with colon
+    "RUF052",   # Ignore ruff lints for accessing 'private' _variable names
 ]
+
