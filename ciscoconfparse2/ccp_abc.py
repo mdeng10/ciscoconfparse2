@@ -22,8 +22,7 @@ import math
 import re
 from collections.abc import Sequence
 from copy import copy
-from types import GeneratorType
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from warnings import warn
 
 import attrs
@@ -35,6 +34,9 @@ from ciscoconfparse2.errors import (
     InvalidParameters,
     InvalidTypecast,
 )
+
+if TYPE_CHECKING:
+    from types import GeneratorType
 
 DEFAULT_TEXT = "__undefined__"
 
@@ -69,9 +71,8 @@ def get_brace_termination(line: str) -> str:
         if char == "}":
             brace_open = True
 
-        if char in brace_chars or char.isspace():
-            if (brace_open and char.isspace()) or char in brace_chars:
-                _retval.append(char)
+        if (char in brace_chars or char.isspace()) and ((brace_open and char.isspace()) or char in brace_chars):
+            _retval.append(char)
 
         if brace_open and char == "{":
             brace_open = False
@@ -332,11 +333,10 @@ class BaseCfgLine:
             # comment... just return None in this case...
             return False
 
-        if isinstance(self._text, str):
-            if len(self._text.lstrip()) > 0:
-                first_char = self._text.lstrip()[0]
-                if first_char in self.confobj.comment_delimiters:
-                    return True
+        if isinstance(self._text, str) and len(self._text.lstrip()) > 0:
+            first_char = self._text.lstrip()[0]
+            if first_char in self.confobj.comment_delimiters:
+                return True
         return False
 
     # On BaseCfgLine()
@@ -1419,9 +1419,8 @@ class BaseCfgLine:
             self.confobj[idx] = self
 
         # Only auto_commit if there was a text change
-        if text_before_replace != text_after_replace:
-            if self.confobj and self.confobj.auto_commit is True:
-                self.ccp_ref.commit()
+        if text_before_replace != text_after_replace and self.confobj and self.confobj.auto_commit is True:
+            self.ccp_ref.commit()
 
         return text_after_replace
 
@@ -1660,9 +1659,8 @@ class BaseCfgLine:
             raise NotImplementedError("groupdict is not supported at this time")
 
         mm = re.search(regex, self.text)
-        if mm is not None:
-            if mm.group(group) is not None:
-                return result_type(mm.group(group))
+        if mm is not None and mm.group(group) is not None:
+            return result_type(mm.group(group))
 
         if untyped_default:
             return default

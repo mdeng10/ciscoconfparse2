@@ -302,9 +302,7 @@ class IOSXRCfgLine(BaseFactoryLine):
     @property
     @logger.catch(reraise=True)
     def is_virtual_intf(self) -> bool:
-        if self.re_match(self._VIRTUAL_INTF_REGEX):
-            return True
-        return False
+        return bool(self.re_match(self._VIRTUAL_INTF_REGEX))
 
     @property
     @logger.catch(reraise=True)
@@ -339,9 +337,7 @@ class IOSXRCfgLine(BaseFactoryLine):
            >>>
         """
         intf_regex = r"^interface\s+(\Soopback)"
-        if self.re_match(intf_regex):
-            return True
-        return False
+        return bool(self.re_match(intf_regex))
 
     @property
     @logger.catch(reraise=True)
@@ -382,9 +378,7 @@ class IOSXRCfgLine(BaseFactoryLine):
            >>>
         """
         intf_regex = r"^interface\s+(.*?\Sthernet)"
-        if self.re_match(intf_regex):
-            return True
-        return False
+        return bool(self.re_match(intf_regex))
 
     @property
     @logger.catch(reraise=True)
@@ -1256,9 +1250,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         :return: Whether ``value`` is a good abbreviation for the interface
         :rtype: bool
         """
-        if value.lower() in self.abbvs:
-            return True
-        return False
+        return value.lower() in self.abbvs
 
     # This method is on BaseIOSXRIntfLine()
     @logger.catch(reraise=True)
@@ -1320,7 +1312,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
 
     # This method is on BaseIOSXRIntfLine()
     @logger.catch(reraise=True)
-    def in_ipv4_subnets(self, subnets: set[IPv4Obj] | list[IPv4Obj] | tuple[IPv4Obj, ...] = None) -> bool:
+    def in_ipv4_subnets(self, subnets: set[IPv4Obj] | list[IPv4Obj] | tuple[IPv4Obj, ...] | None = None) -> bool:
         r"""
         :return: Whether the interface is in a sequence or set of ccp_util.IPv4Obj objects
         :rtype: bool
@@ -1485,10 +1477,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         if self.ipv4_addr == "":
             return False
 
-        for _obj in self.children:
-            if _obj.text.strip().split()[0:3] == ["ip", "pim", "sparse-dense-mode"]:
-                return True
-        return False
+        return any(_obj.text.strip().split()[0:3] == ["ip", "pim", "sparse-dense-mode"] for _obj in self.children)
 
     # This method is on BaseIOSXRIntfLine()
     @property
@@ -1537,7 +1526,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
            [{'addr': '172.16.20.12', 'vrf': '', 'scope': 'local'}, {'addr': '172.19.185.91', 'vrf': '', 'scope': 'local'}]
            >>>
         """
-        retval = list()
+        retval = []
         for child in self.children:
             if "helper-address" in child.text:
                 addr = child.re_match_typed(r"ip\s+helper-address\s.*?(\d+\.\d+\.\d+\.\d+)")
@@ -1567,10 +1556,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         :return: Whether the interface is a switchport
         :rtype: bool
         """
-        for _obj in self.children:
-            if _obj.text.strip().split()[0] == "switchport":
-                return True
-        return False
+        return any(_obj.text.strip().split()[0] == "switchport" for _obj in self.children)
 
     # This method is on BaseIOSXRIntfLine()
     @property
@@ -1580,10 +1566,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         :return: Whether the interface is manually configured as an access switchport
         :rtype: bool
         """
-        for _obj in self.children:
-            if _obj.text.strip().split()[0:3] == ["switchport", "mode", "access"]:
-                return True
-        return False
+        return any(_obj.text.strip().split()[0:3] == ["switchport", "mode", "access"] for _obj in self.children)
 
     # This method is on BaseIOSXRIntfLine()
     @property
@@ -1617,10 +1600,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         :return: Whether this interface is manually configured as a trunk switchport
         :rtype: bool
         """
-        for _obj in self.children:
-            if _obj.text.strip().split()[0:3] == ["switchport", "mode", "trunk"]:
-                return True
-        return False
+        return any(_obj.text.strip().split()[0:3] == ["switchport", "mode", "trunk"] for _obj in self.children)
 
     # This method is on BaseIOSXRIntfLine()
     @property
@@ -1635,10 +1615,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         ## IMPORTANT: Cisco IOSXR will not enable port-security on the port
         ##    unless 'switch port-security' (with no other options)
         ##    is in the configuration
-        for _obj in self.children:
-            if _obj.text.strip().split()[0:2] == ["switchport", "port-security"]:
-                return True
-        return False
+        return any(_obj.text.strip().split()[0:2] == ["switchport", "port-security"] for _obj in self.children)
 
     # This method is on BaseIOSXRIntfLine()
     @property
@@ -1650,10 +1627,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         """
         if not self.is_switchport:
             return False
-        for _obj in self.children:
-            if _obj.text.strip().split()[0:1] == ["storm-control"]:
-                return True
-        return False
+        return any(_obj.text.strip().split()[0:1] == ["storm-control"] for _obj in self.children)
 
     # This method is on BaseIOSXRIntfLine()
     @property
@@ -2246,47 +2220,32 @@ class IOSXRIntfGlobal(IOSXRCfgLine):
     @classmethod
     @logger.catch(reraise=True)
     def is_object_for(cls, all_lines, line, index=None, re=re):
-        if re.search(
-            r"^(no\s+cdp\s+run)|(logging\s+event\s+link-status\s+global)|(spanning-tree\sportfast\sdefault)|(spanning-tree\sportfast\sbpduguard\sdefault)",
-            line,
-        ):
-            return True
-        return False
+        return bool(re.search(r"^(no\s+cdp\s+run)|(logging\s+event\s+link-status\s+global)|(spanning-tree\sportfast\sdefault)|(spanning-tree\sportfast\sbpduguard\sdefault)", line))
 
     @property
     @logger.catch(reraise=True)
     def has_cdp_disabled(self):
-        if self.re_search(r"^no\s+cdp\s+run\s*"):
-            return True
-        return False
+        return bool(self.re_search(r"^no\s+cdp\s+run\s*"))
 
     @property
     @logger.catch(reraise=True)
     def has_intf_logging_def(self):
-        if self.re_search(r"^logging\s+event\s+link-status\s+global"):
-            return True
-        return False
+        return bool(self.re_search(r"^logging\s+event\s+link-status\s+global"))
 
     @property
     @logger.catch(reraise=True)
     def has_stp_portfast_def(self):
-        if self.re_search(r"^spanning-tree\sportfast\sdefault"):
-            return True
-        return False
+        return bool(self.re_search(r"^spanning-tree\sportfast\sdefault"))
 
     @property
     @logger.catch(reraise=True)
     def has_stp_portfast_bpduguard_def(self):
-        if self.re_search(r"^spanning-tree\sportfast\sbpduguard\sdefault"):
-            return True
-        return False
+        return bool(self.re_search(r"^spanning-tree\sportfast\sbpduguard\sdefault"))
 
     @property
     @logger.catch(reraise=True)
     def has_stp_mode_rapidpvst(self):
-        if self.re_search(r"^spanning-tree\smode\srapid-pvst"):
-            return True
-        return False
+        return bool(self.re_search(r"^spanning-tree\smode\srapid-pvst"))
 
 
 ##
@@ -2315,9 +2274,7 @@ class IOSXRvPCLine(BaseCfgLine):
 
     @classmethod
     def is_object_for(cls, all_lines, line, index=None, re=re):
-        if re.search(r"^vpc\s+domain", line):
-            return True
-        return False
+        return bool(re.search(r"^vpc\s+domain", line))
 
     @property
     def vpc_domain_id(self):
@@ -2441,9 +2398,7 @@ class IOSXRAccessLine(IOSXRCfgLine):
     @classmethod
     @logger.catch(reraise=True)
     def is_object_for(cls, all_lines, line, index=None, re=re):
-        if re.search(r"^line", line):
-            return True
-        return False
+        return bool(re.search(r"^line", line))
 
     @property
     @logger.catch(reraise=True)
@@ -2643,9 +2598,7 @@ class IOSXRRouteLine(IOSXRCfgLine):
     @classmethod
     @logger.catch(reraise=True)
     def is_object_for(cls, all_lines, line, index=None, re=re):
-        if (line[0:9] == "ip route ") or (line[0:11] == "ipv6 route "):
-            return True
-        return False
+        return bool(line[0:9] == "ip route " or line[0:11] == "ipv6 route ")
 
     @property
     @logger.catch(reraise=True)
@@ -2685,6 +2638,7 @@ class IOSXRRouteLine(IOSXRCfgLine):
             return self.route_info["netmask"]
         if self._address_family == "ipv6":
             return str(self.network_object.netmask)
+        return None
 
     @property
     @logger.catch(reraise=True)
@@ -2694,6 +2648,7 @@ class IOSXRRouteLine(IOSXRCfgLine):
         if self._address_family == "ipv6":
             masklen_str = self.route_info["masklength"] or "128"
             return int(masklen_str)
+        return None
 
     @property
     @logger.catch(reraise=True)
@@ -2734,6 +2689,7 @@ class IOSXRRouteLine(IOSXRCfgLine):
             if self.route_info["nh_intf"]:
                 return self.route_info["nh_intf"]
             return ""
+        return None
 
     @property
     @logger.catch(reraise=True)
@@ -2742,6 +2698,7 @@ class IOSXRRouteLine(IOSXRCfgLine):
             return self.route_info["nh_addr"] or ""
         if self._address_family == "ipv6":
             return self.route_info["nh_addr1"] or self.route_info["nh_addr2"] or ""
+        return None
 
     @property
     @logger.catch(reraise=True)
@@ -2797,6 +2754,7 @@ class IOSXRRouteLine(IOSXRCfgLine):
             return False
         if self._address_family == "ipv6":
             raise NotImplementedError
+        return None
 
     @property
     @logger.catch(reraise=True)

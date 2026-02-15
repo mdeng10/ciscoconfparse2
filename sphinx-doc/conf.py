@@ -11,11 +11,12 @@
 # serve to show the default.
 
 import os
+import pathlib
 import sys
 import time
 
 # Absolute import path referenced to this sphinx-doc directory
-sys.path.insert(0, os.path.join(os.path.abspath(os.path.dirname(__file__)), ".."))
+sys.path.insert(0, os.path.join(pathlib.Path(pathlib.Path(__file__).parent).resolve(), ".."))
 
 # Import sphinx-rtd-theme to ensure pip installed it...
 # import sphinx_rtd_theme

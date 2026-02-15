@@ -329,9 +329,8 @@ class BaseASAIntfLine(ASACfgLine):
     def ipv6_standby_addr(self):
         for cobj in self.children:
             cmd_parts = cobj.text.split()
-            if len(cmd_parts) == 5:
-                if cmd_parts[0:2] == ["ipv6", "address"] and cmd_parts[3] == "standby":
-                    return cmd_parts[4]
+            if len(cmd_parts) == 5 and cmd_parts[0:2] == ["ipv6", "address"] and cmd_parts[3] == "standby":
+                return cmd_parts[4]
         return ""
 
     # This method is on BaseIOSIntfLine()

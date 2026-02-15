@@ -20,11 +20,12 @@ mike [~at~] pennington [.dot.] net
 """
 
 import os
+import pathlib
 import sys
 
 sys.path.insert(0, "..")
 
-THIS_TEST_PATH = os.path.dirname(os.path.abspath(__file__))
+THIS_TEST_PATH = pathlib.Path(pathlib.Path(__file__).resolve()).parent
 
 
 def testValues_find_objects_list_01(parse_fixture_j03):

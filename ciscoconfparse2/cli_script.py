@@ -950,14 +950,13 @@ class CliApplication:
 
         for word in potential_matches:
             search = MACEUISearch(word)
-            if search.mac_retval is not None:
-                if search.search_all_formats(mac_regex_strs=mac_regex_strs):
-                    mac_str = word
-                    if unique_matches:
-                        if mac_str not in retval:
-                            retval.append(mac_str)
-                    else:
+            if search.mac_retval is not None and search.search_all_formats(mac_regex_strs=mac_regex_strs):
+                mac_str = word
+                if unique_matches:
+                    if mac_str not in retval:
                         retval.append(mac_str)
+                else:
+                    retval.append(mac_str)
         return retval
 
     @logger.catch(reraise=True)
@@ -975,10 +974,9 @@ class CliApplication:
                 if line_appended:
                     continue
                 search = MACEUISearch(word)
-                if search.mac_retval is not None:
-                    if search.search_all_formats(mac_regex_strs=mac_regex_strs):
-                        retval.append(line)
-                        line_appended = True
+                if search.mac_retval is not None and search.search_all_formats(mac_regex_strs=mac_regex_strs):
+                    retval.append(line)
+                    line_appended = True
 
         return retval
 

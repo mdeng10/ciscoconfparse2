@@ -45,7 +45,7 @@ from ciscoconfparse2.ciscoconfparse2 import (
 from ciscoconfparse2.errors import InvalidParameters
 from ciscoconfparse2.models_junos import JunosCfgLine
 
-THIS_TEST_PATH = os.path.dirname(os.path.abspath(__file__))
+THIS_TEST_PATH = Path(Path(__file__).resolve()).parent
 
 
 def testValues_save_as_01():
@@ -763,7 +763,7 @@ routing-options {
         "        building HQ_005",
         "        floor 1",
         "    root-authentication",
-        '        encrypted-password "$1$y7ArHxKU$zUbdeLfBirgkCsKiOJ5Qa0"; ## ' "SECRET-DATA",
+        ('        encrypted-password "$1$y7ArHxKU$zUbdeLfBirgkCsKiOJ5Qa0"; ## ' "SECRET-DATA"),
         "    name-server",
         "        172.16.3.222",
         "    login",
@@ -774,7 +774,7 @@ routing-options {
         "            uid 1000",
         "            class super-user",
         "            authentication",
-        '                encrypted-password "$1$y7ArHxKU$zUbdeLfBirgkCsKiOJ5Qa0"; ## ' "SECRET-DATA",
+        ('                encrypted-password "$1$y7ArHxKU$zUbdeLfBirgkCsKiOJ5Qa0"; ## ' "SECRET-DATA"),
         "    services",
         "        ssh",
         "            root-login allow",

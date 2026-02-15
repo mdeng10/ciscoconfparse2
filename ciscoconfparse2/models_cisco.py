@@ -627,17 +627,7 @@ class IOSCfgLine(BaseFactoryLine):
     def is_object_for(cls, all_lines, line, index=None, re=re) -> bool:
         """Return True if this object should be used for a given configuration line; otherwise return False"""
         ## Default object, for now
-        if (
-            cls.is_object_for_hostname(line=line)
-            or cls.is_object_for_interface(line=line)
-            or cls.is_object_for_aaa_authentication(line=line)
-            or cls.is_object_for_aaa_authorization(line=line)
-            or cls.is_object_for_aaa_accounting(line=line)
-            or cls.is_object_for_ip_route(line=line)
-            or cls.is_object_for_ipv6_route(line=line)
-        ):
-            return False
-        return True
+        return not (cls.is_object_for_hostname(line=line) or cls.is_object_for_interface(line=line) or cls.is_object_for_aaa_authentication(line=line) or cls.is_object_for_aaa_authorization(line=line) or cls.is_object_for_aaa_accounting(line=line) or cls.is_object_for_ip_route(line=line) or cls.is_object_for_ipv6_route(line=line))
 
     @classmethod
     @logger.catch(reraise=True)
@@ -3068,7 +3058,6 @@ class IOSRouteLine(IOSCfgLine):
             return None
         return None
 
-
     @property
     @logger.catch(reraise=True)
     def nexthop_str(self):
@@ -3093,6 +3082,7 @@ class IOSRouteLine(IOSCfgLine):
             if self.route_info["nh_intf"]:
                 return self.route_info["nh_intf"]
             return ""
+        return None
 
     @property
     @logger.catch(reraise=True)
@@ -3157,6 +3147,7 @@ class IOSRouteLine(IOSCfgLine):
             return False
         if self._address_family == "ipv6":
             raise NotImplementedError
+        return None
 
     @property
     @logger.catch(reraise=True)

@@ -35,8 +35,7 @@ import time
 from collections import UserList
 from collections.abc import Callable, Iterator, Sequence
 from pathlib import Path
-from types import GeneratorType
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from warnings import warn
 
 import attrs
@@ -60,6 +59,7 @@ from pyparsing import (
 )
 from traitlets import Bool, CInt, HasTraits, Instance, List, Unicode
 from typeguard import typechecked
+from typing_extensions import Self
 
 from ciscoconfparse2.__about__ import __version__
 from ciscoconfparse2.ccp_abc import BaseCfgLine
@@ -98,6 +98,9 @@ from ciscoconfparse2.models_nxos import (
     NXOSIntfLine,
     NXOSvPCLine,
 )
+
+if TYPE_CHECKING:
+    from types import GeneratorType
 
 ALL_IOS_FACTORY_CLASSES = [
     IOSIntfLine,
@@ -344,11 +347,10 @@ class BraceParse(HasTraits):
         enforce_valid_types(stop_width, (int,), "stop_width parameter must be an int.")
 
         # Flag the config invalid if it starts with a curly-brace...
-        if len(config_txt) > 0:
-            if config_txt[0] == "{" or config_txt[0] == "}":
-                error = "Invalid JunOS configuration"
-                logger.critical(error)
-                raise ValueError(error)
+        if len(config_txt) > 0 and (config_txt[0] == "{" or config_txt[0] == "}"):
+            error = "Invalid JunOS configuration"
+            logger.critical(error)
+            raise ValueError(error)
 
         self.config_txt = config_txt
         self.comment_delimiters = comment_delimiters
@@ -880,7 +882,7 @@ class ConfigList(UserList):
 
     # This method is on ConfigList()
     @logger.catch(reraise=True)
-    def __iadd__(self, other) -> list[BaseCfgLine]:
+    def __iadd__(self, other) -> Self:
         if isinstance(other, ConfigList):
             self.data += other.data
         elif isinstance(other, type(self.data)):
@@ -4013,7 +4015,7 @@ class CiscoPassword(HasTraits):
             for ii in range(0, len(e), 2):
 
                 # int( blah, 16) assumes blah is base16... cool
-                magic = int(re.search(".{%s}(..)" % ii, e).group(1), 16)
+                magic = int(re.search(f".{{{ii}}}(..)", e).group(1), 16)
 
                 # Wrap around after 53 chars...
                 char_formula = magic ^ int(xlat[int(s % 53)])

@@ -36,7 +36,6 @@ mike [~at~] pennington !dot! net
 # Silence pylint warnings about type hints with a pipe
 from __future__ import annotations
 
-import _io
 import copy
 import os
 import re
@@ -53,8 +52,7 @@ from ipaddress import (
     IPv6Network,
     collapse_addresses as ipaddr_collapse_addresses,
 )
-from types import GeneratorType
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import attrs
 from dns import query, reversename, zone
@@ -79,6 +77,10 @@ from ciscoconfparse2.errors import (
     UnexpectedType,
 )
 from ciscoconfparse2.protocol_values import ASA_TCP_PORTS, ASA_UDP_PORTS
+
+if TYPE_CHECKING:
+    import _io
+    from types import GeneratorType
 
 # Maximum ipv4 as an integer
 IPV4_MAXINT = 4294967295
@@ -3214,7 +3216,7 @@ class CiscoIOSInterface:
     def __hash__(self):
         """Build a unique (and sortable) identifier based solely on slot / card / port / subinterface / channel numbers for the object instance"""
         # I am using __hash__() in __gt__() and __lt__()
-        return sum([(idx + 1) ** ii for idx, ii in enumerate(self.sort_list) if isinstance(ii, int)])
+        return sum((idx + 1) ** ii for idx, ii in enumerate(self.sort_list) if isinstance(ii, int))
 
     # This method is on CiscoIOSInterface()
     @logger.catch(reraise=True)
@@ -4140,7 +4142,7 @@ class CiscoIOSXRInterface:
     def __hash__(self):
         """Build a unique (and sortable) identifier based solely on slot / card / port / subinterface / channel numbers for the object instance"""
         # I am using __hash__() in __gt__() and __lt__()
-        return sum([(idx + 1) ** ii for idx, ii in enumerate(self.sort_list) if isinstance(ii, int)])
+        return sum((idx + 1) ** ii for idx, ii in enumerate(self.sort_list) if isinstance(ii, int))
 
     # This method is on CiscoIOSXRInterface()
     @logger.catch(reraise=True)
@@ -5280,10 +5282,9 @@ class CiscoRange(UserList):
                 "card",
                 "slot",
             ):
-                if magic_dict[attr_name] is not None:
-                    if attr_name == self.iterate_attribute:
-                        magic_dict[attr_name] = int(magic_string)
-                        break
+                if magic_dict[attr_name] is not None and attr_name == self.iterate_attribute:
+                    magic_dict[attr_name] = int(magic_string)
+                    break
             if debug is True:
                 logger.info(f"CiscoRange() calling {self.member_type}(interface_dict={magic_dict}).as_compressed_str()")
             obj = CiscoIOSInterface(interface_dict=magic_dict, debug=debug)
@@ -5312,10 +5313,9 @@ class CiscoRange(UserList):
                 "card",
                 "slot",
             ):
-                if magic_dict[attr_name] is not None:
-                    if attr_name == self.iterate_attribute:
-                        magic_dict[attr_name] = int(magic_string)
-                        break
+                if magic_dict[attr_name] is not None and attr_name == self.iterate_attribute:
+                    magic_dict[attr_name] = int(magic_string)
+                    break
             if debug is True:
                 logger.info(f"CiscoRange() calling {self.member_type}(interface_dict={magic_dict}).as_compressed_str()")
             obj = CiscoIOSXRInterface(interface_dict=magic_dict, debug=debug)

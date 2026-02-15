@@ -124,7 +124,7 @@ class JunosCfgLine(BaseCfgLine):
     def intf_name(self):
         """If this is an interface, return a name such as 'ge-0/0/0 unit 0', otherwise return None"""
         if self.is_intf is True:
-            intf_parts = list()
+            intf_parts = []
             for pobj in self.all_parents:
                 if pobj.text.strip() == "interfaces":
                     continue
@@ -232,10 +232,7 @@ class JunosCfgLine(BaseCfgLine):
            True
            >>>
         """
-        if self.is_intf is True:
-            if "unit" in self.intf_name:
-                return True
-        return False
+        return bool(self.is_intf is True and "unit" in self.intf_name)
 
     # This method is on JunosCfgLine()
     @property
@@ -253,9 +250,7 @@ class JunosCfgLine(BaseCfgLine):
     @logger.catch(reraise=True)
     def is_virtual_intf(self):
         intf_regex = r"^interface\s+(Loopback|Tunnel|Dialer|Virtual-Template|Port-Channel)"
-        if self.re_match(intf_regex):
-            return True
-        return False
+        return bool(self.re_match(intf_regex))
 
     # This method is on JunosCfgLine()
     @property
@@ -291,9 +286,7 @@ class JunosCfgLine(BaseCfgLine):
            >>>
         """
         intf_regex = r"^interface\s+(\Soopback)"
-        if self.re_match(intf_regex):
-            return True
-        return False
+        return bool(self.re_match(intf_regex))
 
     # This method is on JunosCfgLine()
     @property
@@ -336,9 +329,7 @@ class JunosCfgLine(BaseCfgLine):
            >>>
         """
         intf_regex = r"^interface\s+(.*?\Sthernet)"
-        if self.re_match(intf_regex):
-            return True
-        return False
+        return bool(self.re_match(intf_regex))
 
 
 ##
@@ -381,7 +372,7 @@ class BaseJunosIntfLine(JunosCfgLine):
     # This method is on BaseJunosIntfLine()
     @classmethod
     @logger.catch(reraise=True)
-    def is_object_for_interface(cls, all_lines: list[str], line: str, index: int = None, re=re) -> bool:
+    def is_object_for_interface(cls, all_lines: list[str], line: str, index: int | None = None, re=re) -> bool:
         """
         :param all_lines: A sequence of all text configuration lines
         :type all_lines: List[str]
@@ -435,9 +426,7 @@ class BaseJunosIntfLine(JunosCfgLine):
                         return False
                     return False
 
-        if _intf_level >= 0:
-            return True
-        return False
+        return _intf_level >= 0
 
     # This method is on BaseJunosIntfLine()
     @property
@@ -490,13 +479,7 @@ class BaseJunosIntfLine(JunosCfgLine):
     @property
     @logger.catch(reraise=True)
     def is_switchport(self):
-        for obj in self.parent.all_children:
-            if obj.parent.text.split()[0] == "unit" and obj.text.split()[0:2] == [
-                "family",
-                "ethernet-switching",
-            ]:
-                return True
-        return False
+        return any(obj.parent.text.split()[0] == "unit" and obj.text.split()[0:2] == ["family", "ethernet-switching"] for obj in self.parent.all_children)
 
     # This method is on BaseJunosIntfLine()
     @property
@@ -783,9 +766,7 @@ class JunosRouteLine(BaseJunosRouteLine):
     @classmethod
     @logger.catch(reraise=True)
     def is_object_for(cls, all_lines, line, index=None, re=re):
-        if re.search(r"^(ip|ipv6)\s+route\s+\S", line):
-            return True
-        return False
+        return bool(re.search(r"^(ip|ipv6)\s+route\s+\S", line))
 
     @property
     @logger.catch(reraise=True)
