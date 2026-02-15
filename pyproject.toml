@@ -216,7 +216,7 @@ ignore = [
     "E266",     # Do not modify comments
     "F401",     # Ignore obnoxious ruff imports (i.e import foo as foo)
     "RET504",   # Ignore variable assignment before return
-    "TD003",    # Ignore missing TODO author
+    "TD002",    # Ignore missing TODO author
     "TD003",    # Ignore missing TODO issue url
     "TD004",    # Ignore missing TODO with colon
 ]
