@@ -141,6 +141,9 @@ whitelines = 1
 quote_basic_values = true
 quote_representation='"'
 
+[tool.black]
+line-length=320
+
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
 exclude = [
@@ -170,3 +173,20 @@ exclude = [
 # Same as Black.
 line-length = 320
 indent-width = 4
+
+
+[tool.ruff.format]
+# The formatter shares some settings like line-length from the top-level [tool.ruff] section.
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+# Experimental docstring formatter
+docstring-code-format = true
+
+[tool.ruff.lint]
+# Enable core linting rules:
+# E/F: Pyflakes and pycodestyle errors (essential checks)
+# W: Pycodestyle warnings
+# I: isort-compatible import sorting
+# UP: pyupgrade rules (modern Python syntax)
+select = ["E", "W", "F", "I", "UP"]
