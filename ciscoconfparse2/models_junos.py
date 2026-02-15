@@ -508,7 +508,7 @@ class BaseJunosIntfLine(JunosCfgLine):
     @logger.catch(reraise=True)
     def verbose(self):
         if not self.is_switchport:
-            return "<%s # %s '%s' info: '%s' (child_indent: %s / len(children): %s / family_endpoint: %s)>" % (
+            return "<{} # {} '{}' info: '{}' (child_indent: {} / len(children): {} / family_endpoint: {})>".format(
                 self.classname,
                 self.linenum,
                 self.text,
@@ -518,7 +518,7 @@ class BaseJunosIntfLine(JunosCfgLine):
                 self.family_endpoint,
             )
         else:
-            return "<%s # %s '%s' info: 'switchport' (child_indent: %s / len(children): %s / family_endpoint: %s)>" % (
+            return "<{} # {} '{}' info: 'switchport' (child_indent: {} / len(children): {} / family_endpoint: {})>".format(
                 self.classname,
                 self.linenum,
                 self.text,
