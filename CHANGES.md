@@ -6,6 +6,16 @@
 - Summary:
     - To be determined
 
+## Version: 0.9.12
+
+- Summary:
+    - Simplify `CiscoConfParse().read_config_file()`
+    - Update versions in `.pre-commit-config.yaml`
+    - Fix many ruff linter flags
+    - Upgrade `pyupgrade` and `black` versions
+    - Add `make ruff` target
+    - Remove conditional code to handle Python 2.x
+
 ## Version: 0.9.11
 
 - Summary:
