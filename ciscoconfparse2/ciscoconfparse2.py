@@ -29,12 +29,12 @@ import hashlib
 import inspect
 import locale
 import os
-import pathlib
 import random
 import re
 import time
 from collections import UserList
 from collections.abc import Callable, Iterator, Sequence
+from pathlib import Path
 from types import GeneratorType
 from typing import Any
 from warnings import warn
@@ -219,13 +219,7 @@ def get_syntax_comment_delimiters(syntax: str | None = None) -> list[str]:
         raise InvalidParameters(error)
 
     comment_delimiters = []
-    if syntax == "ios":
-        comment_delimiters = ["!"]
-    elif syntax == "asa":
-        comment_delimiters = ["!"]
-    elif syntax == "iosxr":
-        comment_delimiters = ["!"]
-    elif syntax == "nxos":
+    if syntax == "ios" or syntax == "asa" or syntax == "iosxr" or syntax == "nxos":
         comment_delimiters = ["!"]
     elif syntax == "junos":
         comment_delimiters = ["#"]
@@ -251,7 +245,7 @@ def check_comment_delimiters(comment_delimiters: list) -> list[str]:
             logger.critical(error)
             raise InvalidParameters(error)
 
-        if not len(comment_delimiter) == 1:
+        if len(comment_delimiter) != 1:
             error = f"`{comment_delimiter}` must be a single string character."
             logger.critical(error)
             raise InvalidParameters(error)
@@ -1460,7 +1454,7 @@ class ConfigList(UserList):
                 except IndexError:
                     break
 
-        return None
+        return
 
     # This method is on ConfigList()
     @logger.catch(reraise=True)
@@ -1538,7 +1532,7 @@ class ConfigList(UserList):
         else:
             # As long as the child indent hasn't gone backwards,
             #    we can use a cached parent
-            parent = parents_cache.get(indent, None)
+            parent = parents_cache.get(indent)
 
         return parents_cache, parent
 
@@ -1574,8 +1568,7 @@ class ConfigList(UserList):
                     parent = candidate_parent
                     parents_cache[indent] = parent  # Cache the parent
                     break
-                else:
-                    candidate_parent_idx -= 1
+                candidate_parent_idx -= 1
 
             # Add the line as a child...
             self._add_child_to_parent(retval, index, indent, parent, obj)
@@ -1990,7 +1983,7 @@ class CiscoConfParse:
         self.auto_commit = auto_commit
 
         if factory:
-            msg = "CiscoConfParse factory parameter is deprecated.  " "It should always be False."
+            msg = "CiscoConfParse factory parameter is deprecated.  It should always be False."
             logger.warning(msg)
             warn(msg)
 
@@ -2198,7 +2191,7 @@ class CiscoConfParse:
             indent_width = self.auto_indent_width
 
         elif not isinstance(indent_width, int):
-            raise ValueError("CiscoConfParse().auto_indent_configuration() " "only accepts None or an integer")
+            raise ValueError("CiscoConfParse().auto_indent_configuration() only accepts None or an integer")
 
         if indent_width == -1:
             # Get indentation from the CiscoConfParse() syntax...
@@ -2213,7 +2206,7 @@ class CiscoConfParse:
             self.commit()
             return True
 
-        error = "CiscoConfParse().auto_indent_configuration() " "cannot auto-indent if auto_indent_width " "is less than 1"
+        error = "CiscoConfParse().auto_indent_configuration() cannot auto-indent if auto_indent_width is less than 1"
         logger.error(error)
         raise ValueError(error)
 
@@ -2225,22 +2218,22 @@ class CiscoConfParse:
 
         if int(idx) == -1:
             self.append(line)
-            return None
+            return
 
         if idx < -1:
             self.insert(last_index + (idx + 2), line)
-            return None
+            return
 
         obj = None
         for obj in self.objs:
             if obj.linenum == int(idx):
                 obj.insert_before(line)
-                return None
+                return
 
         # Default to inserting after the last object...
         obj.insert_after(line)
 
-        return None
+        return
 
     # This method is on CiscoConfParse()
     @logger.catch(reraise=True)
@@ -2340,11 +2333,7 @@ class CiscoConfParse:
             raise InvalidParameters(error)
 
         indent_width = -1
-        if syntax == "ios":
-            indent_width = 1
-        elif syntax == "asa":
-            indent_width = 1
-        elif syntax == "iosxr":
+        if syntax == "ios" or syntax == "asa" or syntax == "iosxr":
             indent_width = 1
         elif syntax == "nxos":
             indent_width = 2
@@ -2374,9 +2363,9 @@ class CiscoConfParse:
 
     # This method is on CiscoConfParse()
     @logger.catch(reraise=True)
-    def read_config(self, config: None | tuple[str, ...] | list[str] | str | pathlib.Path) -> list[str]:
+    def read_config(self, config: None | tuple[str, ...] | list[str] | str | Path) -> list[str]:
         """
-        Read `config` as a string, list, tuple or `pathlib.Path`
+        Read `config` as a string, list, tuple or `Path`
 
         :return: The output configuration
         :rtype: List[str]
@@ -2416,7 +2405,7 @@ class CiscoConfParse:
                 config,
                 (
                     str,
-                    pathlib.Path,
+                    Path,
                 ),
             )
             and len(str(config).splitlines()) == 1
@@ -2466,7 +2455,7 @@ class CiscoConfParse:
             filepath,
             (
                 str,
-                pathlib.Path,
+                Path,
             ),
         ):
 
@@ -3117,9 +3106,8 @@ debug={debug},
                 # condition when that failure happens.
                 ######################################################
                 return []
-            else:
-                # Sort and return the de-duplicated results
-                return sorted(_result)
+            # Sort and return the de-duplicated results
+            return sorted(_result)
         else:
             error = f"Received unexpected `parentspec` {type(parentspec)}"
             logger.error(error)
@@ -3403,7 +3391,7 @@ debug={debug},
             if len(parentspec) == 1:
                 return self.find_objects(parentspec[0])
 
-            elif len(parentspec) > 1:
+            if len(parentspec) > 1:
                 _result = set()
                 _tmp = self.find_object_branches(
                     parentspec,
@@ -3420,10 +3408,9 @@ debug={debug},
                     return []
                 # Sort the de-duplicated results
                 return sorted(_result)
-            else:
-                error = f"`parentspec` {type(parentspec)} must have at least one element."
-                logger.error(error)
-                raise InvalidParameters(error)
+            error = f"`parentspec` {type(parentspec)} must have at least one element."
+            logger.error(error)
+            raise InvalidParameters(error)
         else:
             error = f"Received unexpected `parentspec` {type(parentspec)}"
             logger.error(error)
@@ -3496,9 +3483,8 @@ debug={debug},
         if recurse is False:
             # Only return the matching oldest ancestor objects...
             return [obj for obj in self.find_objects(regexspec) if (obj.parent is obj)]
-        else:
-            # Return any matching object
-            return list(self.find_objects(regexspec))
+        # Return any matching object
+        return list(self.find_objects(regexspec))
 
     # This method is on CiscoConfParse()
     @logger.catch(reraise=True)
@@ -3602,8 +3588,7 @@ debug={debug},
         ## Ref Github issue #121
         if untyped_default:
             return default
-        else:
-            return result_type(default)
+        return result_type(default)
 
     # This method is on CiscoConfParse()
     @logger.catch(reraise=True)
@@ -3612,7 +3597,7 @@ debug={debug},
         method uses the OperatingSystem's native line separators (such as
         ``\\r\\n`` in Windows)."""
         try:
-            with open(filepath, "w", encoding=self.encoding) as newconf:
+            with Path(filepath).open("w", encoding=self.encoding) as newconf:
                 for line in self.get_text():
                     newconf.write(line + "\n")
             return True
@@ -3775,9 +3760,9 @@ class Diff(HasTraits):
         ######################################################################
         if old_config is None:
             old_config = []
-        elif isinstance(old_config, str) and len(old_config.splitlines()) == 1 and os.path.isfile(old_config):
+        elif isinstance(old_config, str) and len(old_config.splitlines()) == 1 and Path(old_config).is_file():
             # load the old config from a file as a string...
-            with open(old_config) as fh:
+            with Path(old_config).open() as fh:
                 old_config = fh.read()
         elif isinstance(old_config, str):
             pass
@@ -3793,9 +3778,9 @@ class Diff(HasTraits):
         ######################################################################
         if new_config is None:
             new_config = []
-        elif isinstance(new_config, str) and len(new_config.splitlines()) == 1 and os.path.isfile(new_config):
+        elif isinstance(new_config, str) and len(new_config.splitlines()) == 1 and Path(new_config).is_file():
             # load the new config from a file as a string...
-            with open(new_config) as fh:
+            with Path(new_config).open() as fh:
                 new_config = fh.read()
         elif isinstance(new_config, str):
             pass
@@ -3821,7 +3806,7 @@ class Diff(HasTraits):
         # _ represents ios options as a dict... for now we use an empty
         # dict below...
         try:
-            with open("./misc/options_ios.hier_config.yml") as fh:
+            with Path("./misc/options_ios.hier_config.yml").open() as fh:
                 yaml.load(fh, Loader=yaml.SafeLoader)
         except FileNotFoundError:
             pass
@@ -3872,7 +3857,7 @@ class Diff(HasTraits):
         return retval
 
 
-#########################################################################3
+# 3
 
 
 class DiffObject(HasTraits):

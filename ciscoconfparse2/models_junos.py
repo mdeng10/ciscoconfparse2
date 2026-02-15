@@ -39,7 +39,7 @@ from ciscoconfparse2.ccp_util import IPv4Obj, IPv6Obj
 DEFAULT_IPV4_ADDR_OBJ = IPv4Obj("0.0.0.1/32", strict=False)
 
 ##
-##-------------  Junos Configuration line object
+# -------------  Junos Configuration line object
 ##
 
 
@@ -132,8 +132,7 @@ class JunosCfgLine(BaseCfgLine):
             # Append this object text
             intf_parts.append(self.text.strip())
             return " ".join(intf_parts)
-        else:
-            return None
+        return None
 
     # This method is on JunosCfgLine()
     @property
@@ -343,7 +342,7 @@ class JunosCfgLine(BaseCfgLine):
 
 
 ##
-##-------------  Junos Interface ABC
+# -------------  Junos Interface ABC
 ##
 
 # Valid method name substitutions:
@@ -377,8 +376,7 @@ class BaseJunosIntfLine(JunosCfgLine):
                 prefixlen = str(self.ipv4_addr_object.prefixlen)
                 addr = f"{ip}/{prefixlen}"
             return f"<{self.classname} # {self.linenum} '{self.text.strip()}' info: '{addr}'{parent_str}>"
-        else:
-            return f"<{self.classname} # {self.linenum} '{self.text.strip()}' info: 'switchport'{parent_str}>"
+        return f"<{self.classname} # {self.linenum} '{self.text.strip()}' info: 'switchport'{parent_str}>"
 
     # This method is on BaseJunosIntfLine()
     @classmethod
@@ -430,19 +428,16 @@ class BaseJunosIntfLine(JunosCfgLine):
                     if line.strip() != "" and line.split()[0] == "unit":
                         # This should be a logical intf...
                         return True
-                    elif all_lines[index + 1].strip() != "":
+                    if all_lines[index + 1].strip() != "":
                         if all_lines[index + 1].strip().split()[0] == "unit":
                             # This should be a physical intf or vlan intf
                             return True
-                        else:
-                            return False
-                    else:
                         return False
+                    return False
 
         if _intf_level >= 0:
             return True
-        else:
-            return False
+        return False
 
     # This method is on BaseJunosIntfLine()
     @property
@@ -517,17 +512,9 @@ class BaseJunosIntfLine(JunosCfgLine):
                 len(self.children),
                 self.family_endpoint,
             )
-        else:
-            return "<{} # {} '{}' info: 'switchport' (child_indent: {} / len(children): {} / family_endpoint: {})>".format(
-                self.classname,
-                self.linenum,
-                self.text,
-                self.child_indent,
-                len(self.children),
-                self.family_endpoint,
-            )
+        return f"<{self.classname} # {self.linenum} '{self.text}' info: 'switchport' (child_indent: {self.child_indent} / len(children): {len(self.children)} / family_endpoint: {self.family_endpoint})>"
 
-    ##-------------  Basic interface properties
+    # -------------  Basic interface properties
 
     # This method is on BaseJunosIntfLine()
     @property
@@ -657,13 +644,11 @@ class BaseJunosIntfLine(JunosCfgLine):
         """
         if not self.is_intf:
             return ()
-        else:
-            intf_regex = r"^interface\s+[A-Za-z\-]+\s*(\d+.*?)(\.\d+)*(\s\S+)*\s*$"
-            intf_number = self.re_match(intf_regex, group=1, default="")
-            if intf_number:
-                return tuple(int(ii) for ii in intf_number.split("/"))
-            else:
-                return ()
+        intf_regex = r"^interface\s+[A-Za-z\-]+\s*(\d+.*?)(\.\d+)*(\s\S+)*\s*$"
+        intf_number = self.re_match(intf_regex, group=1, default="")
+        if intf_number:
+            return tuple(int(ii) for ii in intf_number.split("/"))
+        return ()
 
     # This method is on BaseJunosIntfLine()
     @property
@@ -689,7 +674,7 @@ class BaseJunosIntfLine(JunosCfgLine):
 
 
 ##
-##-------------  IOS Interface Object
+# -------------  IOS Interface Object
 ##
 
 
@@ -717,7 +702,7 @@ class JunosIntfLine(BaseJunosIntfLine):
 
 
 ##
-##-------------  Base Junos Route line object
+# -------------  Base Junos Route line object
 ##
 
 
@@ -736,8 +721,7 @@ class BaseJunosRouteLine(BaseCfgLine):
         ### Route information for the repr string
         if self.tracking_object_name:
             return self.nexthop_str + " AD: " + str(self.admin_distance) + " Track: " + self.tracking_object_name
-        else:
-            return self.nexthop_str + " AD: " + str(self.admin_distance)
+        return self.nexthop_str + " AD: " + str(self.admin_distance)
 
     @classmethod
     @logger.catch(reraise=True)
@@ -782,7 +766,7 @@ class BaseJunosRouteLine(BaseCfgLine):
 
 
 ##
-##-------------  Junos Configuration line object
+# -------------  Junos Configuration line object
 ##
 
 
@@ -857,7 +841,7 @@ class JunosRouteLine(BaseJunosRouteLine):
         try:
             if self.address_family == "ip":
                 return IPv4Obj(f"{self.network}/{self.netmask}", strict=False)
-            elif self.address_family == "ipv6":
+            if self.address_family == "ipv6":
                 return ipaddress.IPv6Network(f"{self.network}/{self.netmask}")
         except BaseException:
             return None

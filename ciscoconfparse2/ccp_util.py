@@ -271,18 +271,18 @@ def ccp_logger_control(
             raise ValueError()
         return True
 
-    elif action == "disable":
+    if action == "disable":
         # Administratively disable this loguru logger
         logger.disable(package_name)
         return True
 
-    elif action == "enable":
+    if action == "enable":
         # Administratively enable this loguru logger
         logger.enable(package_name)
         logger.add(sys.stderr, level=level)
         return True
 
-    elif action == "add":
+    if action == "add":
 
         if debug > 0:
             print(f"    Adding loguru handler with enqueue={enqueue}, because read_only={read_only}")
@@ -304,8 +304,7 @@ def ccp_logger_control(
         active_handlers.append(handler_id)
         return active_handlers
 
-    else:
-        raise NotImplementedError(f"action='{action}' is an unsupported logger action")
+    raise NotImplementedError(f"action='{action}' is an unsupported logger action")
 
 
 @logger.catch(reraise=True)
@@ -349,7 +348,7 @@ def configure_loguru(
     if not isinstance(colorize, bool):
         raise ValueError
 
-    if not isinstance(debug, int) or (debug < 0) or (5 < debug):
+    if not isinstance(debug, int) or (debug < 0) or (debug > 5):
         raise ValueError
 
     if active_handlers is None:
@@ -399,7 +398,7 @@ def junos_unsupported(func):
     @logger.catch(reraise=True)
     def wrapper(*args, **kwargs):
         warn = f"syntax='junos' does not fully support config modifications such as .{func.__name__}(); see Github Issue #185.  https://github.com/mpenning/ciscoconfparse/issues/185"
-        syntax = kwargs.get("syntax", None)
+        syntax = kwargs.get("syntax")
         if len(args) >= 1:
             if isinstance(args[0], ciscoconfparse2.ConfigList):
                 syntax = args[0].syntax
@@ -443,19 +442,17 @@ def _get_ipv4(val="", strict=False, stdlib=False, debug=0):
         obj = IPv4Obj(val)
         if stdlib is False:
             return obj
-        else:
-            if obj.prefixlen == IPV4_MAX_PREFIXLEN:
-                # Return IPv6Address()
-                if not isinstance(obj.ip, IPv4Address):
-                    raise ValueError
+        if obj.prefixlen == IPV4_MAX_PREFIXLEN:
+            # Return IPv6Address()
+            if not isinstance(obj.ip, IPv4Address):
+                raise ValueError
 
-                return obj.ip
-            else:
-                # Return IPv6Network()
-                if not isinstance(obj.network, IPv4Network):
-                    raise ValueError
+            return obj.ip
+        # Return IPv6Network()
+        if not isinstance(obj.network, IPv4Network):
+            raise ValueError
 
-                return obj.network
+        return obj.network
     except BaseException:
         raise AddressValueError(f"_get_ipv4(val='{val}')")
 
@@ -483,19 +480,17 @@ def _get_ipv6(val="", strict=False, stdlib=False, debug=0):
         obj = IPv6Obj(val)
         if stdlib is False:
             return obj
-        else:
-            if obj.prefixlen == IPV6_MAX_PREFIXLEN:
-                # Return IPv6Address()
-                if not isinstance(obj.ip, IPv6Address):
-                    raise ValueError
+        if obj.prefixlen == IPV6_MAX_PREFIXLEN:
+            # Return IPv6Address()
+            if not isinstance(obj.ip, IPv6Address):
+                raise ValueError
 
-                return obj.ip
-            else:
-                # Return IPv6Network()
-                if not isinstance(obj.network, IPv6Network):
-                    raise ValueError
+            return obj.ip
+        # Return IPv6Network()
+        if not isinstance(obj.network, IPv6Network):
+            raise ValueError
 
-                return obj.network
+        return obj.network
 
     except BaseException:
         raise AddressValueError(f"_get_ipv6(val='{val}')")
@@ -538,11 +533,10 @@ def ip_factory(val="", stdlib=False, mode="auto_detect", debug=0):
 
         if obj is not None:
             return obj
-        else:
-            error_str = f"Cannot auto-detect ip='{val}'"
-            raise AddressValueError(error_str)
+        error_str = f"Cannot auto-detect ip='{val}'"
+        raise AddressValueError(error_str)
 
-    elif mode == "ipv4":
+    if mode == "ipv4":
         try:
             obj = _get_ipv4(val=val, stdlib=stdlib, debug=debug)
             return obj
@@ -582,14 +576,13 @@ def collapse_addresses(network_list):
     def ip_net(arg):
         if isinstance(arg, IPv4Obj):
             return arg.network
-        elif isinstance(arg, IPv4Network):
+        if isinstance(arg, IPv4Network):
             return arg
-        elif isinstance(arg, IPv6Obj):
+        if isinstance(arg, IPv6Obj):
             return arg.network
-        elif isinstance(arg, IPv6Network):
+        if isinstance(arg, IPv6Network):
             return arg
-        else:
-            raise ValueError(f"collapse_addresses() isn't sure how to handle {arg}")
+        raise ValueError(f"collapse_addresses() isn't sure how to handle {arg}")
 
     return ipaddr_collapse_addresses([ip_net(ii) for ii in network_list])
 
@@ -765,11 +758,11 @@ class IPv4Obj:
             else:
                 v4_groupdict = {}
 
-            v4addr_nomask = v4_groupdict.get("v4addr_nomask", None) or ""
-            v4addr_netmask = v4_groupdict.get("v4addr_netmask", None) or ""
-            v4addr_prefixlen = v4_groupdict.get("v4addr_prefixlen", None) or ""
-            netmask = v4_groupdict.get("netmask", None) or ""
-            prefixlen = v4_groupdict.get("masklen", None) or ""
+            v4addr_nomask = v4_groupdict.get("v4addr_nomask") or ""
+            v4addr_netmask = v4_groupdict.get("v4addr_netmask") or ""
+            v4addr_prefixlen = v4_groupdict.get("v4addr_prefixlen") or ""
+            netmask = v4_groupdict.get("netmask") or ""
+            prefixlen = v4_groupdict.get("masklen") or ""
 
             # There is a bug here... if I don't use this if condition, address
             #     parsing fails
@@ -820,8 +813,7 @@ class IPv4Obj:
     def __repr__(self):
         if self.empty is False:
             return f"""<IPv4Obj {str(self.ip_object)}/{self.prefixlen}>"""
-        else:
-            return f"""<IPv4Obj None empty={self.empty}>"""
+        return f"""<IPv4Obj None empty={self.empty}>"""
 
     # do NOT wrap with @logger.catch(...)
     # On IPv4Obj()
@@ -839,9 +831,8 @@ class IPv4Obj:
                         return False
 
             # Compare objects numerically...
-            if self.as_decimal == val.as_decimal and self.prefixlen == val.prefixlen:
-                return True
-            return False
+            return self.as_decimal == val.as_decimal and self.prefixlen == val.prefixlen
+
         except AttributeError as eee:
             errmsg = f"'{self.__repr__()}' cannot compare itself to '{val}': {eee}"
             raise AttributeError(errmsg)
@@ -855,8 +846,7 @@ class IPv4Obj:
     def __ne__(self, val):
         if isinstance(val, IPv4Obj):
             return not self.__eq__(val)
-        else:
-            return True
+        return True
 
     # do NOT wrap with @logger.catch(...)
     # On IPv4Obj()
@@ -882,11 +872,10 @@ class IPv4Obj:
                 return self_dec > val_dec
 
             # for the same network, longer prefixlens sort "higher" than shorter prefixlens
-            elif self_ndec == val_ndec:
+            if self_ndec == val_ndec:
                 return self_prefixlen > val_prefixlen
 
-            else:
-                return self_ndec > val_ndec
+            return self_ndec > val_ndec
 
         except BaseException:
             errmsg = f"{self.__repr__()} cannot compare itself to '{val}'"
@@ -919,11 +908,10 @@ class IPv4Obj:
                 return self_dec < val_dec
 
             # for the same network, longer prefixlens sort "higher" than shorter prefixlens
-            elif self_ndec == val_ndec:
+            if self_ndec == val_ndec:
                 return self_prefixlen < val_prefixlen
 
-            else:
-                return self_ndec < val_ndec
+            return self_ndec < val_ndec
 
         except Exception:
             errmsg = f"{self.__repr__()} cannot compare itself to '{val}'"
@@ -936,8 +924,7 @@ class IPv4Obj:
         """Return this object as an integer"""
         if getattr(self, "as_decimal", None) is not None:
             return self.as_decimal
-        else:
-            return False
+        return False
 
     # do NOT wrap with @logger.catch(...)
     # On IPv4Obj()
@@ -945,8 +932,7 @@ class IPv4Obj:
         """Return this object as an integer (used for hex() and bin() operations)"""
         if getattr(self, "as_decimal", None) is not None:
             return self.as_decimal
-        else:
-            return False
+        return False
 
     # do NOT wrap with @logger.catch(...)
     # On IPv4Obj()
@@ -988,25 +974,24 @@ class IPv4Obj:
         # Used for "foo in bar"... python calls bar.__contains__(foo)
         if self.empty is True and val.empty is True:
             return True
-        elif self.empty is True or val.empty is True:
+        if self.empty is True or val.empty is True:
             return False
 
         # For all other cases, see below...
         try:
             if self.network_object.prefixlen == 0:
                 return True
-            elif self.network_object.prefixlen > val.network_object.prefixlen:
+            if self.network_object.prefixlen > val.network_object.prefixlen:
                 # obvious shortcut... if this object's mask is longer than
                 #    val, this object cannot contain val
                 return False
-            else:
-                # return (val.network in self.network)
-                #
-                ## Last used: 2020-07-12... version 1.5.6
-                # return (self.network <= val.network) and (
-                #    self.broadcast >= val.broadcast
-                # )
-                return (self.as_decimal_network <= val.as_decimal_network) and (self.as_decimal_broadcast >= val.as_decimal_broadcast) and (self.prefixlen <= val.prefixlen)
+            # return (val.network in self.network)
+            #
+            ## Last used: 2020-07-12... version 1.5.6
+            # return (self.network <= val.network) and (
+            #    self.broadcast >= val.broadcast
+            # )
+            return (self.as_decimal_network <= val.as_decimal_network) and (self.as_decimal_broadcast >= val.as_decimal_broadcast) and (self.prefixlen <= val.prefixlen)
 
         except ValueError as eee:
             raise ValueError(f"Could not check whether '{val}' is contained in '{self}': {eee}")
@@ -1019,8 +1004,7 @@ class IPv4Obj:
         # Python3 needs __hash__()
         if self.empty is False:
             return hash(str(self.ip_object)) + hash(str(self.prefixlen))
-        else:
-            return hash(None)
+        return hash(None)
 
     # do NOT wrap with @logger.catch(...)
     # On IPv4Obj()
@@ -1135,8 +1119,7 @@ class IPv4Obj:
         """Returns the length of the network mask as an integer."""
         if self.empty is False:
             return int(self.network_object.prefixlen)
-        else:
-            return None
+        return None
 
     # do NOT wrap with @logger.catch(...)
     # On IPv4Obj()
@@ -1269,14 +1252,13 @@ class IPv4Obj:
         """Returns the total number of IP addresses in this network, including broadcast and the "subnet zero" address"""
         if self.prefixlength <= 30:
             return 2 ** (IPV4_MAX_PREFIXLEN - self.network_object.prefixlen) - 2
-        elif self.prefixlength == 31:
+        if self.prefixlength == 31:
             # special case... /31 subnet has no broadcast address
             return 2
-        elif self.prefixlength == 32:
+        if self.prefixlength == 32:
             return 1
-        else:
-            # We (obviously) should never hit this...
-            raise NotImplementedError
+        # We (obviously) should never hit this...
+        raise NotImplementedError
 
     # do NOT wrap with @logger.catch(...)
     # On IPv4Obj()
@@ -1573,18 +1555,16 @@ class IPv6Obj:
         # Detect IPv4_mapped IPv6 addresses...
         if self.empty is True:
             return f"""<IPv6Obj None empty={self.empty}>"""
-        elif self.is_ipv4_mapped:
+        if self.is_ipv4_mapped:
             return f"""<IPv6Obj ::ffff:{self.ip.ipv4_mapped}/{self.prefixlen}>"""
-        else:
-            return f"""<IPv6Obj {str(self.ip)}/{self.prefixlen}>"""
+        return f"""<IPv6Obj {str(self.ip)}/{self.prefixlen}>"""
 
     # On IPv6Obj()
     def __eq__(self, val):
+
         if self.empty is True:
-            if val.empty is True:
-                return True
-            else:
-                return False
+            return val.empty is True
+
         try:
             for obj in [self, val]:
                 for attr_name in ["as_decimal", "prefixlen"]:
@@ -1592,9 +1572,8 @@ class IPv6Obj:
                         return False
 
             # Compare objects numerically...
-            if self.as_decimal == val.as_decimal and self.prefixlen == val.prefixlen:
-                return True
-            return False
+            return self.as_decimal == val.as_decimal and self.prefixlen == val.prefixlen
+
         except BaseException as eee:
             errmsg = f"'{self.__repr__()}' cannot compare itself to '{val}': {eee}"
             raise ValueError(errmsg)
@@ -1623,11 +1602,10 @@ class IPv6Obj:
                 return self_dec > val_dec
 
             # for the same network, longer prefixlens sort "higher" than shorter prefixlens
-            elif self_ndec == val_ndec:
+            if self_ndec == val_ndec:
                 return self_prefixlen > val_prefixlen
 
-            else:
-                return self_ndec > val_ndec
+            return self_ndec > val_ndec
 
         except BaseException:
             errmsg = f"{self.__repr__()} cannot compare itself to '{val}'"
@@ -1653,11 +1631,10 @@ class IPv6Obj:
                 return self_dec < val_dec
 
             # for the same network, longer prefixlens sort "higher" than shorter prefixlens
-            elif self_ndec == val_ndec:
+            if self_ndec == val_ndec:
                 return self_prefixlen < val_prefixlen
 
-            else:
-                return self_ndec < val_ndec
+            return self_ndec < val_ndec
 
         except BaseException:
             errmsg = f"{self.__repr__()} cannot compare itself to '{val}'"
@@ -1668,16 +1645,14 @@ class IPv6Obj:
         """Return this object as an integer"""
         if getattr(self, "as_decimal", None) is not None:
             return self.as_decimal
-        else:
-            return False
+        return False
 
     # On IPv6Obj()
     def __index__(self):
         """Return this object as an integer (used for hex() and bin() operations)"""
         if getattr(self, "as_decimal", None) is not None:
             return self.as_decimal
-        else:
-            return False
+        return False
 
     # On IPv6Obj()
     def __add__(self, val):
@@ -1717,15 +1692,14 @@ class IPv6Obj:
         try:
             if self.network_object.prefixlen == 0:
                 return True
-            elif self.network_object.prefixlen > val.network_object.prefixlen:
+            if self.network_object.prefixlen > val.network_object.prefixlen:
                 # obvious shortcut... if this object's mask is longer than
                 #    val, this object cannot contain val
                 return False
-            else:
-                # NOTE: We cannot use the same algorithm as IPv4Obj.__contains__() b/c IPv6Obj has no broadcast
-                comparison_01 = self.as_decimal_network <= val.as_decimal_network
-                comparison_02 = (self.as_decimal_network + self.numhosts - 1) >= (val.as_decimal_network + val.numhosts - 1)
-                return comparison_01 and comparison_02
+            # NOTE: We cannot use the same algorithm as IPv4Obj.__contains__() b/c IPv6Obj has no broadcast
+            comparison_01 = self.as_decimal_network <= val.as_decimal_network
+            comparison_02 = (self.as_decimal_network + self.numhosts - 1) >= (val.as_decimal_network + val.numhosts - 1)
+            return comparison_01 and comparison_02
 
         except BaseException as eee:
             raise ValueError(f"Could not check whether '{val}' is contained in '{self}': {eee}")
@@ -1788,9 +1762,7 @@ class IPv6Obj:
         #     https://datatracker.ietf.org/doc/html/rfc5156#section-2.2
         #
         # if self.ip in IPv6Network("::ffff:0:0/96", strict=False):
-        if IPv6Network("::ffff:0:0/96").__contains__(self.ip):
-            return True
-        return False
+        return IPv6Network("::ffff:0:0/96").__contains__(self.ip)
 
     # On IPv6Obj()
     @property
@@ -1979,14 +1951,13 @@ class IPv6Obj:
         """Returns the total number of IP addresses in this network, including broadcast and the "subnet zero" address"""
         if self.prefixlength <= 126:
             return 2 ** (IPV6_MAX_PREFIXLEN - self.network_object.prefixlen) - 2
-        elif self.prefixlength == 127:
+        if self.prefixlength == 127:
             # special case... /127 subnet has no broadcast address
             return 2
-        elif self.prefixlength == 128:
+        if self.prefixlength == 128:
             return 1
-        else:
-            # We (obviously) should never hit this...
-            raise NotImplementedError
+        # We (obviously) should never hit this...
+        raise NotImplementedError
 
     # On IPv6Obj()
     @property
@@ -2188,14 +2159,14 @@ class MACObj(EUI48):
 
     @logger.catch(reraise=True)
     def __eq__(self, other) -> bool:
+
         if isinstance(other, MACObj):
             return str(self.dash).lower() == str(other.dash).lower()
-        elif isinstance(other, EUI48):
+
+        if isinstance(other, (EUI48, MAC)):
             return str(self.mac).lower() == str(other).lower()
-        elif isinstance(other, MAC):
-            return str(self.mac).lower() == str(other).lower()
-        else:
-            return False
+
+        return False
 
     def __str__(self) -> str:
         return self.__repr__()
@@ -2260,10 +2231,9 @@ class EUI64Obj(EUI64):
     def __eq__(self, other) -> bool:
         if isinstance(other, EUI64Obj):
             return str(self.dash).lower() == str(other.dash).lower()
-        elif isinstance(other, EUI64):
+        if isinstance(other, EUI64):
             return str(self.eui64).lower() == str(other).lower()
-        else:
-            return False
+        return False
 
     def __str__(self) -> str:
         return self.__repr__()
@@ -2290,7 +2260,7 @@ class L4Object:
 
     def __init__(self, protocol="", port_spec="", syntax=""):
         self.protocol = protocol
-        self.port_list = list()
+        self.port_list = []
         self.syntax = syntax
 
         try:
@@ -2350,9 +2320,7 @@ class L4Object:
             raise NotImplementedError(f"This port_spec is unknown: '{port_spec}'")
 
     def __eq__(self, val):
-        if (self.protocol == val.protocol) and (self.port_list == val.port_list):
-            return True
-        return False
+        return (self.protocol == val.protocol) and (self.port_list == val.port_list)
 
 
 class DNSResponse:
@@ -2406,8 +2374,7 @@ class DNSResponse:
     def __repr__(self):
         if not self.has_error:
             return f'<DNSResponse "{self.query_type}" result_str="{self.result_str}">'
-        else:
-            return f'<DNSResponse "{self.query_type}" error="{self.error_str}">'
+        return f'<DNSResponse "{self.query_type}" error="{self.error_str}">'
 
 
 @logger.catch(reraise=True)
@@ -2506,7 +2473,7 @@ def dns_query(input_str="", query_type="A", server="8.8.8.8", timeout=2.0):
     elif query_type == "AXFR":
         """This is a hack: return text of zone transfer, instead of axfr objs"""
         _zone = zone.from_xfr(query.xfr(server, input_str, lifetime=timeout))
-        return [_zone[node].to_text(node) for node in _zone.nodes.keys()]
+        return [_zone[node].to_text(node) for node in _zone.nodes]
 
     elif query_type == "CNAME":
         try:
@@ -3007,7 +2974,7 @@ class CiscoIOSInterface:
             error = "`re_intf_short` must not be none"
             logger.error(error)
             raise ValueError(error)
-        elif isinstance(re_intf_short, re.Match):
+        if isinstance(re_intf_short, re.Match):
             groupdict_intf_short = re_intf_short.groupdict()
             if groupdict_intf_short is None:
                 error = "The `re_intf_short` regex matched, but there are no groupdict() contents"
@@ -3128,11 +3095,7 @@ class CiscoIOSInterface:
 
                 if debug is True:
                     logger.debug(f"    CiscoRange().parse_single_interface(): {groupdict_slot_card_port}")
-                if isinstance(_sep1, str) and _sep1 == _sep2:
-                    _digit_separator = _sep1
-                    if debug is True:
-                        logger.debug(f"    CiscoRange().parse_single_interface(): `_digit_separator` = '{_digit_separator}'`")
-                elif isinstance(_sep1, str):
+                if isinstance(_sep1, str) and _sep1 == _sep2 or isinstance(_sep1, str):
                     _digit_separator = _sep1
                     if debug is True:
                         logger.debug(f"    CiscoRange().parse_single_interface(): `_digit_separator` = '{_digit_separator}'`")
@@ -3238,17 +3201,13 @@ class CiscoIOSInterface:
     @logger.catch(reraise=True)
     def __gt__(self, other):
         # Ref: http://stackoverflow.com/a/7152796/667301
-        if self.sort_list > other.sort_list:
-            return True
-        return False
+        return self.sort_list > other.sort_list
 
     # This method is on CiscoIOSInterface()
     @logger.catch(reraise=True)
     def __lt__(self, other):
         # Ref: http://stackoverflow.com/a/7152796/667301
-        if self.sort_list < other.sort_list:
-            return True
-        return False
+        return self.sort_list < other.sort_list
 
     # This method is on CiscoIOSInterface()
     @logger.catch(reraise=True)
@@ -3267,12 +3226,11 @@ class CiscoIOSInterface:
 
         if self.subinterface is None and self.channel is None:
             return f"""{self.prefix}{self.number}{interface_class}"""
-        elif isinstance(self.subinterface, int) and self.channel is None:
+        if isinstance(self.subinterface, int) and self.channel is None:
             return f"""{self.prefix}{self.number}.{self.subinterface}{interface_class}"""
-        elif self.subinterface is None and isinstance(self.channel, int):
+        if self.subinterface is None and isinstance(self.channel, int):
             return f"""{self.prefix}{self.number}:{self.channel}{interface_class}"""
-        else:
-            return f"""{self.prefix}{self.number}.{self.subinterface}:{self.channel}{interface_class}"""
+        return f"""{self.prefix}{self.number}.{self.subinterface}:{self.channel}{interface_class}"""
 
     # This method is on CiscoIOSInterface()
     @logger.catch(reraise=True)
@@ -3322,7 +3280,7 @@ class CiscoIOSInterface:
                 # Use sys.exit(1) here to avoid infinite recursion during
                 #     pathological errors such as a dash in an interface range
                 logger.critical(
-                    "Forced python sys.exit() from " f"`CiscoIOSInterface(interface_name='{self.interface_name}').number`.  " "Manually calling sys.exit(99) " "on this failure to avoid infinite " "recursion during what should be a `raise ValueError()`; " "the infinite recursion might be a bug in a third-party library."
+                    "Forced python sys.exit() from " f"`CiscoIOSInterface(interface_name='{self.interface_name}').number`.  " "Manually calling sys.exit(99) on this failure to avoid infinite recursion during what should be a `raise ValueError()`; the infinite recursion might be a bug in a third-party library."
                 )
                 sys.exit(99)
 
@@ -3400,18 +3358,17 @@ class CiscoIOSInterface:
 
         if isinstance(self.digit_separator, str) and isinstance(self.slot, (int, str)) and isinstance(self.card, (int, str)) and isinstance(self.port, (int, str)) and isinstance(self.subinterface, (int, str)) and isinstance(self.channel, (int, str)):
             return f"{self.slot}{self.digit_separator}{self.card}{self.digit_separator}{self.port}.{self.subinterface}:{self.channel}{_interface_class}"
-        elif isinstance(self.digit_separator, str) and isinstance(self.slot, (int, str)) and isinstance(self.card, (int, str)) and isinstance(self.port, (int, str)) and isinstance(self.subinterface, (int, str)) and self.channel is None:
+        if isinstance(self.digit_separator, str) and isinstance(self.slot, (int, str)) and isinstance(self.card, (int, str)) and isinstance(self.port, (int, str)) and isinstance(self.subinterface, (int, str)) and self.channel is None:
             return f"{self.slot}{self.digit_separator}{self.card}{self.digit_separator}{self.port}.{self.subinterface}{_interface_class}"
-        elif isinstance(self.digit_separator, str) and isinstance(self.slot, (int, str)) and isinstance(self.card, (int, str)) and isinstance(self.port, (int, str)) and self.subinterface is None and self.channel is None:
+        if isinstance(self.digit_separator, str) and isinstance(self.slot, (int, str)) and isinstance(self.card, (int, str)) and isinstance(self.port, (int, str)) and self.subinterface is None and self.channel is None:
             return f"{self.slot}{self.digit_separator}{self.card}{self.digit_separator}{self.port}{_interface_class}"
-        elif isinstance(self.digit_separator, str) and isinstance(self.slot, (int, str)) and self.card is None and isinstance(self.port, (int, str)) and self.subinterface is None and self.channel is None:
+        if isinstance(self.digit_separator, str) and isinstance(self.slot, (int, str)) and self.card is None and isinstance(self.port, (int, str)) and self.subinterface is None and self.channel is None:
             return f"{self.slot}{self.digit_separator}{self.port}{_interface_class}"
-        elif self.slot is None and self.card is None and isinstance(self.port, (int, str)) and self.subinterface is None and self.channel is None:
+        if self.slot is None and self.card is None and isinstance(self.port, (int, str)) and self.subinterface is None and self.channel is None:
             return f"{self.port}{_interface_class}"
-        else:
-            error = "Could not construct a return value for CiscoIOSInterface().slot_card_port_subinterface_channel.  digit_separator: {self.digit_separator} sort_list: {self.sort_list}"
-            logger.error(error)
-            raise ValueError(error)
+        error = "Could not construct a return value for CiscoIOSInterface().slot_card_port_subinterface_channel.  digit_separator: {self.digit_separator} sort_list: {self.sort_list}"
+        logger.error(error)
+        raise ValueError(error)
 
     # This method is on CiscoIOSInterface()
     @property
@@ -3420,8 +3377,7 @@ class CiscoIOSInterface:
         "Return 2 if self.interface_name is 'Serial 2/1/8.3:6' and return None if there is no slot"
         if self._slot is None:
             return None
-        else:
-            return int(self._slot)
+        return int(self._slot)
 
     # This method is on CiscoIOSInterface()
     @slot.setter
@@ -3443,8 +3399,7 @@ class CiscoIOSInterface:
         "Return 1 if self.interface_name is 'Serial 2/1/8.3:6' and return None if there is no card"
         if self._card is None:
             return self._card
-        else:
-            return int(self._card)
+        return int(self._card)
 
     # This method is on CiscoIOSInterface()
     @card.setter
@@ -3466,8 +3421,7 @@ class CiscoIOSInterface:
         "Return 8 if self.interface_name is 'Serial 2/1/8.3:6' and raise a ValueError if there is no port"
         if self._port is None:
             return None
-        else:
-            return int(self._port)
+        return int(self._port)
 
     # This method is on CiscoIOSInterface()
     @port.setter
@@ -3529,8 +3483,7 @@ class CiscoIOSInterface:
         "Return point-to-point if self.interface_name is 'ATM 2/1/8 point-to-point and return None if there is no interface_class'"
         if isinstance(self._interface_class, str):
             return self._interface_class.strip()
-        else:
-            return self._interface_class
+        return self._interface_class
 
     # This method is on CiscoIOSInterface()
     @interface_class.setter
@@ -3943,7 +3896,7 @@ class CiscoIOSXRInterface:
             error = "`re_intf_short` must not be none"
             logger.error(error)
             raise ValueError(error)
-        elif isinstance(re_intf_short, re.Match):
+        if isinstance(re_intf_short, re.Match):
             groupdict_intf_short = re_intf_short.groupdict()
             if groupdict_intf_short is None:
                 error = "The `re_intf_short` regex matched, but there are no groupdict() contents"
@@ -4017,7 +3970,7 @@ class CiscoIOSXRInterface:
             error = "`re_intf_long` must not be None"
             logger.error(error)
             raise ValueError(error)
-        elif isinstance(re_intf_long, re.Match):
+        if isinstance(re_intf_long, re.Match):
             groupdict_intf_long = re_intf_long.groupdict()
             if groupdict_intf_long is None:
                 error = "The `re_intf_long` regex matched, but there are no groupdict() contents"
@@ -4064,11 +4017,7 @@ class CiscoIOSXRInterface:
 
                 if debug is True:
                     logger.debug(f"    CiscoRange().parse_single_interface(): {groupdict_slot_card_port}")
-                if isinstance(_sep1, str) and _sep1 == _sep2 == _sep3:
-                    _digit_separator = _sep1
-                    if debug is True:
-                        logger.debug(f"    CiscoRange().parse_single_interface(): `_digit_separator` = '{_digit_separator}'`")
-                elif isinstance(_sep1, str):
+                if isinstance(_sep1, str) and _sep1 == _sep2 == _sep3 or isinstance(_sep1, str):
                     _digit_separator = _sep1
                     if debug is True:
                         logger.debug(f"    CiscoRange().parse_single_interface(): `_digit_separator` = '{_digit_separator}'`")
@@ -4178,17 +4127,13 @@ class CiscoIOSXRInterface:
     @logger.catch(reraise=True)
     def __gt__(self, other):
         # Ref: http://stackoverflow.com/a/7152796/667301
-        if self.sort_list > other.sort_list:
-            return True
-        return False
+        return self.sort_list > other.sort_list
 
     # This method is on CiscoIOSXRInterface()
     @logger.catch(reraise=True)
     def __lt__(self, other):
         # Ref: http://stackoverflow.com/a/7152796/667301
-        if self.sort_list < other.sort_list:
-            return True
-        return False
+        return self.sort_list < other.sort_list
 
     # This method is on CiscoIOSXRInterface()
     @logger.catch(reraise=True)
@@ -4207,12 +4152,11 @@ class CiscoIOSXRInterface:
 
         if self.subinterface is None and self.channel is None:
             return f"""{self.prefix}{self.number}{interface_class}"""
-        elif isinstance(self.subinterface, int) and self.channel is None:
+        if isinstance(self.subinterface, int) and self.channel is None:
             return f"""{self.prefix}{self.number}.{self.subinterface}{interface_class}"""
-        elif self.subinterface is None and isinstance(self.channel, int):
+        if self.subinterface is None and isinstance(self.channel, int):
             return f"""{self.prefix}{self.number}:{self.channel}{interface_class}"""
-        else:
-            return f"""{self.prefix}{self.number}.{self.subinterface}:{self.channel}{interface_class}"""
+        return f"""{self.prefix}{self.number}.{self.subinterface}:{self.channel}{interface_class}"""
 
     # This method is on CiscoIOSXRInterface()
     @logger.catch(reraise=True)
@@ -4338,18 +4282,17 @@ class CiscoIOSXRInterface:
 
         if isinstance(self.digit_separator, str) and isinstance(self.slot, (int, str)) and isinstance(self.card, (int, str)) and isinstance(self.port, (int, str)) and isinstance(self.subinterface, (int, str)) and isinstance(self.channel, (int, str)):
             return f"{self.slot}{self.digit_separator}{self.card}{self.digit_separator}{self.port}.{self.subinterface}:{self.channel}{_interface_class}"
-        elif isinstance(self.digit_separator, str) and isinstance(self.slot, (int, str)) and isinstance(self.card, (int, str)) and isinstance(self.port, (int, str)) and isinstance(self.subinterface, (int, str)) and self.channel is None:
+        if isinstance(self.digit_separator, str) and isinstance(self.slot, (int, str)) and isinstance(self.card, (int, str)) and isinstance(self.port, (int, str)) and isinstance(self.subinterface, (int, str)) and self.channel is None:
             return f"{self.slot}{self.digit_separator}{self.card}{self.digit_separator}{self.port}.{self.subinterface}{_interface_class}"
-        elif isinstance(self.digit_separator, str) and isinstance(self.slot, (int, str)) and isinstance(self.card, (int, str)) and isinstance(self.port, (int, str)) and self.subinterface is None and self.channel is None:
+        if isinstance(self.digit_separator, str) and isinstance(self.slot, (int, str)) and isinstance(self.card, (int, str)) and isinstance(self.port, (int, str)) and self.subinterface is None and self.channel is None:
             return f"{self.slot}{self.digit_separator}{self.card}{self.digit_separator}{self.port}{_interface_class}"
-        elif isinstance(self.digit_separator, str) and isinstance(self.slot, (int, str)) and self.card is None and isinstance(self.port, (int, str)) and self.subinterface is None and self.channel is None:
+        if isinstance(self.digit_separator, str) and isinstance(self.slot, (int, str)) and self.card is None and isinstance(self.port, (int, str)) and self.subinterface is None and self.channel is None:
             return f"{self.slot}{self.digit_separator}{self.port}{_interface_class}"
-        elif self.slot is None and self.card is None and isinstance(self.port, (int, str)) and self.subinterface is None and self.channel is None:
+        if self.slot is None and self.card is None and isinstance(self.port, (int, str)) and self.subinterface is None and self.channel is None:
             return f"{self.port}{_interface_class}"
-        else:
-            error = "Could not construct a return value for CiscoIOSXRInterface().slot_card_port_subinterface_channel.  digit_separator: {self.digit_separator} sort_list: {self.sort_list}"
-            logger.error(error)
-            raise ValueError(error)
+        error = "Could not construct a return value for CiscoIOSXRInterface().slot_card_port_subinterface_channel.  digit_separator: {self.digit_separator} sort_list: {self.sort_list}"
+        logger.error(error)
+        raise ValueError(error)
 
     # This method is on CiscoIOSXRInterface()
     @property
@@ -4358,8 +4301,7 @@ class CiscoIOSXRInterface:
         "Return 2 if self.interface_name is 'Serial 2/1/8.3:6' and return None if there is no slot"
         if self._slot is None:
             return None
-        else:
-            return str(self._slot)
+        return str(self._slot)
 
     # This method is on CiscoIOSXRInterface()
     @slot.setter
@@ -4381,8 +4323,7 @@ class CiscoIOSXRInterface:
         "Return 1 if self.interface_name is 'Serial 2/1/8.3:6' and return None if there is no card"
         if self._card is None:
             return self._card
-        else:
-            return str(self._card)
+        return str(self._card)
 
     # This method is on CiscoIOSXRInterface()
     @card.setter
@@ -4404,8 +4345,7 @@ class CiscoIOSXRInterface:
         "Return 8 if self.interface_name is 'Serial 2/1/8.3:6' and raise a ValueError if there is no port"
         if self._processor is None:
             return None
-        else:
-            return str(self._processor)
+        return str(self._processor)
 
     # This method is on CiscoIOSXRInterface()
     @processor.setter
@@ -4427,8 +4367,7 @@ class CiscoIOSXRInterface:
         "Return 8 if self.interface_name is 'Serial 2/1/8.3:6' and raise a ValueError if there is no port"
         if self._port is None:
             return None
-        else:
-            return int(self._port)
+        return int(self._port)
 
     # This method is on CiscoIOSXRInterface()
     @port.setter
@@ -4490,8 +4429,7 @@ class CiscoIOSXRInterface:
         "Return point-to-point if self.interface_name is 'ATM 2/1/8 point-to-point and return None if there is no interface_class'"
         if isinstance(self._interface_class, str):
             return self._interface_class.strip()
-        else:
-            return self._interface_class
+        return self._interface_class
 
     # This method is on CiscoIOSXRInterface()
     @interface_class.setter
@@ -4609,9 +4547,7 @@ class CiscoRange(UserList):
         self.this_obj = None
         self.iterate_attribute = None
         if isinstance(text, str) or empty is False:
-            if result_type is None:
-                self.data = self.parse_cisco_interfaces(text, result_type=CiscoIOSInterface, debug=debug)
-            elif result_type is CiscoIOSInterface:
+            if result_type is None or result_type is CiscoIOSInterface:
                 self.data = self.parse_cisco_interfaces(text, result_type=CiscoIOSInterface, debug=debug)
             elif result_type is CiscoIOSXRInterface:
                 self.data = self.parse_cisco_interfaces(text, result_type=CiscoIOSXRInterface, debug=debug)
@@ -5069,10 +5005,9 @@ class CiscoRange(UserList):
                     # Skip the item if it does not exist...
                     pass
             return self
-        else:
-            error = f"`{other}` must be a CiscoRange() instance; the received argument was {type(other)} instead of a CiscoRange()"
-            logger.error(error)
-            raise InvalidCiscoRange(error)
+        error = f"`{other}` must be a CiscoRange() instance; the received argument was {type(other)} instead of a CiscoRange()"
+        logger.error(error)
+        raise InvalidCiscoRange(error)
 
     # This method is on CiscoRange()
     @logger.catch(reraise=True)
@@ -5086,31 +5021,29 @@ class CiscoRange(UserList):
         if sort_this_obj:
             self.data = target_list
             return self
-        else:
-            if len(target_list) > 0:
-                if isinstance(target_list, list):
-                    if isinstance(target_list[0], (CiscoIOSInterface, CiscoIOSXRInterface)):
-                        # Sort CiscoIOSInterface() or CiscoIOSXRInterface members
-                        new_list = sorted(
-                            target_list,
-                            key=lambda x: getattr(x, attribute),
-                            reverse=reverse,
-                        )
-                    elif isinstance(target_list[0], (int, float)):
-                        # Sort int or float members
-                        new_list = sorted(target_list, reverse=reverse)
-                    elif isinstance(target_list[0], str):
-                        # Sort int or string members containing an int
-                        new_list = sorted(target_list, key=lambda x: int(x), reverse=reverse)
-                    else:
-                        error = f"CiscoRange() member {target_list[0]} {type(target_list[0])} was an unhandled member type."
+        if len(target_list) > 0:
+            if isinstance(target_list, list):
+                if isinstance(target_list[0], (CiscoIOSInterface, CiscoIOSXRInterface)):
+                    # Sort CiscoIOSInterface() or CiscoIOSXRInterface members
+                    new_list = sorted(
+                        target_list,
+                        key=lambda x: getattr(x, attribute),
+                        reverse=reverse,
+                    )
+                elif isinstance(target_list[0], (int, float)):
+                    # Sort int or float members
+                    new_list = sorted(target_list, reverse=reverse)
+                elif isinstance(target_list[0], str):
+                    # Sort int or string members containing an int
+                    new_list = sorted(target_list, key=lambda x: int(x), reverse=reverse)
                 else:
-                    error = f"`target_list` must be a list; however, we got `target_list`: {target_list} {type(target_list)}"
-                    logger.critical(error)
-                    raise ValueError(error)
-                return new_list
+                    error = f"CiscoRange() member {target_list[0]} {type(target_list[0])} was an unhandled member type."
             else:
-                raise ValueError()
+                error = f"`target_list` must be a list; however, we got `target_list`: {target_list} {type(target_list)}"
+                logger.critical(error)
+                raise ValueError(error)
+            return new_list
+        raise ValueError()
 
     # This method is on CiscoRange()
     @property
@@ -5140,9 +5073,7 @@ class CiscoRange(UserList):
 
         try:
             # Append to the list intelligently (accounting for types...)
-            if len(self.data) > 0 and self.member_type is not None:
-                new_list.append(self.result_type(val))
-            elif len(self.data) == 0 and self.result_type is not None:
+            if len(self.data) > 0 and self.member_type is not None or len(self.data) == 0 and self.result_type is not None:
                 new_list.append(self.result_type(val))
             else:
                 new_list.append(val)
@@ -5272,8 +5203,7 @@ class CiscoRange(UserList):
                 if len(self.data) > 0:
                     result_type = self.member_type
                     return [result_type(ii) for ii in retval]
-                else:
-                    return set()
+                return set()
             if result_type is None:
                 return [CiscoIOSInterface(ii) for ii in retval]
             if result_type in (CiscoIOSInterface, CiscoIOSXRInterface, str, int):
@@ -5299,8 +5229,7 @@ class CiscoRange(UserList):
             if len(self.data) > 0:
                 result_type = type(self.as_list[0])
                 return {result_type(ii) for ii in retval}
-            else:
-                return []
+            return []
         if result_type is None:
             return {CiscoIOSInterface(ii) for ii in retval}
         if isinstance(result_type, (CiscoIOSInterface, CiscoIOSXRInterface)):
@@ -5430,7 +5359,7 @@ class CiscoRange(UserList):
             return ""
 
         # source - https://stackoverflow.com/a/51227915/667301
-        input_str = sorted(list(set(input_str)))
+        input_str = sorted(set(input_str))
         range_list = [input_str[0]]
         for ii in range(len(input_str)):
             if ii + 1 < len(input_str) and ii - 1 > -1:

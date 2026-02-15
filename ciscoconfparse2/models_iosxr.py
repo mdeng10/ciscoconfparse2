@@ -56,7 +56,7 @@ MAX_VLAN = 4094
 
 
 ##
-##-------------  IOSXR Configuration line object
+# -------------  IOSXR Configuration line object
 ##
 
 
@@ -136,22 +136,9 @@ class IOSXRCfgLine(BaseFactoryLine):
     def is_object_for(cls, all_lines, line, index=None, re=re) -> bool:
         """Return True if this object should be used for a given configuration line; otherwise return False"""
         ## Default object, for now
-        if cls.is_object_for_hostname(line=line):
+        if cls.is_object_for_hostname(line=line) or cls.is_object_for_interface(line=line) or cls.is_object_for_aaa_authentication(line=line) or cls.is_object_for_aaa_authorization(line=line) or cls.is_object_for_aaa_accounting(line=line) or cls.is_object_for_ip_route(line=line) or cls.is_object_for_ipv6_route(line=line):
             return False
-        elif cls.is_object_for_interface(line=line):
-            return False
-        elif cls.is_object_for_aaa_authentication(line=line):
-            return False
-        elif cls.is_object_for_aaa_authorization(line=line):
-            return False
-        elif cls.is_object_for_aaa_accounting(line=line):
-            return False
-        elif cls.is_object_for_ip_route(line=line):
-            return False
-        elif cls.is_object_for_ipv6_route(line=line):
-            return False
-        else:
-            return True
+        return True
 
     @classmethod
     @logger.catch(reraise=True)
@@ -420,7 +407,7 @@ class IOSXRCfgLine(BaseFactoryLine):
 
 
 ##
-##-------------  IOSXR Interface ABC
+# -------------  IOSXR Interface ABC
 ##
 
 # Valid method name substitutions:
@@ -459,8 +446,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
             else:
                 addr_str = f"{self.ipv4_addr}/{self.ipv4_masklength}"
             return f"<{self.classname} # {self.linenum} '{self.text.strip()}' primary_ipv4: '{addr_str}'>"
-        else:
-            return f"<{self.classname} # {self.linenum} '{self.text.strip()}' switchport: 'switchport'>"
+        return f"<{self.classname} # {self.linenum} '{self.text.strip()}' switchport: 'switchport'>"
 
     # This method is on BaseIOSXRIntfLine()
     @logger.catch(reraise=True)
@@ -508,15 +494,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
                 len(self.children),
                 self.family_endpoint,
             )
-        else:
-            return "<{} # {} '{}' info: 'switchport' (child_indent: {} / len(children): {} / family_endpoint: {})>".format(
-                self.classname,
-                self.linenum,
-                self.text,
-                self.child_indent,
-                len(self.children),
-                self.family_endpoint,
-            )
+        return f"<{self.classname} # {self.linenum} '{self.text}' info: 'switchport' (child_indent: {self.child_indent} / len(children): {len(self.children)} / family_endpoint: {self.family_endpoint})>"
 
     # This method is on BaseIOSXRIntfLine()
     @classmethod
@@ -524,7 +502,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
     def is_object_for(cls, all_lines, line, index=None, re=re) -> bool:
         return False
 
-    ##-------------  Basic interface properties
+    # -------------  Basic interface properties
 
     # This method is on BaseIOSXRIntfLine()
     @property
@@ -715,26 +693,24 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         """
         if not self.is_intf:
             return ()
-        else:
-            ifobj = self.cisco_interface_object
-            retval = []
-            static_list = (
-                ifobj.slot,
-                ifobj.card,
-                ifobj.port,
-                ifobj.subinterface,
-                ifobj.channel,
-                ifobj.interface_class,
-            )
-            if ifobj:
-                for ii in static_list:
-                    if isinstance(ii, int):
-                        retval.append(ii)
-                    else:
-                        retval.append(-1)
-                return tuple(retval)
-            else:
-                return ()
+        ifobj = self.cisco_interface_object
+        retval = []
+        static_list = (
+            ifobj.slot,
+            ifobj.card,
+            ifobj.port,
+            ifobj.subinterface,
+            ifobj.channel,
+            ifobj.interface_class,
+        )
+        if ifobj:
+            for ii in static_list:
+                if isinstance(ii, int):
+                    retval.append(ii)
+                else:
+                    retval.append(-1)
+            return tuple(retval)
+        return ()
 
     # This method is on BaseIOSXRIntfLine()
     @property
@@ -780,10 +756,9 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         """
         if not self.is_intf:
             return ""
-        else:
-            intf_regex = r"^interface\s+[A-Za-z\-]+\s*(\d+.*?)(\.\d+)*(\s\S+)*\s*$"
-            intf_number = self.re_match(intf_regex, group=1, default="")
-            return intf_number
+        intf_regex = r"^interface\s+[A-Za-z\-]+\s*(\d+.*?)(\.\d+)*(\s\S+)*\s*$"
+        intf_number = self.re_match(intf_regex, group=1, default="")
+        return intf_number
 
     # This method is on BaseIOSXRIntfLine()
     @property
@@ -829,10 +804,9 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         """
         if not self.is_intf:
             return ""
-        else:
-            subintf_regex = r"^interface\s+[A-Za-z\-]+\s*(\d+.*?\.?\d?)(\s\S+)*\s*$"
-            subintf_number = self.re_match(subintf_regex, group=1, default="")
-            return subintf_number
+        subintf_regex = r"^interface\s+[A-Za-z\-]+\s*(\d+.*?\.?\d?)(\s\S+)*\s*$"
+        subintf_number = self.re_match(subintf_regex, group=1, default="")
+        return subintf_number
 
     # This method is on BaseIOSXRIntfLine()
     @property
@@ -925,14 +899,9 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
             default="",
         )
 
-        if retval["v4addr"] == "":
+        if retval["v4addr"] == "" or retval["v4addr"] == "dhcp" or retval["v4addr"] == "negotiated":
             return self.default_ipv4_addr_object
-        elif retval["v4addr"] == "dhcp":
-            return self.default_ipv4_addr_object
-        elif retval["v4addr"] == "negotiated":
-            return self.default_ipv4_addr_object
-        else:
-            return IPv4Obj(f"{retval['v4addr']}/{retval['v4netmask']}")
+        return IPv4Obj(f"{retval['v4addr']}/{retval['v4netmask']}")
 
     # This method is on BaseIOSXRIntfLine()
     @property
@@ -1041,14 +1010,11 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         :return: Whether autonegotiation is enabled on this interface
         :rtype: bool
         """
-        if not self.is_ethernet_intf:
+        if not self.is_ethernet_intf or self.is_ethernet_intf and (self.manual_speed != "" and self.manual_duplex != ""):
             return False
-        elif self.is_ethernet_intf and (self.manual_speed != "" and self.manual_duplex != ""):
-            return False
-        elif self.is_ethernet_intf:
+        if self.is_ethernet_intf:
             return True
-        else:
-            raise ValueError
+        raise ValueError
 
     # This method is on BaseIOSXRIntfLine()
     @property
@@ -1063,10 +1029,9 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
 
         if cd_seconds > -1.0:
             return cd_seconds
-        elif cd_msec > -1.0:
+        if cd_msec > -1.0:
             return cd_msec / 1000.0
-        else:
-            return -1.0
+        return -1.0
 
     # This method is on BaseIOSXRIntfLine()
     @property
@@ -1230,12 +1195,9 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         )
         condition1 = self.re_match_iter_typed(r"^\s+ip\s+address\s+(dhcp)\s*$", result_type=str, default="")
         condition2 = self.re_match_iter_typed(r"^\s+ip\s+address\s+(negotiated)\s*$", result_type=str, default="")
-        if condition1.lower() == "dhcp":
+        if condition1.lower() == "dhcp" or condition2.lower() == "negotiated":
             return ""
-        elif condition2.lower() == "negotiated":
-            return ""
-        else:
-            return retval
+        return retval
 
     # This method is on BaseIOSXRIntfLine()
     @property
@@ -1281,14 +1243,9 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         condition1 = self.re_match_iter_typed(r"^\s+ipv6\s+address\s+(dhcp)\s*$", result_type=str, default="")
         condition2 = self.re_match_iter_typed(r"^\s+ipv6\s+address\s+(autoconfig)\s*$", result_type=str, default="")
         condition3 = self.re_match_iter_typed(r"^\s+ipv6\s+address\s+(negotiated)\s*$", result_type=str, default="")
-        if condition1.lower() == "dhcp":
+        if condition1.lower() == "dhcp" or condition2.lower() == "autoconfig" or condition3.lower() == "negotiated":
             return ""
-        elif condition2.lower() == "autoconfig":
-            return ""
-        elif condition3.lower() == "negotiated":
-            return ""
-        else:
-            return retval
+        return retval
 
     # This method is on BaseIOSXRIntfLine()
     @logger.catch(reraise=True)
@@ -1339,13 +1296,9 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
            False
            >>>
         """
-        if self.ipv4_addr_object.empty is True:
+        if self.ipv4_addr_object.empty is True or ipv4network is None or isinstance(ipv4network, IPv4Obj) and ipv4network.empty is True:
             return False
-        elif ipv4network is None:
-            return False
-        elif isinstance(ipv4network, IPv4Obj) and ipv4network.empty is True:
-            return False
-        elif isinstance(ipv4network, IPv4Obj):
+        if isinstance(ipv4network, IPv4Obj):
             intf_ipv4obj = self.ipv4_addr_object
             if isinstance(intf_ipv4obj, IPv4Obj):
                 try:
@@ -1837,9 +1790,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
                         vdict["allowed"] = _all_vlans
                     else:
                         # handle **double allowed** statements here...
-                        if vdict["allowed"] == _all_vlans:
-                            vdict["allowed"] = f"{allowed_str}"
-                        elif vdict["allowed"] == "":
+                        if vdict["allowed"] == _all_vlans or vdict["allowed"] == "":
                             vdict["allowed"] = f"{allowed_str}"
                         else:
                             vdict["allowed"] += f",{allowed_str}"
@@ -1866,14 +1817,14 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
 
             if _value == "":
                 continue
-            elif _value != "_nomatch_":
+            if _value != "_nomatch_":
                 ## allowed in the key overrides previous values
                 if key == "allowed":
                     # When considering 'allowed', reset retval to be empty...
                     retval = CiscoRange(result_type=int)
                     if _value.lower() == "none":
                         continue
-                    elif _value.lower() == "all":
+                    if _value.lower() == "all":
                         retval = CiscoRange(text=f"1-{MAX_VLAN}", result_type=int)
                     elif isinstance(re.search(r"^\d[\d\-\,\s]*", _value), re.Match):
                         retval = retval + CiscoRange(_value, result_type=int)
@@ -1916,7 +1867,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
                 return int(_parts[4])
         return default_val
 
-    ##-------------  CDP
+    # -------------  CDP
 
     # This method is on BaseIOSXRIntfLine()
     @property
@@ -1936,7 +1887,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
                 return True
         return False
 
-    ##-------------  EoMPLS
+    # -------------  EoMPLS
 
     # This method is on BaseIOSXRIntfLine()
     @property
@@ -1959,7 +1910,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         retval = self.re_match_iter_typed(r"^\s*xconnect\s+\S+\s+(\d+)\s+\S+", result_type=int, default=-1)
         return retval
 
-    ##-------------  HSRP
+    # -------------  HSRP
 
     # This method is on BaseIOSXRIntfLine()
     @property
@@ -1985,7 +1936,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
 
         ## For API simplicity, I always assume there is only one hsrp
         ##     group on the interface
-        retval = dict()
+        retval = {}
         if self.ipv4_addr == "":
             return retval
 
@@ -2026,7 +1977,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         """
         ## For API simplicity, I always assume there is only one hsrp
         ##     group on the interface
-        retval = dict()
+        retval = {}
         if self.ipv4_addr == "":
             return retval
 
@@ -2080,7 +2031,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
     def hsrp_authentication_md5_keychain(self):
         ## For API simplicity, I always assume there is only one hsrp
         ##     group on the interface
-        retval = dict()
+        retval = {}
         if self.ipv4_addr == "":
             return retval
 
@@ -2102,7 +2053,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
 
         return retval
 
-    ##-------------  MAC ACLs
+    # -------------  MAC ACLs
 
     # This method is on BaseIOSXRIntfLine()
     @property
@@ -2134,7 +2085,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
         )
         return retval["group_number"]
 
-    ##-------------  IPv4 ACLs
+    # -------------  IPv4 ACLs
 
     # This method is on BaseIOSXRIntfLine()
     @property
@@ -2226,7 +2177,7 @@ class BaseIOSXRIntfLine(IOSXRCfgLine, BaseFactoryInterfaceLine):
 
 
 ##
-##-------------  IOSXR Interface Object
+# -------------  IOSXR Interface Object
 ##
 
 
@@ -2266,7 +2217,7 @@ class IOSXRIntfLine(BaseIOSXRIntfLine):
 
 
 ##
-##-------------  IOSXR Interface Globals
+# -------------  IOSXR Interface Globals
 ##
 
 
@@ -2337,7 +2288,7 @@ class IOSXRIntfGlobal(IOSXRCfgLine):
 
 
 ##
-##-------------  IOSXR vPC line
+# -------------  IOSXR vPC line
 ##
 @attrs.define(repr=False, slots=False)
 class IOSXRvPCLine(BaseCfgLine):
@@ -2543,7 +2494,7 @@ class IOSXRAccessLine(IOSXRCfgLine):
 
 
 ##
-##-------------  Base IOSXR Route line object
+# -------------  Base IOSXR Route line object
 ##
 
 
@@ -2562,8 +2513,7 @@ class BaseIOSXRRouteLine(IOSXRCfgLine):
         ### Route information for the repr string
         if self.tracking_object_name:
             return self.nexthop_str + " AD: " + str(self.admin_distance) + " Track: " + self.tracking_object_name
-        else:
-            return self.nexthop_str + " AD: " + str(self.admin_distance)
+        return self.nexthop_str + " AD: " + str(self.admin_distance)
 
     @classmethod
     @logger.catch(reraise=True)
@@ -2608,7 +2558,7 @@ class BaseIOSXRRouteLine(IOSXRCfgLine):
 
 
 ##
-##-------------  IOSXR Route line object
+# -------------  IOSXR Route line object
 ##
 
 _RE_IP_ROUTE = re.compile(
@@ -2700,8 +2650,7 @@ class IOSXRRouteLine(IOSXRCfgLine):
     def vrf(self):
         if self.route_info["vrf"] is not None:
             return self.route_info["vrf"]
-        else:
-            return ""
+        return ""
 
     @property
     @logger.catch(reraise=True)
@@ -2715,7 +2664,7 @@ class IOSXRRouteLine(IOSXRCfgLine):
         retval = None
         if self._address_family == "ip":
             return self.route_info["prefix"]
-        elif self._address_family == "ipv6":
+        if self._address_family == "ipv6":
             retval = self.re_match_typed(
                 r"^ipv6\s+route\s+(vrf\s+)*(\S+?)\/\d+",
                 group=2,
@@ -2732,7 +2681,7 @@ class IOSXRRouteLine(IOSXRCfgLine):
     def netmask(self):
         if self._address_family == "ip":
             return self.route_info["netmask"]
-        elif self._address_family == "ipv6":
+        if self._address_family == "ipv6":
             return str(self.network_object.netmask)
 
     @property
@@ -2740,7 +2689,7 @@ class IOSXRRouteLine(IOSXRCfgLine):
     def masklen(self):
         if self._address_family == "ip":
             return self.network_object.prefixlen
-        elif self._address_family == "ipv6":
+        if self._address_family == "ipv6":
             masklen_str = self.route_info["masklength"] or "128"
             return int(masklen_str)
 
@@ -2750,7 +2699,7 @@ class IOSXRRouteLine(IOSXRCfgLine):
         try:
             if self._address_family == "ip":
                 return IPv4Obj(f"{self.network}/{self.netmask}", strict=False)
-            elif self._address_family == "ipv6":
+            if self._address_family == "ipv6":
                 return IPv6Obj(f"{self.network}/{self.masklen}")
         except BaseException:
             logger.critical(f"Found _address_family = '{self._address_family}''")
@@ -2763,9 +2712,8 @@ class IOSXRRouteLine(IOSXRCfgLine):
         if self._address_family == "ip":
             if self.next_hop_interface:
                 return self.next_hop_interface + " " + self.next_hop_addr
-            else:
-                return self.next_hop_addr
-        elif self._address_family == "ipv6":
+            return self.next_hop_addr
+        if self._address_family == "ipv6":
             retval = self.re_match_typed(
                 r"^ipv6\s+route\s+(vrf\s+)*\S+\s+(\S+)",
                 group=2,
@@ -2780,23 +2728,17 @@ class IOSXRRouteLine(IOSXRCfgLine):
     @property
     @logger.catch(reraise=True)
     def next_hop_interface(self):
-        if self._address_family == "ip":
+        if self._address_family == "ip" or self._address_family == "ipv6":
             if self.route_info["nh_intf"]:
                 return self.route_info["nh_intf"]
-            else:
-                return ""
-        elif self._address_family == "ipv6":
-            if self.route_info["nh_intf"]:
-                return self.route_info["nh_intf"]
-            else:
-                return ""
+            return ""
 
     @property
     @logger.catch(reraise=True)
     def next_hop_addr(self):
         if self._address_family == "ip":
             return self.route_info["nh_addr"] or ""
-        elif self._address_family == "ipv6":
+        if self._address_family == "ipv6":
             return self.route_info["nh_addr1"] or self.route_info["nh_addr2"] or ""
 
     @property
@@ -2804,29 +2746,26 @@ class IOSXRRouteLine(IOSXRCfgLine):
     def global_next_hop(self):
         if self._address_family == "ip" and bool(self.vrf):
             return bool(self.route_info["global"])
-        elif self._address_family == "ip" and not bool(self.vrf):
+        if self._address_family == "ip" and not bool(self.vrf):
             return True
-        elif self._address_family == "ipv6":
+        if self._address_family == "ipv6":
             ## ipv6 uses nexthop_vrf
             raise ValueError(f"[FATAL] ipv6 doesn't support a global_next_hop for '{self.text}'")
-        else:
-            raise ValueError(f"[FATAL] Could not identify global next-hop for '{self.text}'")
+        raise ValueError(f"[FATAL] Could not identify global next-hop for '{self.text}'")
 
     @property
     @logger.catch(reraise=True)
     def nexthop_vrf(self):
         if self._address_family == "ipv6":
             return self.route_info["nexthop_vrf"] or ""
-        else:
-            raise ValueError(f"[FATAL] ip doesn't support a global_next_hop for '{self.text}'")
+        raise ValueError(f"[FATAL] ip doesn't support a global_next_hop for '{self.text}'")
 
     @property
     @logger.catch(reraise=True)
     def admin_distance(self):
         if self.route_info["ad"]:
             return int(self.route_info["ad"])
-        else:
-            return 1
+        return 1
 
     @property
     @logger.catch(reraise=True)
@@ -2845,8 +2784,7 @@ class IOSXRRouteLine(IOSXRCfgLine):
     def route_name(self):
         if self.route_info["name"]:
             return self.route_info["name"]
-        else:
-            return ""
+        return ""
 
     @property
     @logger.catch(reraise=True)
@@ -2854,9 +2792,8 @@ class IOSXRRouteLine(IOSXRCfgLine):
         if self._address_family == "ip":
             if self.route_info["permanent"]:
                 return bool(self.route_info["permanent"])
-            else:
-                return False
-        elif self._address_family == "ipv6":
+            return False
+        if self._address_family == "ipv6":
             raise NotImplementedError
 
     @property
@@ -2864,8 +2801,7 @@ class IOSXRRouteLine(IOSXRCfgLine):
     def tracking_object_name(self):
         if bool(self.route_info["track"]):
             return self.route_info["track"]
-        else:
-            return ""
+        return ""
 
     @property
     @logger.catch(reraise=True)

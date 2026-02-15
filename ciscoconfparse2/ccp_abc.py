@@ -70,9 +70,7 @@ def get_brace_termination(line: str) -> str:
             brace_open = True
 
         if char in brace_chars or char.isspace():
-            if brace_open and char.isspace():
-                _retval.append(char)
-            elif char in brace_chars:
+            if brace_open and char.isspace() or char in brace_chars:
                 _retval.append(char)
 
         if brace_open and char == "{":
@@ -117,32 +115,32 @@ class BaseCfgLine:
         # Hack to accept old parameter names instead of finding all the places
         # where `all_text` and `text` are used and renaming attributes all
         # over the place
-        if isinstance(kwargs.get("all_text", None), list):
+        if isinstance(kwargs.get("all_text"), list):
             # The all_text kwarg is now called all_lines
             all_lines = kwargs.get("all_text")
-        if isinstance(kwargs.get("text", None), str):
+        if isinstance(kwargs.get("text"), str):
             # The text kwarg is now called line
             line = kwargs.get("text")
-        if isinstance(kwargs.get("linenum", None), int):
+        if isinstance(kwargs.get("linenum"), int):
             linenum = kwargs.get("linenum")
         else:
             linenum = -1
-        if isinstance(kwargs.get("children", None), list):
+        if isinstance(kwargs.get("children"), list):
             children = kwargs.get("children")
         else:
             children = []
 
-        if isinstance(kwargs.get("child_indent", None), int):
+        if isinstance(kwargs.get("child_indent"), int):
             child_indent = kwargs.get("child_indent")
         else:
             child_indent = 0
 
-        if kwargs.get("confobj", None) is not None:
+        if kwargs.get("confobj") is not None:
             confobj = kwargs.get("confobj")
         else:
             confobj = None
 
-        if isinstance(kwargs.get("comment_delimiters", None), list):
+        if isinstance(kwargs.get("comment_delimiters"), list):
             error = "BaseCfgLine() does not accept a comment_delimiters parameter"
             logger.critical(error)
             raise InvalidParameters(error)
@@ -165,8 +163,7 @@ class BaseCfgLine:
         self.feature = ""
         self._brace_termination = ""
 
-        # FIXME
-        #   Bypass @text.setter method for now...  @text.setter writes to
+        #   FIXME - Bypass @text.setter method for now...  @text.setter writes to
         #   self._text, but currently children do not associate correctly if
         #   @text.setter is used as-is...
         # self.text = text
@@ -252,17 +249,13 @@ class BaseCfgLine:
     # On BaseCfgLine()
     @logger.catch(reraise=True)
     def __gt__(self, val):
-        if self.linenum > val.linenum:
-            return True
-        return False
+        return self.linenum > val.linenum
 
     # On BaseCfgLine()
     @logger.catch(reraise=True)
     def __lt__(self, val):
         # Ref: http://stackoverflow.com/a/7152796/667301
-        if self.linenum < val.linenum:
-            return True
-        return False
+        return self.linenum < val.linenum
 
     # On BaseCfgLine()
     @property
@@ -603,9 +596,7 @@ class BaseCfgLine:
         :return: Whether this object has children
         :rtype: bool
         """
-        if isinstance(self.children, list) and len(self.children) > 0:
-            return True
-        return False
+        return isinstance(self.children, list) and len(self.children) > 0
 
     # On BaseCfgLine()
     @property
@@ -615,9 +606,7 @@ class BaseCfgLine:
         :return: Whether this object is a config line, blank line, or a comment.
         :rtype: bool
         """
-        if len(self.text.lstrip()) > 0 and not self.is_comment:
-            return True
-        return False
+        return len(self.text.lstrip()) > 0 and not self.is_comment
 
     # On BaseCfgLine()
     @junos_unsupported
@@ -749,9 +738,8 @@ class BaseCfgLine:
             offspring = self.all_children
 
         length = len([ll for cobj in offspring if cobj.re_search(ll)])
-        if length == 0:
-            return False
-        return True
+
+        return length != 0
 
     # On BaseCfgLine()
     @junos_unsupported
@@ -869,7 +857,7 @@ class BaseCfgLine:
             insertstr = insertstr.text
 
         if auto_indent is not None:
-            warning_msg = "BaseCfgLine().append_to_family(auto_indent) is " "no longer supported; instead use BaseCfgLine().insert_after()."
+            warning_msg = "BaseCfgLine().append_to_family(auto_indent) is no longer supported; instead use BaseCfgLine().insert_after()."
             logger.warning(warning_msg)
             warn(warning_msg)
 
@@ -879,7 +867,7 @@ class BaseCfgLine:
         auto_indent_width = self.ccp_ref.auto_indent_width
 
         if indent == 0:
-            error = "BaseCfgLine().append_to_family() with indent=0 " "is not supported since all child family members " "must be indented"
+            error = "BaseCfgLine().append_to_family() with indent=0 is not supported since all child family members must be indented"
             logger.error(error)
             raise NotImplementedError(error)
 
@@ -1331,7 +1319,7 @@ class BaseCfgLine:
         elif regex is None and isinstance(type_dict, dict):
             # If the regex did not match, None is returned... and we should
             # assign the default to the regex key...
-            for _regex_key in type_dict.keys():
+            for _regex_key in type_dict:
                 retval[_regex_key] = default
         else:
             error = f"`regex` must be the result of a regex match, and `type_dict` must be a dict of types; however we received `regex`: {type(regex)} and `type_dict`: {type(type_dict)}."
@@ -1803,7 +1791,7 @@ class BaseCfgLine:
                 return default
             return result_type(default)
 
-        elif isinstance(groupdict, dict):
+        if isinstance(groupdict, dict):
             if debug is True:
                 logger.debug(f"    {self}.re_match_iter_typed() is checking with `groupdict`={groupdict}")
 
@@ -1848,10 +1836,9 @@ class BaseCfgLine:
                 default=default,
                 debug=debug,
             )
-        else:
-            error = f"`groupdict` must be None or a `dict`, but we got {type(groupdict)}."
-            logger.critical(error)
-            raise ValueError(error)
+        error = f"`groupdict` must be None or a `dict`, but we got {type(groupdict)}."
+        logger.critical(error)
+        raise ValueError(error)
 
     # On BaseCfgLine()
     @logger.catch(reraise=True)

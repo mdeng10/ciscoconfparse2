@@ -53,7 +53,7 @@ _VIRTUAL_INTF_REGEX_STR = r"""^interface\s+(Loopback|Vlan|Tunnel|Dialer|Virtual-
 _VIRTUAL_INTF_REGEX = re.compile(_VIRTUAL_INTF_REGEX_STR, re.I)
 
 ##
-##-------------  IOS Configuration line object
+# -------------  IOS Configuration line object
 ##
 
 
@@ -227,7 +227,7 @@ class BaseFactoryLine(BaseCfgLine):
 
 
 ##
-##-------------  IOS Interface ABC
+# -------------  IOS Interface ABC
 ##
 
 # Valid method name substitutions:
@@ -267,8 +267,7 @@ class BaseFactoryInterfaceLine(BaseFactoryLine):
             else:
                 addr_str = f"{self.ipv4_addr}/{self.ipv4_masklength}"
             return f"<{self.classname} # {self.linenum} '{self.text.strip()}' primary_ipv4: '{addr_str}'>"
-        else:
-            return f"<{self.classname} # {self.linenum} '{self.text.strip()}' switchport: 'switchport'>"
+        return f"<{self.classname} # {self.linenum} '{self.text.strip()}' switchport: 'switchport'>"
 
     # This method is on BaseFactoryInterfaceLine()
     @logger.catch(reraise=True)
@@ -293,9 +292,8 @@ class BaseFactoryInterfaceLine(BaseFactoryLine):
     @logger.catch(reraise=True)
     def verbose(self) -> str:
         if not self.is_switchport:
-            return f"""<{self.classname} # {self.linenum} '{self.text}' """ f"""info: '{self.ipv4_addr_object or "No IPv4"}' """ f"""(child_indent: {self.child_indent} / len(children): {len(self.children)} """ f"""/ family_endpoint: {self.family_endpoint})>"""
-        else:
-            return f"""<{self.classname} # {self.linenum} '{self.text}' """ f"""info: 'switchport' (child_indent: {self.child_indent} """ f"""/ len(children): {len(self.children)} / family_endpoint: {self.family_endpoint})>"""
+            return f"""<{self.classname} # {self.linenum} '{self.text}' info: '{self.ipv4_addr_object or "No IPv4"}' (child_indent: {self.child_indent} / len(children): {len(self.children)} / family_endpoint: {self.family_endpoint})>"""
+        return f"""<{self.classname} # {self.linenum} '{self.text}' info: 'switchport' (child_indent: {self.child_indent} / len(children): {len(self.children)} / family_endpoint: {self.family_endpoint})>"""
 
     # This method is on BaseFactoryInterfaceLine()
     @classmethod
@@ -304,7 +302,7 @@ class BaseFactoryInterfaceLine(BaseFactoryLine):
         """Return a boolean for whether this object should be used based on the inputs"""
         raise NotImplementedError()
 
-    ##-------------  Basic interface properties
+    # -------------  Basic interface properties
 
     # This method is on BaseFactoryInterfaceLine()
     @property
@@ -963,7 +961,7 @@ class BaseFactoryInterfaceLine(BaseFactoryLine):
         """
         raise NotImplementedError()
 
-    ##-------------  CDP
+    # -------------  CDP
 
     # This method is on BaseFactoryInterfaceLine()
     @property
@@ -975,7 +973,7 @@ class BaseFactoryInterfaceLine(BaseFactoryLine):
         """
         raise NotImplementedError()
 
-    ##-------------  EoMPLS
+    # -------------  EoMPLS
 
     # This method is on BaseFactoryInterfaceLine()
     @property
@@ -997,7 +995,7 @@ class BaseFactoryInterfaceLine(BaseFactoryLine):
         """
         raise NotImplementedError()
 
-    ##-------------  HSRP
+    # -------------  HSRP
 
     # This method is on BaseFactoryInterfaceLine()
     @property
@@ -1089,7 +1087,7 @@ class BaseFactoryInterfaceLine(BaseFactoryLine):
         """
         raise NotImplementedError()
 
-    ##-------------  MAC ACLs
+    # -------------  MAC ACLs
 
     # This method is on BaseFactoryInterfaceLine()
     @property
@@ -1111,7 +1109,7 @@ class BaseFactoryInterfaceLine(BaseFactoryLine):
         """
         raise NotImplementedError()
 
-    ##-------------  IPv4 ACLs
+    # -------------  IPv4 ACLs
 
     # This method is on BaseFactoryInterfaceLine()
     @property
@@ -1199,7 +1197,7 @@ class BaseFactoryInterfaceLine(BaseFactoryLine):
 
 
 ##
-##-------------  IOS Interface Object
+# -------------  IOS Interface Object
 ##
 
 
@@ -1242,7 +1240,7 @@ class IOSIntfLine(BaseFactoryInterfaceLine):
 
 
 ##
-##-------------  IOS Interface Globals
+# -------------  IOS Interface Globals
 ##
 
 
@@ -1388,7 +1386,7 @@ class IOSAccessLine(BaseFactoryLine):
 
 
 ##
-##-------------  Base IOS Route line object
+# -------------  Base IOS Route line object
 ##
 
 
@@ -1467,7 +1465,7 @@ class BaseIOSRouteLine(BaseFactoryLine):
 
 
 ##
-##-------------  IOS Route line object
+# -------------  IOS Route line object
 ##
 
 _RE_IP_ROUTE = re.compile(
@@ -1540,9 +1538,7 @@ class IOSRouteLine(BaseFactoryLine):
     @classmethod
     @logger.catch(reraise=True)
     def is_object_for(cls, all_lines, line, index=None, re=re):
-        if (line[0:9] == "ip route ") or (line[0:11] == "ipv6 route "):
-            return True
-        return False
+        return (line[0:9] == "ip route ") or (line[0:11] == "ipv6 route ")
 
     # This method is on IOSRouteLine()
     @property

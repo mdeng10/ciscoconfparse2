@@ -25,6 +25,7 @@ from collections.abc import Iterator
 from copy import deepcopy
 from itertools import repeat
 from operator import attrgetter
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -56,7 +57,7 @@ def testValues_save_as_01():
     # Save to disk and then delete the config
     filename = "fixtures/plain_text/_that.txt"
     parse.save_as(filename)
-    os.remove(filename)
+    Path(filename).unlink()
 
 
 def testValues_pickle_01():
@@ -75,17 +76,17 @@ def testValues_pickle_01():
 
     # Save to disk as a pickle
     filename = "fixtures/plain_text/_test_01.pkl"
-    with open(filename, "wb") as fh:
+    with Path(filename).open("wb") as fh:
         pickle.dump(parse, fh)
 
     # Load pickle from disk...
-    with open(filename, "rb") as fh:
+    with Path(filename).open("rb") as fh:
         parse = pickle.load(fh)
 
     assert isinstance(parse, CiscoConfParse)
     assert len(parse.objs) == 7
 
-    os.remove(filename)
+    Path(filename).unlink()
 
 
 def testValues_return_iterator():
@@ -867,7 +868,7 @@ def testParse_invalid_filepath_01():
 
     # Use a filename that should not exist...
     bad_filename = "./45faa63b-92e0-4449-a247-f20510d50c1b.txt"
-    assert os.path.isfile(bad_filename) is False
+    assert Path(bad_filename).is_file() is False
 
     # ccp_logger_control(action="disable")  # Silence logs about the missing file error
 
@@ -880,7 +881,7 @@ def testParse_invalid_filepath_01():
 def testParse_invalid_filepath_02():
     bad_filename = "this is not a filename or list"
     # Ensure the bad filename does not exist...
-    assert os.path.isfile(bad_filename) is False
+    assert Path(bad_filename).is_file() is False
 
     # Test that we get FileNotFoundError() from CiscoConfParse(bad_filename)
     with pytest.raises(FileNotFoundError):
@@ -2018,7 +2019,7 @@ def testValues_find_object_branches_06():
         "      state down",
     ]
 
-    retval = list()
+    retval = []
     parse = CiscoConfParse(config)
     branches = parse.find_object_branches([r"pool", r"members", r"snack", "address|session"])
     for branch in branches:
@@ -2048,7 +2049,7 @@ def testValues_find_object_branches_07():
         "      state down",
     ]
 
-    retval = list()
+    retval = []
     parse = CiscoConfParse(config)
     branches = parse.find_object_branches([r"pool", r"members", r"lunch", "address|session"])
     for branch in branches:
@@ -2089,7 +2090,7 @@ def testValues_find_object_branches_08():
         "      state down",
     ]
 
-    retval = list()
+    retval = []
     parse = CiscoConfParse(config)
     branches = parse.find_object_branches([r"pool", r"", r"lunch", "address|session"])
     for branch in branches:
@@ -2268,7 +2269,7 @@ def testValues_replace_children_01(parse_c01):
         " power inline static max 30000",
     ]
 
-    uut = list()
+    uut = []
     for obj in parse_c01.find_child_objects("GigabitEthernet4/", "power inline static max 7000"):
         obj.re_sub("max 7000", "max 30000")
         uut.append(obj.text)
@@ -2679,7 +2680,7 @@ def testValues_ignore_ws():
 
 def testValues_negative_ignore_ws():
     config = ["set snmp community read-only     myreadonlystring"]
-    correct_result = list()
+    correct_result = []
     parse = CiscoConfParse(config)
     uut = parse.find_objects("set snmp community read-only myreadonlystring", ignore_ws=False)
     assert correct_result == uut
@@ -2687,7 +2688,7 @@ def testValues_negative_ignore_ws():
 
 def testValues_IOSCfgLine_all_parents(parse_c01):
     """Ensure IOSCfgLine.all_parents finds all parents, recursively"""
-    correct_result = list()
+    correct_result = []
     # mockobj pretends to be the IOSCfgLine object
     with patch(__name__ + "." + "IOSCfgLine") as mockobj:
         vals = [("policy-map QOS_1", 0), (" class SILVER", 4)]
@@ -2866,7 +2867,7 @@ def testValues_syntax_ios_nofactory_find_objects(parse_c01):
         ("interface GigabitEthernet4/7", 43),
         ("interface GigabitEthernet4/8", 47),
     ]
-    result_correct = list()
+    result_correct = []
     for config_line, linenum in lines:
         # Mock up the correct object
         obj = IOSCfgLine(all_lines=lines, line=config_line)
@@ -3332,12 +3333,12 @@ def testValues_find_objects_factory_01(parse_c01_factory):
             ("interface GigabitEthernet4/8", 47),
         ]
         ## Simulate correct IOSIntfLine objects...
-        correct_result = list()
+        correct_result = []
 
         # deepcopy a unique mock for every val with itertools.repeat()
         _ = [deepcopy(ii) for ii in repeat(mockobj, len(vals))]
         # correct_intf simulates an IOSCfgLine so we can test against it
-        #########for idx, correct_intf in enumerate(mockobjs):
+        # for idx, correct_intf in enumerate(mockobjs):
         for idx in range(0, len(vals)):
             correct_intf = BaseCfgLine(text=vals[idx][0])
             correct_intf.linenum = vals[idx][1]  # correct line numbers
@@ -3688,7 +3689,7 @@ def test_BaseCfgLine_has_child_with(parse_c03):
         "interface GigabitEthernet4/5",
         "interface GigabitEthernet4/6",
     ]
-    test_output = list()
+    test_output = []
     for intf in parse_c03.find_objects(r"^interface\s+\w+?thernet"):
         if intf.has_child_with("switchport access vlan"):
             test_output.append(intf.text)

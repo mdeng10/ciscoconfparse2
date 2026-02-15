@@ -40,6 +40,7 @@ import os
 import pickle
 import sys
 from ipaddress import IPv4Address, IPv4Network, IPv6Address, IPv6Network
+from pathlib import Path
 
 import pytest
 from hypothesis import given, strategies
@@ -74,15 +75,15 @@ def testValues_pickle_01():
 
     # Save to disk as a pickle
     filename = "fixtures/plain_text/_test_01.pkl"
-    with open(filename, "wb") as fh:
+    with Path(filename).open("wb") as fh:
         pickle.dump(addr, fh)
 
     # Load pickle from disk...
-    addr = pickle.load(open(filename, "rb"))
+    addr = pickle.load(Path(filename).open("rb"))
 
     assert isinstance(addr, IPv4Obj)
 
-    os.remove(filename)
+    Path(filename).unlink()
 
 
 @pytest.mark.parametrize(
@@ -145,10 +146,10 @@ def test_IPv6_REGEX(addr):
         "0:1",  # Loopback, insufficient bytes
         ":1",  # Loopback, insufficient bytes
         # FIXME: The following *should* fail, but I'm not failing on them
-        #':::beef',                     # FAIL Too many leading colons
-        #'fe80::dead::beef',            # FAIL multiple double colons
-        #'::1::',                       # FAIL too many double colons
-        #'fe80:0:0:0:0:0:dead:beef::',  # FAIL Too many bytes with double colons
+        # ':::beef',                     # FAIL Too many leading colons
+        # 'fe80::dead::beef',            # FAIL multiple double colons
+        # '::1::',                       # FAIL too many double colons
+        # 'fe80:0:0:0:0:0:dead:beef::',  # FAIL Too many bytes with double colons
     ],
 )
 def test_negative_IPv6_REGEX(addr):

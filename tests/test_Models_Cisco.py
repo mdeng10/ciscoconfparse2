@@ -730,7 +730,7 @@ def testVal_IOSIntfLine_abbvs(parse_c03_factory):
             "atm 5/0/1",
         },
     }
-    test_result = dict()
+    test_result = {}
     for intf_obj in cfg.find_objects("^interface"):
         test_result[intf_obj.text] = intf_obj.abbvs
     assert test_result == result_correct
@@ -776,7 +776,7 @@ def testVal_IOSIntfLine_ordinal_list(parse_c03_factory):
         "interface ATM5/0/0.32 point-to-point": (5, 0, 0, 32, -1, -1),
         "interface ATM5/0/1": (5, 0, 1, -1, -1, -1),
     }
-    test_result = dict()
+    test_result = {}
     ## Parse all interface objects in c01 and check ordinal_list
     for intf_obj in cfg.find_objects("^interface"):
         test_result[intf_obj.text] = intf_obj.ordinal_list
@@ -800,7 +800,7 @@ def testVal_IOSIntfLine_interface_number(parse_c03_factory):
         "interface ATM5/0/0.32 point-to-point": "5/0/0",
         "interface ATM5/0/1": "5/0/1",
     }
-    test_result = dict()
+    test_result = {}
     ## Parse all interface objects in self.c01 and check interface_number
     for intf_obj in cfg.find_objects("^interface"):
         test_result[intf_obj.text] = intf_obj.interface_number
@@ -824,7 +824,7 @@ def testVal_IOSIntfLine_subinterface_number(parse_c03_factory):
         "interface ATM5/0/0.32 point-to-point": "5/0/0.32",
         "interface ATM5/0/1": "5/0/1",
     }
-    test_result = dict()
+    test_result = {}
     ## Parse all interface objects in c01 and check subinterface_number
     for intf_obj in cfg.find_objects("^interface"):
         test_result[intf_obj.text] = intf_obj.subinterface_number
@@ -848,7 +848,7 @@ def testVal_IOSIntfLine_port(parse_c03_factory):
         "interface ATM5/0/0.32 point-to-point": 0,
         "interface ATM5/0/1": 1,
     }
-    test_result = dict()
+    test_result = {}
     ## Parse all interface objects in c01 and check port number
     for intf_obj in cfg.find_objects("^interface"):
         test_result[intf_obj.text] = intf_obj.port
@@ -895,7 +895,7 @@ def testVal_IOSIntfLine_description_01(parse_c03_factory):
         "interface ATM5/0/0.32 point-to-point": "",
         "interface ATM5/0/1": "",
     }
-    test_result = dict()
+    test_result = {}
     ## Parse all interface objects in self.c01 and check description
     for intf_obj in cfg.find_objects("^interface"):
         test_result[intf_obj.text] = intf_obj.description
@@ -920,7 +920,7 @@ def testVal_IOSIntfLine_description_02():
         "interface GigabitEthernet1/2": "Z",
     }
     cfg = CiscoConfParse(gh269_conf, factory=True)
-    test_result = dict()
+    test_result = {}
     ## Parse all interface objects in cfg and check description
     for intf_obj in cfg.find_objects("^interface"):
         test_result[intf_obj.text] = intf_obj.description
@@ -944,7 +944,7 @@ def testVal_IOSIntfLine_manual_bandwidth(parse_c03_factory):
         "interface ATM5/0/0.32 point-to-point": -1,
         "interface ATM5/0/1": -1,
     }
-    test_result = dict()
+    test_result = {}
     ## Parse all interface objects in self.c01 and check bandwidth
     for intf_obj in cfg.find_objects("^interface"):
         test_result[intf_obj.text] = intf_obj.manual_bandwidth
@@ -968,7 +968,7 @@ def testVal_IOSIntfLine_manual_delay(parse_c03_factory):
         "interface ATM5/0/0.32 point-to-point": -1,
         "interface ATM5/0/1": -1,
     }
-    test_result = dict()
+    test_result = {}
     ## Parse all interface objects in c01 and check delay
     for intf_obj in cfg.find_objects("^interface"):
         test_result[intf_obj.text] = intf_obj.manual_delay
@@ -992,7 +992,7 @@ def testVal_IOSIntfLine_manual_holdqueue_in(parse_c03_factory):
         "interface ATM5/0/0.32 point-to-point": -1,
         "interface ATM5/0/1": -1,
     }
-    test_result = dict()
+    test_result = {}
     ## Parse all interface objects in c01 and check holdqueue in
     for intf_obj in cfg.find_objects("^interface"):
         test_result[intf_obj.text] = intf_obj.manual_holdqueue_in
@@ -1016,7 +1016,7 @@ def testVal_IOSIntfLine_manual_holdqueue_out(parse_c03_factory):
         "interface ATM5/0/0.32 point-to-point": -1,
         "interface ATM5/0/1": -1,
     }
-    test_result = dict()
+    test_result = {}
     ## Parse all interface objects in c01 and check holdqueue out
     for intf_obj in cfg.find_objects("^interface"):
         test_result[intf_obj.text] = intf_obj.manual_holdqueue_out
@@ -1040,7 +1040,7 @@ def testVal_IOSIntfLine_manual_encapsulation(parse_c03_factory):
         "interface ATM5/0/0.32 point-to-point": "",
         "interface ATM5/0/1": "",
     }
-    test_result = dict()
+    test_result = {}
     ## Parse all interface objects in c01 and check encapsulation
     for intf_obj in cfg.find_objects("^interface"):
         test_result[intf_obj.text] = intf_obj.manual_encapsulation
@@ -1064,7 +1064,7 @@ def testVal_IOSIntfLine_has_mpls(parse_c03_factory):
         "interface ATM5/0/0.32 point-to-point": False,
         "interface ATM5/0/1": False,
     }
-    test_result = dict()
+    test_result = {}
     ## Parse all interface objects in c01 and check has_mpls
     for intf_obj in cfg.find_objects("^interface"):
         test_result[intf_obj.text] = intf_obj.has_mpls
@@ -1088,7 +1088,7 @@ def testVal_IOSIntfLine_ipv4_addr_object01(parse_c03_factory):
         "interface ATM5/0/0.32 point-to-point": IPv4Obj("1.1.1.5/30", strict=False),
         "interface ATM5/0/1": IPv4Obj(),
     }
-    test_result = dict()
+    test_result = {}
     ## Parse all interface objects in c01 and check ipv4_addr_object
     for intf_obj in cfg.find_objects("^interface"):
         test_result[intf_obj.text] = intf_obj.ipv4_addr_object
@@ -1143,7 +1143,7 @@ def testVal_IOSIntfLine_has_autonegotiation(parse_c03_factory):
         "interface ATM5/0/0.32 point-to-point": False,
         "interface ATM5/0/1": False,
     }
-    test_result = dict()
+    test_result = {}
     ## Parse all interface objects in c01 and check has_autonegotiation
     for intf_obj in cfg.find_objects("^interface"):
         test_result[intf_obj.text] = intf_obj.has_autonegotiation
@@ -1167,7 +1167,7 @@ def testVal_IOSIntfLine_manual_speed(parse_c03_factory):
         "interface ATM5/0/0.32 point-to-point": False,
         "interface ATM5/0/1": False,
     }
-    test_result = dict()
+    test_result = {}
     ## Parse all interface objects in c01 and check manual_speed
     for intf_obj in cfg.find_objects("^interface"):
         test_result[intf_obj.text] = intf_obj.manual_speed > -1
@@ -1191,7 +1191,7 @@ def testVal_IOSIntfLine_manual_duplex(parse_c03_factory):
         "interface ATM5/0/0.32 point-to-point": False,
         "interface ATM5/0/1": False,
     }
-    test_result = dict()
+    test_result = {}
     ## Parse all interface objects in c01 and check manual_duplex
     for intf_obj in cfg.find_objects("^interface"):
         test_result[intf_obj.text] = bool(intf_obj.manual_duplex)
@@ -1215,7 +1215,7 @@ def testVal_IOSIntfLine_manual_carrierdelay_01(parse_c03_factory):
         "interface ATM5/0/0.32 point-to-point": True,
         "interface ATM5/0/1": True,
     }
-    test_result = dict()
+    test_result = {}
     ## Parse all interface objects in self.c01 and check manual_carrierdelay
     for intf_obj in cfg.find_objects("^interface"):
         test_result[intf_obj.text] = bool(intf_obj.manual_carrierdelay)
@@ -1239,7 +1239,7 @@ def testVal_IOSIntfLine_manual_carrierdelay_02(parse_c03_factory):
         "interface ATM5/0/0.32 point-to-point": -1.0,
         "interface ATM5/0/1": -1.0,
     }
-    test_result = dict()
+    test_result = {}
     ## Parse all interface objects in c01 and check manual_carrierdelay
     for intf_obj in cfg.find_objects("^interface"):
         test_result[intf_obj.text] = intf_obj.manual_carrierdelay
@@ -1263,7 +1263,7 @@ def testVal_IOSIntfLine_manual_clock_rate(parse_c03_factory):
         "interface ATM5/0/0.32 point-to-point": -1,
         "interface ATM5/0/1": -1,
     }
-    test_result = dict()
+    test_result = {}
     ## Parse all interface objects in self.c01 and check manual_clock_rate
     for intf_obj in cfg.find_objects("^interface"):
         test_result[intf_obj.text] = intf_obj.manual_clock_rate
@@ -1287,7 +1287,7 @@ def testVal_IOSIntfLine_manual_mtu(parse_c03_factory):
         "interface ATM5/0/0.32 point-to-point": -1,
         "interface ATM5/0/1": -1,
     }
-    test_result = dict()
+    test_result = {}
     ## Parse all interface objects in c01 and check manual_mtu
     for intf_obj in cfg.find_objects("^interface"):
         test_result[intf_obj.text] = intf_obj.manual_mtu
@@ -1311,7 +1311,7 @@ def testVal_IOSIntfLine_manual_mpls_mtu(parse_c03_factory):
         "interface ATM5/0/0.32 point-to-point": -1,
         "interface ATM5/0/1": -1,
     }
-    test_result = dict()
+    test_result = {}
     ## Parse all interface objects in c01 and check manual_mpls_mtu
     for intf_obj in cfg.find_objects("^interface"):
         test_result[intf_obj.text] = intf_obj.manual_mpls_mtu
@@ -1335,7 +1335,7 @@ def testVal_IOSIntfLine_manual_ip_mtu(parse_c03_factory):
         "interface ATM5/0/0.32 point-to-point": -1,
         "interface ATM5/0/1": -1,
     }
-    test_result = dict()
+    test_result = {}
     ## Parse all interface objects in c01 and check manual_ip_mtu
     for intf_obj in cfg.find_objects("^interface"):
         test_result[intf_obj.text] = intf_obj.manual_ip_mtu
@@ -1359,7 +1359,7 @@ def testVal_IOSIntfLine_is_shutdown(parse_c03_factory):
         "interface ATM5/0/0.32 point-to-point": False,
         "interface ATM5/0/1": True,
     }
-    test_result = dict()
+    test_result = {}
     ## Parse all interface objects in c01 and check is_shutdown
     for intf_obj in cfg.find_objects("^interface"):
         test_result[intf_obj.text] = intf_obj.is_shutdown
@@ -1383,7 +1383,7 @@ def testVal_IOSIntfLine_vrf01(parse_c03_factory):
         "interface ATM5/0/0.32 point-to-point": "",
         "interface ATM5/0/1": "",
     }
-    test_result = dict()
+    test_result = {}
     ## Parse all interface objects in c01 and check vrf
     for intf_obj in cfg.find_objects("^interface"):
         test_result[intf_obj.text] = intf_obj.vrf
@@ -1421,7 +1421,7 @@ def testVal_IOSIntfLine_ipv4_addr(parse_c03_factory):
         "interface ATM5/0/0.32 point-to-point": "1.1.1.5",
         "interface ATM5/0/1": "",
     }
-    test_result = dict()
+    test_result = {}
     ## Parse all interface objects in c01 and check ipv4_addr
     for intf_obj in cfg.find_objects("^interface"):
         test_result[intf_obj.text] = intf_obj.ipv4_addr
@@ -1445,7 +1445,7 @@ def testVal_IOSIntfLine_ipv4_netmask(parse_c03_factory):
         "interface ATM5/0/0.32 point-to-point": "255.255.255.252",
         "interface ATM5/0/1": "",
     }
-    test_result = dict()
+    test_result = {}
     ## Parse all interface objects in c01 and check ipv4_netmask
     for intf_obj in cfg.find_objects("^interface"):
         test_result[intf_obj.text] = intf_obj.ipv4_netmask
@@ -1469,7 +1469,7 @@ def testVal_IOSIntfLine_ipv4_masklength(parse_c03_factory):
         "interface ATM5/0/0.32 point-to-point": 30,
         "interface ATM5/0/1": -1,
     }
-    test_result = dict()
+    test_result = {}
     ## Parse all interface objects in c01 and check ipv4_masklength
     for intf_obj in cfg.find_objects("^interface"):
         test_result[intf_obj.text] = intf_obj.ipv4_masklength
@@ -1493,7 +1493,7 @@ def testVal_IOSIntfLine_in_ipv4_subnet(parse_c03_factory):
         "interface ATM5/0/0.32 point-to-point": True,
         "interface ATM5/0/1": False,
     }
-    test_result = dict()
+    test_result = {}
     ## Parse all interface objects in c01 and check in_ipv4_subnet
     ##   where the subnet is 1.1.0.0/22
     test_network = IPv4Obj("1.1.0.0/22", strict=False)
@@ -1519,7 +1519,7 @@ def testVal_IOSIntfLine_in_ipv4_subnets(parse_c03_factory):
         "interface ATM5/0/0.32 point-to-point": True,
         "interface ATM5/0/1": False,
     }
-    test_result = dict()
+    test_result = {}
     ## Parse all interface objects in c01 and check in_ipv4_subnets
     test_network1 = IPv4Obj("1.1.0.0/23", strict=False)
     test_network2 = IPv4Obj("1.1.2.0/23", strict=False)
@@ -1547,7 +1547,7 @@ def testVal_IOSIntfLine_has_no_icmp_unreachables(parse_c03_factory):
         "interface ATM5/0/0.32 point-to-point": True,
         "interface ATM5/0/1": False,
     }
-    test_result = dict()
+    test_result = {}
     ## Parse all interface objects in c01 and check has_no_icmp_unreachables
     for intf_obj in cfg.find_objects("^interface"):
         test_result[intf_obj.text] = intf_obj.has_no_icmp_unreachables
@@ -1571,7 +1571,7 @@ def testVal_IOSIntfLine_has_no_icmp_redirects(parse_c03_factory):
         "interface ATM5/0/0.32 point-to-point": True,
         "interface ATM5/0/1": False,
     }
-    test_result = dict()
+    test_result = {}
     ## Parse all interface objects in c01 and check has_no_icmp_redirects
     for intf_obj in cfg.find_objects("^interface"):
         test_result[intf_obj.text] = intf_obj.has_no_icmp_redirects
@@ -1595,7 +1595,7 @@ def testVal_IOSIntfLine_has_no_ip_proxyarp(parse_c03_factory):
         "interface ATM5/0/0.32 point-to-point": True,
         "interface ATM5/0/1": False,
     }
-    test_result = dict()
+    test_result = {}
     ## Parse all interface objects in c01 and check has_no_ip_proxyarp
     for intf_obj in cfg.find_objects("^interface"):
         test_result[intf_obj.text] = intf_obj.has_no_ip_proxyarp
@@ -1834,20 +1834,20 @@ def testVal_IOSRouteLine_12():
     line = "ipv6 route 2001::/16 Tunnel0 2002::1 multicast"
     cfg = CiscoConfParse([line], factory=True)
     obj = cfg.config_objs[0]
-    assert "ipv6" == obj.address_family
-    assert "" == obj.vrf
-    assert "2001::" == obj.network
-    assert "ffff::" == obj.netmask
-    assert 16 == obj.masklen
-    assert "Tunnel0" == obj.next_hop_interface
-    assert "2002::1" == obj.next_hop_addr
+    assert obj.address_family == "ipv6"
+    assert obj.vrf == ""
+    assert obj.network == "2001::"
+    assert obj.netmask == "ffff::"
+    assert obj.masklen == 16
+    assert obj.next_hop_interface == "Tunnel0"
+    assert obj.next_hop_addr == "2002::1"
     assert obj.multicast is True
     # assert ''==obj.tracking_object_name
     # assert ''==obj.route_name
     # assert obj.permanent is False
     # assert obj.global_next_hop is True    # All non-vrf routes have global NHs
-    assert 1 == obj.admin_distance
-    assert "" == obj.tag
+    assert obj.admin_distance == 1
+    assert obj.tag == ""
 
 
 ###

@@ -65,7 +65,7 @@ result_special_2 = timeit(
 print("SPECIAL REGEX2 ", round(result_special_2, 4))
 
 result_standard = timeit(
-    #'rr = re.compile(r"(\w?)(?P<numbers>\d+)(\S+)");ss=rr.search("");ss.groups();ss.groupdict()',
+    # 'rr = re.compile(r"(\w?)(?P<numbers>\d+)(\S+)");ss=rr.search("");ss.groups();ss.groupdict()',
     'ss = rr.search("FoMike12325234234nananana");ss.groups();ss.groupdict()',
     setup=r'import re;rr = re.compile(r"(\w?)(?P<numbers3>\d+)(\S+)")',
     number=iterations,

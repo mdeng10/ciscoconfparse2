@@ -4,6 +4,7 @@ import re
 import shlex
 import sys
 from argparse import Action, ArgumentParser, FileType, Namespace, _SubParsersAction
+from pathlib import Path
 from typing import Any
 
 import attrs
@@ -51,8 +52,7 @@ def ccp_script_entry(cli_args: str = ""):
     if return_retval:
         # Only return the retval during unit tests...
         return cliapp
-    else:
-        return None
+    return None
 
 
 @attrs.define(repr=False)
@@ -657,10 +657,12 @@ class CliApplication:
     def diff_command(self) -> None:
         """Implement the CLI diff command"""
 
-        with open(self.file_list[0]) as fh0:
+        with Path(self.file_list[0]).open() as fh0:
             file0 = fh0.read()
-        with open(self.file_list[1]) as fh1:
+
+        with Path(self.file_list[1]).open() as fh1:
             file1 = fh1.read()
+
         diff = Diff(file0, file1)
 
         if self.diff_method == "diff":
@@ -732,17 +734,16 @@ class CliApplication:
             # had an invalid ip address like 172.16.355555
             return False
 
-        elif isinstance(retval, list):
+        if isinstance(retval, list):
             # Multiple IP address mode...
             for match in retval:
                 self.stdout.append(match)
 
             return True
 
-        else:
-            error = f"mode: {mode} is invalid"
-            logger.critical(error)
-            raise ValueError(error)
+        error = f"mode: {mode} is invalid"
+        logger.critical(error)
+        raise ValueError(error)
 
     @logger.catch(reraise=True)
     @typechecked
@@ -773,14 +774,10 @@ class CliApplication:
                         append_addr = False
 
                         if self.show_cidr is False:
-                            if self.show_networks is False and str(addr.ip) not in retval:
-                                append_addr = True
-                            elif self.show_networks is True and str(addr.as_cidr_net) not in retval:
+                            if self.show_networks is False and str(addr.ip) not in retval or self.show_networks is True and str(addr.as_cidr_net) not in retval:
                                 append_addr = True
                         else:
-                            if self.show_networks is False and str(addr.as_cidr_addr) not in retval:
-                                append_addr = True
-                            elif self.show_networks is True and str(addr.as_cidr_net) not in retval:
+                            if self.show_networks is False and str(addr.as_cidr_addr) not in retval or self.show_networks is True and str(addr.as_cidr_net) not in retval:
                                 append_addr = True
 
                         # Append if not already in retval...
@@ -821,12 +818,12 @@ class CliApplication:
             if addr.version == 4 and addr.prefixlength == 32:
                 # IPv4 Host, --exclude-hosts applies
                 return True
-            elif addr.version == 6 and addr.prefixlength == 128:
+            if addr.version == 6 and addr.prefixlength == 128:
                 # IPv6 Host, --exclude-hosts applies
                 return True
 
             # Only do if we are not explicitly showing networks (instead of hosts)...
-            elif not self.show_networks:
+            if not self.show_networks:
                 # it's also a host if the network address not equal the ip address
                 if str(addr.as_cidr_net) != str(addr.as_cidr_addr):
                     return True
@@ -845,16 +842,15 @@ class CliApplication:
                 # (even though technically a /32 is also a network)
                 return False
 
-            elif addr.version == 6 and addr.prefixlength == 128:
+            if addr.version == 6 and addr.prefixlength == 128:
                 # IPv6 Host, --exclude-networks does not apply
                 # (even though technically a /128 is also a network)
                 return False
 
-            else:
-                # Since we are showing networks, any address (on the
-                # subnet number or not) should return True if the
-                # cases above did not match.
-                return True
+            # Since we are showing networks, any address (on the
+            # subnet number or not) should return True if the
+            # cases above did not match.
+            return True
 
         return False
 
@@ -891,10 +887,7 @@ class CliApplication:
                         continue
 
                     if (addr.version == subnet.version) and (addr in subnet):
-                        if self.check_ip46_net_exclusion_args(addr):
-                            exclude_line = True
-                            append_line = False
-                        elif self.check_ip46_host_exclusion_args(addr):
+                        if self.check_ip46_net_exclusion_args(addr) or self.check_ip46_host_exclusion_args(addr):
                             exclude_line = True
                             append_line = False
                         else:
@@ -934,17 +927,16 @@ class CliApplication:
             # had an invalid ip address like 172.16.355555
             return False
 
-        elif isinstance(retval, list):
+        if isinstance(retval, list):
             # Multiple IP address mode...
             for match in retval:
                 self.stdout.append(match)
 
             return True
 
-        else:
-            error = "Something unexpected happened.  Please file this bug on github.com/mpenning/ciscoconfparse2"
-            logger.critical(error)
-            raise ValueError(error)
+        error = "Something unexpected happened.  Please file this bug on github.com/mpenning/ciscoconfparse2"
+        logger.critical(error)
+        raise ValueError(error)
 
     @logger.catch(reraise=True)
     def find_maceui_addr_matches(
@@ -1058,13 +1050,7 @@ class MACEUISearch:
         # Search through all valid mac formats for a regex match (contained
         #    in the mac_regex_strs set of regex strings...)
         for rgx in mac_regex_strs:
-            if re.search(rgx, self.mac_retval.dash, re.I):
-                return True
-            elif re.search(rgx, self.mac_retval.colon, re.I):
-                return True
-            elif re.search(rgx, self.mac_retval.cisco, re.I):
-                return True
-            elif re.search(rgx, self.mac_retval.dash.replace("-", ""), re.I):
+            if re.search(rgx, self.mac_retval.dash, re.I) or re.search(rgx, self.mac_retval.colon, re.I) or re.search(rgx, self.mac_retval.cisco, re.I) or re.search(rgx, self.mac_retval.dash.replace("-", ""), re.I):
                 return True
         # return False if there was no match above...
         return False
@@ -1072,10 +1058,9 @@ class MACEUISearch:
     def __str__(self):
         if isinstance(self.mac_retval, MACObj):
             return f"""<MACEUISearch word: {self.word}, found: MAC {self.mac_retval.cisco}>"""
-        elif isinstance(self.mac_retval, EUI64Obj):
+        if isinstance(self.mac_retval, EUI64Obj):
             return f"""<MACEUISearch word: {self.word}, found: EUI64 {self.mac_retval.cisco}>"""
-        else:
-            return f"""<MACEUISearch word: {self.word}, found: None>"""
+        return f"""<MACEUISearch word: {self.word}, found: None>"""
 
     def __repr__(self):
         return str(self)
