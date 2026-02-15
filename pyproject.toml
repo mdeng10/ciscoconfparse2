@@ -192,7 +192,6 @@ select = [
     "F",        # Pyflakes rules
     "I",        # I: isort-compatible import sorting
     "C4",       # Catch incorrect use of comprehensions, dict, list, etc
-    "C408",     # Convert dict() syntax to braces (i.e. {})
     "PTH",      # Use pathlib instead of os.path
     "UP",       # Warn if certain things can changed due to newer Python versions
 ]
