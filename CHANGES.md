@@ -6,6 +6,11 @@
 - Summary:
     - To be determined
 
+## Version: 0.9.13
+
+- Summary:
+    - Fix bugs in `models_cisco.py`, `models_nxos.py` and `models_iosxr.py`
+
 ## Version: 0.9.12
 
 - Summary:
