@@ -184,9 +184,30 @@ skip-magic-trailing-comma = false
 docstring-code-format = true
 
 [tool.ruff.lint]
+preview = true
 # Enable core linting rules:
-# E/F: Pyflakes and pycodestyle errors (essential checks)
-# W: Pycodestyle warnings
-# I: isort-compatible import sorting
-# UP: pyupgrade rules (modern Python syntax)
-select = ["E", "W", "F", "I", "UP"]
+select = [
+    "E",        # E/F: Pyflakes and pycodestyle errors (essential checks)
+    "W",        # W: Pycodestyle warnings
+    "F",        # Pyflakes rules
+    "I",        # I: isort-compatible import sorting
+    "UP",       # UP: pyupgrade rules (modern Python syntax)
+]
+
+extend-select = [
+    "W",        # PyCodeStyle warnings
+    "E",        # PyCodeStyle errors
+    "I",        # Sort imports properly
+    "UP",       # Warn if certain things can changed due to newer Python versions
+    "C4",       # Catch incorrect use of comprehensions, dict, list, etc
+    "FA",       # Enforce from __future__ import annotations
+    "ISC",      # Good use of string concatenation
+#    "ICN",      # Use common import conventions
+    "RET",      # Good return practices
+    "SIM",      # Common simplification rules
+    "TID",      # Some good import practices
+    "TC",       # Enforce importing certain types in a TYPE_CHECKING block
+    "PTH",      # Use pathlib instead of os.path
+    "TD",       # Be diligent with TODO comments
+    "NPY",      # Some numpy-specific things
+]
