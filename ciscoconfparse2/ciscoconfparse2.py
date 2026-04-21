@@ -3726,7 +3726,7 @@ class Diff(HasTraits):
     A class to implement diff operations with hier_config
     """
 
-    host = Instance(hier_config.Host)
+    remediation = Instance(hier_config.WorkflowRemediation)
 
     @logger.catch(reraise=True)
     def __init__(
@@ -3811,26 +3811,21 @@ class Diff(HasTraits):
         except FileNotFoundError:
             pass
 
-        # For now, we use {} instead of `options_ios.yml`
-        if syntax in {
-            "ios",
-            "nxos",
-            "iosxr",
-        }:
-            self.host = hier_config.Host("example_hostname", syntax, {})
-        elif syntax in {
-            "asa",
-            "junos",
-        }:
-            # for all other cases, default to 'ios' for now...
-            self.host = hier_config.Host("example_hostname", "ios", {})
+        # hier_config v3 mapping
+        if syntax in {"ios", "asa", "junos"}:
+            platform = hier_config.Platform.CISCO_IOS
+        elif syntax == "nxos":
+            platform = hier_config.Platform.CISCO_NXOS
+        elif syntax == "iosxr":
+            platform = hier_config.Platform.CISCO_XR
         else:
             raise ValueError(f"Diff(syntax='{syntax}') is an invalid syntax.")
 
         # Old configuration
-        self.host.load_running_config(old_config)
+        running_config = hier_config.get_hconfig(platform, old_config)
         # New configuration
-        self.host.load_generated_config(new_config)
+        generated_config = hier_config.get_hconfig(platform, new_config)
+        self.remediation = hier_config.WorkflowRemediation(running_config, generated_config)
 
     @logger.catch(reraise=True)
     def get_diff(self) -> list[str]:
@@ -3839,7 +3834,7 @@ class Diff(HasTraits):
         :rtype: List[str]
         """
         retval = []
-        diff_config = self.host.remediation_config()
+        diff_config = self.remediation.remediation_config
         for obj in diff_config.all_children_sorted():
             retval.append(obj.cisco_style_text())
         return retval
@@ -3851,7 +3846,7 @@ class Diff(HasTraits):
         :rtype: List[str]
         """
         retval = []
-        rollback_config = self.host.rollback_config()
+        rollback_config = self.remediation.rollback_config
         for obj in rollback_config.all_children_sorted():
             retval.append(obj.cisco_style_text())
         return retval

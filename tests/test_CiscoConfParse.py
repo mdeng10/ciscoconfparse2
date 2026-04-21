@@ -2306,11 +2306,11 @@ def testValues_Diff_01():
 
     correct_result = [
         "interface GigabitEthernet 1/5",
+        "  switchport mode access",
         "  no ip address 1.1.1.2 255.255.255.0",
         "  no standby 5 ip 1.1.1.1",
         "  no standby 5 preempt",
         "  switchport",
-        "  switchport mode access",
         "  switchport access vlan 5",
         "  switchport nonegotiate",
         "interface Vlan5",
@@ -2319,7 +2319,6 @@ def testValues_Diff_01():
         "  standby 5 preempt",
         "  no shutdown",
     ]
-
     uut = Diff(old_config=config_01, new_config=required_config, syntax="ios")
     assert uut.get_diff() == correct_result
 
@@ -2354,11 +2353,11 @@ def testValues_Diff_02():
 
     correct_result = [
         "interface GigabitEthernet 1/5",
+        "  switchport mode access",
         "  no ip address 1.1.1.2 255.255.255.0",
         "  no standby 5 ip 1.1.1.1",
         "  no standby 5 preempt",
         "  switchport",
-        "  switchport mode access",
         "  switchport access vlan 5",
         "  switchport nonegotiate",
         "interface Vlan5",
@@ -2367,7 +2366,6 @@ def testValues_Diff_02():
         "  standby 5 preempt",
         "  no shutdown",
     ]
-
     uut = Diff(old_config=config_01, new_config=required_config, syntax="ios")
     assert uut.get_diff() == correct_result
 
