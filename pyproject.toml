@@ -18,7 +18,7 @@ dependencies = [
   "pyparsing==3.3.2",
   "toml==0.10.2",
   # NOTE changing typeguard versions may require code / test changes
-  "typeguard==4.4.4",
+  "typeguard>=4.0.0,<4.3.0",
   "PyYAML>=6.0.2",
   "rich>=14.3.0",
   # "passlib==1.7.4",   <-- deprecating passlib (now unmaintained) in favor of libpass
